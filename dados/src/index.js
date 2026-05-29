@@ -6041,7 +6041,7 @@ if (isCmd && command && !isOwner) {
 
             // Classe
             const classes = {
-              'guerreiro': { emoji: '⚔️', name: 'Guerreiro' },
+              'spartano': { emoji: '⚔️', name: 'Spartano' },
               'mago': { emoji: '🧙', name: 'Mago' },
               'arqueiro': { emoji: '🏹', name: 'Arqueiro' },
               'curandeiro': { emoji: '💚', name: 'Curandeiro' },
@@ -9316,7 +9316,7 @@ if (isCmd && command && !isOwner) {
         const me = getEcoUser(econ, sender);
 
         const classes = {
-          'guerreiro': { emoji: '⚔️', name: 'Guerreiro', bonus: { attack: 20, defense: 10 }, skill: 'Fúria', skillDesc: '+30% dano em duelos' },
+          'spartano': { emoji: '⚔️', name: 'Spartano', bonus: { attack: 20, defense: 10 }, skill: 'Fúria', skillDesc: '+30% dano em duelos' },
           'mago': { emoji: '🧙', name: 'Mago', bonus: { attack: 25, defense: 20, regen: 20, rangeAtk: 5 }, skill: 'Magia Ark', skillDesc: '+20 de regeneração e +5 de ataques a distância' },
           'arqueiro': { emoji: '🏹', name: 'Arqueiro', bonus: { attack: 18, speed: 15 }, skill: 'Precisão', skillDesc: '+20% chance de crítico' },
           'curandeiro': { emoji: '💚', name: 'Curandeiro', bonus: { defense: 15, healing: 25 }, skill: 'Cura', skillDesc: 'Cura 20% HP após batalhas' },
@@ -9345,7 +9345,7 @@ if (isCmd && command && !isOwner) {
         const classeEscolhida = q.toLowerCase().trim();
 
         if (!classes[classeEscolhida]) {
-          return reply(`❌ Classe "${q}" não existe!\n\n📜 Classes: guerreiro, mago, arqueiro, curandeiro, ladino, paladino`);
+          return reply(`❌ Classe "${q}" não existe!\n\n📜 Classes: spartano, mago, arqueiro, curandeiro, ladino, paladino`);
         }
 
         // Custo para trocar classe (grátis se não tiver nenhuma)
