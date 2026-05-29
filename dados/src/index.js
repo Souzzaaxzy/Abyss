@@ -9317,7 +9317,7 @@ if (isCmd && command && !isOwner) {
 
         const classes = {
           'guerreiro': { emoji: '⚔️', name: 'Guerreiro', bonus: { attack: 20, defense: 10 }, skill: 'Fúria', skillDesc: '+30% dano em duelos' },
-          'mago': { emoji: '🧙', name: 'Mago', bonus: { attack: 15, mana: 30 }, skill: 'Arcano', skillDesc: '+25% ganho em mineração mágica' },
+          'mago': { emoji: '🧙', name: 'Mago', bonus: { attack: 25, defense: 20, regen: 20, rangeAtk: 5 }, skill: 'Arcano', skillDesc: '+20 de regeneração e +5 de ataques a distância' },
           'arqueiro': { emoji: '🏹', name: 'Arqueiro', bonus: { attack: 18, speed: 15 }, skill: 'Precisão', skillDesc: '+20% chance de crítico' },
           'curandeiro': { emoji: '💚', name: 'Curandeiro', bonus: { defense: 15, healing: 25 }, skill: 'Cura', skillDesc: 'Cura 20% HP após batalhas' },
           'ladino': { emoji: '🗡️', name: 'Ladino', bonus: { attack: 12, luck: 20 }, skill: 'Roubo', skillDesc: '+15% ganho em crimes' },
