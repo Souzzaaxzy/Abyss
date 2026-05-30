@@ -32828,63 +32828,25 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
               responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'image') {
               responseText += `   🖼️ Foto${m.caption ? ` - ${m.caption.substring(0, 30)}` : ''}\n`;
+              responseText += `   📄 Use ${groupPrefix}m ${i + 1} para ver a mídia\n`;
               responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'video') {
               responseText += `   🎥 Vídeo${m.caption ? ` - ${m.caption.substring(0, 30)}` : ''}\n`;
+              responseText += `   📄 Use ${groupPrefix}m ${i + 1} para ver a mídia\n`;
               responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'audio') {
               responseText += `   🎵 Áudio\n`;
+              responseText += `   📄 Use ${groupPrefix}m ${i + 1} para ver a mídia\n`;
               responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'sticker') {
               responseText += `   🎭 Sticker\n`;
+              responseText += `   📄 Use ${groupPrefix}m ${i + 1} para ver a mídia\n`;
               responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             }
           }
 
           responseText += `\n📌 Limite: ${moments.length}/10 momentos por dia\n🚮 Para apagar um momento, use ${groupPrefix}apm [número]`;
           await reply(responseText);
-          
-          // Enviar as mídias
-          for (let i = 0; i < moments.length; i++) {
-            const m = moments[i];
-            if (m.type === 'image' && m.content) {
-              try {
-                await nazu.sendMessage(from, {
-                  image: { url: m.content },
-                  caption: m.caption || `Foto ${i + 1}`
-                });
-              } catch (err) {
-                console.error('Erro ao enviar imagem:', err);
-              }
-            } else if (m.type === 'video' && m.content) {
-              try {
-                await nazu.sendMessage(from, {
-                  video: { url: m.content },
-                  caption: m.caption || `Vídeo ${i + 1}`
-                });
-              } catch (err) {
-                console.error('Erro ao enviar vídeo:', err);
-              }
-            } else if (m.type === 'audio' && m.content) {
-              try {
-                await nazu.sendMessage(from, {
-                  audio: { url: m.content },
-                  mimetype: 'audio/mpeg',
-                  ptt: m.ptt || false
-                });
-              } catch (err) {
-                console.error('Erro ao enviar áudio:', err);
-              }
-            } else if (m.type === 'sticker' && m.content) {
-              try {
-                await nazu.sendMessage(from, {
-                  sticker: { url: m.content }
-                });
-              } catch (err) {
-                console.error('Erro ao enviar sticker:', err);
-              }
-            }
-          }
         } catch (e) {
           console.error('Erro no comando moment:', e);
           await reply('❌ Ocorreu um erro ao listar momentos 💔');
@@ -32926,7 +32888,7 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
       case 'm':
         try {
           if (!isGroup) return reply('🚫 Este comando só funciona em grupos!');
-          if (!q) return reply(`📄 Como usar:\n\n${groupPrefix}m[número]\n\nExemplo: ${groupPrefix}m1`);
+          if (!q) return reply(`📄 Como usar:\n\n${groupPrefix}m [número]\n\nExemplo: ${groupPrefix}m 1`);
 
           const momentIndex = parseInt(q.trim()) - 1;
           const moments = getMoments(from);
@@ -32935,37 +32897,37 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
             return reply('❌ Número de momento inválido!');
           }
           
-          const momentToMark = moments[momentIndex];
+          const momentToShow = moments[momentIndex];
           
-          // Citar apenas a mensagem original, sem enviar texto
-          if (momentToMark.sender && momentToMark.originalMessageId) {
-            try {
-              await nazu.sendMessage(from, {
-                text: '✅ Momento marcado com sucesso!'
-              }, {
-                quoted: {
-                  key: {
-                    remoteJid: from,
-                    fromMe: momentToMark.originalFromMe || false,
-                    id: momentToMark.originalMessageId
-                  },
-                  message: {
-                    extendedTextMessage: {
-                      text: momentToMark.content || ''
-                    }
-                  }
-                }
-              });
-            } catch (err) {
-              console.error('Erro ao citar mensagem:', err);
-              await reply('✅ Momento marcado com sucesso!');
-            }
+          // Enviar a mídia com legenda
+          if (momentToShow.type === 'text') {
+            await reply(momentToShow.content);
+          } else if (momentToShow.type === 'image' && momentToShow.content) {
+            await nazu.sendMessage(from, {
+              image: { url: momentToShow.content },
+              caption: momentToShow.caption || ''
+            });
+          } else if (momentToShow.type === 'video' && momentToShow.content) {
+            await nazu.sendMessage(from, {
+              video: { url: momentToShow.content },
+              caption: momentToShow.caption || ''
+            });
+          } else if (momentToShow.type === 'audio' && momentToShow.content) {
+            await nazu.sendMessage(from, {
+              audio: { url: momentToShow.content },
+              mimetype: 'audio/mpeg',
+              ptt: momentToShow.ptt || false
+            });
+          } else if (momentToShow.type === 'sticker' && momentToShow.content) {
+            await nazu.sendMessage(from, {
+              sticker: { url: momentToShow.content }
+            });
           } else {
-            await reply('❌ Não foi possível recuperar a mensagem original!');
+            await reply('❌ Não foi possível recuperar a mídia!');
           }
         } catch (e) {
           console.error('Erro no comando m:', e);
-          await reply('❌ Ocorreu um erro ao marcar o momento 💔');
+          await reply('❌ Ocorreu um erro ao enviar a mídia 💔');
         }
         break;
 
