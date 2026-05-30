@@ -249,6 +249,8 @@ import {
   isMenuLerMaisEnabled,
   setMenuLerMais,
   getMenuLerMaisText,
+  // Funções de combate
+  calculateCombatStats,
 } from './utils/database.js';
 import { parseCustomCommandMeta, buildUsageFromParams, parseArgsFromString, escapeRegExp, validateParamValue } from './utils/helpers.js';
 import {

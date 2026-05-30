@@ -1851,6 +1851,7 @@ function applyShopBonuses(user, econ) {
 /**
  * Calcula os atributos totais de combate somando base, level e equipamentos
  */
+function calculateCombatStats(user, econ) {
   const shop = econ.shop || {};
   // Força o recálculo oficial do Nazuna (equipment.js)
   // Isso preenche user.attackBonus, user.defenseBonus, user.hpBonus e user.maxHp
@@ -3472,4 +3473,6 @@ export {
   isMenuLerMaisEnabled,
   setMenuLerMais,
   getMenuLerMaisText,
+  // Funções de combate
+  calculateCombatStats,
 };
