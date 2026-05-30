@@ -32940,6 +32940,51 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
         }
         break;
 
+      case 'medirpau':
+        try {
+          if (!isGroup) return reply('🚫 Este comando só funciona em grupos!');
+          if (!groupData.modobrincadeira) return reply('🎮 O modo de brincadeiras não está ativado! Use !modobrincadeiras para ativar.');
+
+          const tamanho = Math.floor(Math.random() * 67) + 1;
+          let mensagem = '';
+
+          if (tamanho >= 1 && tamanho <= 5) {
+            mensagem = `${tamanho} cm ➥ Encontrado após buscas intensivas de 3 horas. 🔎`;
+          } else if (tamanho >= 6 && tamanho <= 10) {
+            mensagem = `${tamanho} cm ➥ Se piscar, perde. 👀`;
+          } else if (tamanho >= 11 && tamanho <= 15) {
+            mensagem = `${tamanho} cm ➥ Aparentemente existe. Teoricamente. 🤓`;
+          } else if (tamanho >= 16 && tamanho <= 20) {
+            mensagem = `${tamanho} cm ➥ Equilibrado, como tudo deve ser. 🟣`;
+          } else if (tamanho >= 21 && tamanho <= 25) {
+            mensagem = `${tamanho} cm ➥ O orgulho da família. 👨‍👩‍👦`;
+          } else if (tamanho >= 26 && tamanho <= 30) {
+            mensagem = `${tamanho} cm ➥ Já pode entrar em competições amadoras. 🏅`;
+          } else if (tamanho >= 31 && tamanho <= 35) {
+            mensagem = `${tamanho} cm ➥ O segurança pediu documento na entrada. 🪪`;
+          } else if (tamanho >= 36 && tamanho <= 40) {
+            mensagem = `${tamanho} cm ➥ A gravidade começou a colaborar. 🌍`;
+          } else if (tamanho >= 41 && tamanho <= 45) {
+            mensagem = `${tamanho} cm ➥ O Wi-Fi pega melhor perto dele. 📶`;
+          } else if (tamanho >= 46 && tamanho <= 50) {
+            mensagem = `${tamanho} cm ➥ Os engenheiros estão estudando o caso. 🏗️`;
+          } else if (tamanho >= 51 && tamanho <= 55) {
+            mensagem = `${tamanho} cm ➥ O governo classificou como patrimônio nacional. 🏛️`;
+          } else if (tamanho >= 56 && tamanho <= 60) {
+            mensagem = `${tamanho} cm ➥ Apareceu em imagens de satélite. 🛰️`;
+          } else if (tamanho >= 61 && tamanho <= 66) {
+            mensagem = `${tamanho} cm ➥ Detectado por radares militares. 🎯`;
+          } else if (tamanho === 67) {
+            mensagem = `👑 CHEFE FINAL DOS CHEFES 👑\n➥ Raridade: Impossível.\n➥ Status: Bug do sistema.\n➥ O bot travou tentando calcular.\n➥ Resultado validado por nenhum cientista.`;
+          }
+
+          await reply(mensagem);
+        } catch (e) {
+          console.error('Erro no comando medirpau:', e);
+          await reply('❌ Ocorreu um erro ao medir 💔');
+        }
+        break;
+
       default:
         if (isCmd) {
           const cmdNotFoundConfig = loadCmdNotFoundConfig();
