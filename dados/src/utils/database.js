@@ -2549,6 +2549,8 @@ const loadGroupAutoResponses = (groupId) => {
 
 const saveGroupAutoResponses = (groupId, autoResponses) => {
   try {
+    // Garantir que a pasta grupos existe
+    ensureDirectoryExists(GRUPOS_DIR);
     const groupFile = pathz.join(GRUPOS_DIR, `${groupId}.json`);
     let groupData = loadJsonFile(groupFile, {});
     groupData.autoResponses = autoResponses;
