@@ -32752,8 +32752,8 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
           } else if (isQuotedImage) {
             moment.type = 'image';
             try {
-              const imageBuffer = await getFileBuffer(quotedMessageContent.imageMessage, 'image');
-              moment.content = imageBuffer.toString('base64');
+              const imageUrl = await nazu.downloadAndSaveMedia(quotedMessageContent.imageMessage);
+              moment.content = imageUrl;
               moment.caption = quotedMessageContent.imageMessage.caption || '';
             } catch (e) {
               console.error('Erro ao extrair imagem:', e);
@@ -32762,8 +32762,8 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
           } else if (isQuotedVideo) {
             moment.type = 'video';
             try {
-              const videoBuffer = await getFileBuffer(quotedMessageContent.videoMessage, 'video');
-              moment.content = videoBuffer.toString('base64');
+              const videoUrl = await nazu.downloadAndSaveMedia(quotedMessageContent.videoMessage);
+              moment.content = videoUrl;
               moment.caption = quotedMessageContent.videoMessage.caption || '';
             } catch (e) {
               console.error('Erro ao extrair vídeo:', e);
@@ -32772,8 +32772,8 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
           } else if (isQuotedAudio) {
             moment.type = 'audio';
             try {
-              const audioBuffer = await getFileBuffer(quotedMessageContent.audioMessage, 'audio');
-              moment.content = audioBuffer.toString('base64');
+              const audioUrl = await nazu.downloadAndSaveMedia(quotedMessageContent.audioMessage);
+              moment.content = audioUrl;
               moment.ptt = quotedMessageContent.audioMessage.ptt || false;
             } catch (e) {
               console.error('Erro ao extrair áudio:', e);
@@ -32782,8 +32782,8 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
           } else if (isQuotedSticker) {
             moment.type = 'sticker';
             try {
-              const stickerBuffer = await getFileBuffer(quotedMessageContent.stickerMessage, 'sticker');
-              moment.content = stickerBuffer.toString('base64');
+              const stickerUrl = await nazu.downloadAndSaveMedia(quotedMessageContent.stickerMessage);
+              moment.content = stickerUrl;
             } catch (e) {
               console.error('Erro ao extrair sticker:', e);
               return reply('❌ Erro ao processar o sticker!');
@@ -32816,30 +32816,75 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
 
           for (let i = 0; i < moments.length; i++) {
             const m = moments[i];
+            const time = new Date(m.savedAt).toLocaleTimeString('pt-BR');
             const senderMention = m.sender ? `@${m.sender.split('@')[0]}` : 'Desconhecido';
             const requesterMention = m.requester ? `@${m.requester.split('@')[0]}` : 'Desconhecido';
-            
-            responseText += `${i + 1}❤️ *${senderMention}*\n`;
+            responseText += `${i + 1}. 👤 Enviado por: ${senderMention} (${m.senderName})\n`;
+            responseText += `   📄 Salvo por: ${requesterMention} (${m.requesterName || 'Desconhecido'})\n`;
+            responseText += `   🕒 ${time}\n`;
             
             if (m.type === 'text') {
-              responseText += `📝 ${m.content.substring(0, 60)}${m.content.length > 60 ? '...' : ''}\n`;
+              responseText += `   📝 ${m.content.substring(0, 50)}${m.content.length > 50 ? '...' : ''}\n`;
+              responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'image') {
-              responseText += `📷 Foto${m.caption ? `\n${m.caption.substring(0, 60)}${m.caption.length > 60 ? '...' : ''}` : ''}\n`;
+              responseText += `   🖼️ Foto${m.caption ? ` - ${m.caption.substring(0, 30)}` : ''}\n`;
+              responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'video') {
-              responseText += `🎥 Vídeo${m.caption ? `\n${m.caption.substring(0, 60)}${m.caption.length > 60 ? '...' : ''}` : ''}\n`;
+              responseText += `   🎥 Vídeo${m.caption ? ` - ${m.caption.substring(0, 30)}` : ''}\n`;
+              responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'audio') {
-              responseText += `🎵 Áudio\n`;
+              responseText += `   🎵 Áudio\n`;
+              responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             } else if (m.type === 'sticker') {
-              responseText += `🎭 Sticker\n`;
+              responseText += `   🎭 Sticker\n`;
+              responseText += `   📄 Usar: ${groupPrefix}apm ${i + 1}\n\n`;
             }
-            
-            responseText += `👤 Salvo por: ${requesterMention}\n`;
-            responseText += `➡️ Use: ${groupPrefix}m${i + 1}\n\n`;
           }
 
           responseText += `\n📌 Limite: ${moments.length}/10 momentos por dia\n🚮 Para apagar um momento, use ${groupPrefix}apm [número]`;
           await reply(responseText);
-          // Tudo junto em um único texto, sem enviar mídias separadas
+          
+          // Enviar as mídias
+          for (let i = 0; i < moments.length; i++) {
+            const m = moments[i];
+            if (m.type === 'image' && m.content) {
+              try {
+                await nazu.sendMessage(from, {
+                  image: { url: m.content },
+                  caption: m.caption || `Foto ${i + 1}`
+                });
+              } catch (err) {
+                console.error('Erro ao enviar imagem:', err);
+              }
+            } else if (m.type === 'video' && m.content) {
+              try {
+                await nazu.sendMessage(from, {
+                  video: { url: m.content },
+                  caption: m.caption || `Vídeo ${i + 1}`
+                });
+              } catch (err) {
+                console.error('Erro ao enviar vídeo:', err);
+              }
+            } else if (m.type === 'audio' && m.content) {
+              try {
+                await nazu.sendMessage(from, {
+                  audio: { url: m.content },
+                  mimetype: 'audio/mpeg',
+                  ptt: m.ptt || false
+                });
+              } catch (err) {
+                console.error('Erro ao enviar áudio:', err);
+              }
+            } else if (m.type === 'sticker' && m.content) {
+              try {
+                await nazu.sendMessage(from, {
+                  sticker: { url: m.content }
+                });
+              } catch (err) {
+                console.error('Erro ao enviar sticker:', err);
+              }
+            }
+          }
         } catch (e) {
           console.error('Erro no comando moment:', e);
           await reply('❌ Ocorreu um erro ao listar momentos 💔');
