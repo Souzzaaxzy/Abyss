@@ -32875,6 +32875,19 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
           if (!q) return reply(`📄 Como usar:\n\n${groupPrefix}apm [número]\n\nExemplo: ${groupPrefix}apm 1`);
 
           const momentIndex = parseInt(q) - 1;
+          const moments = getMoments(from);
+          
+          if (momentIndex < 0 || momentIndex >= moments.length) {
+            return reply('❌ Número de momento inválido!');
+          }
+          
+          const momentToDelete = moments[momentIndex];
+          
+          // Verificar se quem está tentando apagar é quem salvou
+          if (momentToDelete.sender !== sender) {
+            return reply('🚫 Você só pode apagar momentos que você salvou!');
+          }
+          
           const result = deleteMoment(from, momentIndex);
           
           if (result.success) {
