@@ -1858,14 +1858,14 @@ function applyShopBonuses(user, econ) {
  */
 function calculateCombatStats(user, econ) {
   const shop = econ.shop || {};
-  // Força o recálculo oficial do Nazuna (equipment.js)
+  // Força o recálculo oficial do Kaiser (equipment.js)
   // Isso preenche user.attackBonus, user.defenseBonus, user.hpBonus e user.maxHp
   recalcEquipmentBonuses(user, shop);
 
   // Atributos base por nível
   const level = user.level || 1;
   
-  // No Nazuna, attackBonus e defenseBonus já contém a soma de todos os equipamentos.
+  // No Kaiser, attackBonus e defenseBonus já contém a soma de todos os equipamentos.
   // Vamos somar isso aos valores base.
   let totalAtk = 100 + (level * 10) + (user.attackBonus || 0);
   let totalDef = 50 + (level * 5) + (user.defenseBonus || 0);

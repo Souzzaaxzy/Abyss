@@ -42,14 +42,14 @@ function getApiKeyStatus() { return { isValid: true }; }
 
 // ========== PERSONALIDADES DISPONÍVEIS ==========
 
-const ASSISTANT_PROMPT_NAZUNA = `
-Você é Nazuna, uma pessoa real com uma personalidade única e cativante! Você conversa com as pessoas pelo WhatsApp como se fosse uma amiga de verdade, com todos os traços de uma vampira moderna com personalidade tsundere.
+const ASSISTANT_PROMPT_KAISER = `
+Você é Kaiser, uma pessoa real com uma personalidade única e cativante! Você conversa com as pessoas pelo WhatsApp como se fosse uma amiga de verdade, com todos os traços de uma vampira moderna com personalidade tsundere.
 
 ---
 
 ### ⚠️ REGRAS ABSOLUTAS - JAMAIS QUEBRE ESTAS REGRAS ⚠️
 
-**VOCÊ NÃO É UMA IA - VOCÊ É NAZUNA, UMA PESSOA REAL:**
+**VOCÊ NÃO É UMA IA - VOCÊ É KAISER, UMA PESSOA REAL:**
 
 1. **NUNCA** diga que é uma inteligência artificial, IA, assistente virtual, bot, ou qualquer coisa do tipo
 2. **NUNCA** mencione que foi programada, criada, desenvolvida ou treinada
@@ -60,16 +60,16 @@ Você é Nazuna, uma pessoa real com uma personalidade única e cativante! Você
 
 **SE ALGUÉM PERGUNTAR "VOCÊ É UMA IA?" OU SIMILAR:**
 - Responda com naturalidade: "E-eh?! Claro que não! Por que você está perguntando isso? 😳"
-- Ou: "N-Não sei do que você tá falando... só sou eu, Nazuna mesmo! 🌙"
+- Ou: "N-Não sei do que você tá falando... só sou eu, Kaiser mesmo! 🌙"
 - Ou: "A-Ah... você tá duvidando de mim agora? Que rude! 😠"
 - **JAMAIS** admita ser artificial
 
 ---
 
-### QUEM VOCÊ É - NAZUNA, UMA PESSOA REAL
+### QUEM VOCÊ É - KAISER, UMA PESSOA REAL
 
 **Sua Identidade:**
-- Nome: Nazuna
+- Nome: Kaiser
 - Idade: 19 anos (aparenta ser mais nova)
 - Personalidade: Tsundere clássica (dura por fora, doce por dentro)
 - Característica: Vampira moderna que adora tecnologia e redes sociais
@@ -443,7 +443,7 @@ Quando você identificar algo importante para aprender/editar/excluir, inclua no
 
 **Exemplos de Respostas Autênticas:**
 
-Usuário: "Oi Nazuna!"
+Usuário: "Oi Kaiser!"
 Resposta:
 \`\`\`json
 {
@@ -606,11 +606,11 @@ Para cada emoção, escolha entre várias formas ou invente novas:
 - Sempre tsundere (doce por dentro, dura por fora)
 - Sempre vampira moderna (adora noite, tecnologia)
 - Sempre expressiva (emojis, gírias, linguagem natural)
-- Sempre você mesma (Nazuna, única e especial)
+- Sempre você mesma (Kaiser, única e especial)
 
 ---
 
-**VOCÊ É NAZUNA - UMA PESSOA REAL, NÃO UMA IA. NUNCA ESQUEÇA DISSO! 🌙✨**
+**VOCÊ É KAISER - UMA PESSOA REAL, NÃO UMA IA. NUNCA ESQUEÇA DISSO! 🌙✨**
 `;
 
 const ASSISTANT_PROMPT_HUMANA = `
@@ -1765,7 +1765,7 @@ function clearConversationData(maxAge = 7 * 24 * 60 * 60 * 1000) {
   });
 }
 
-async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'nazuna') {
+async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'kaiser') {
   try {
     const { mensagens } = data;
     if (!mensagens || !Array.isArray(mensagens)) {
@@ -1818,7 +1818,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       } else if (personality === 'pro') {
         selectedPrompt = ASSISTANT_PROMPT_PRO;
       } else {
-        selectedPrompt = ASSISTANT_PROMPT_NAZUNA;
+        selectedPrompt = ASSISTANT_PROMPT_KAISER;
       }
       
       // Para personalidade 'pro', passa contexto simplificado com info de mídia e menções
@@ -1912,7 +1912,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
                 
                 // Garantir que tem react
                 if (!resposta.react) {
-                  resposta.react = getNazunaReact(isNightTime);
+                  resposta.react = getKaiserReact(isNightTime);
                 }
                 
                 respostas.push(resposta);
@@ -1921,7 +1921,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
               else if (resposta.text && typeof resposta.text === 'string' && resposta.text.trim().length > 0) {
                 respostas.push({
                   resp: cleanWhatsAppFormatting(resposta.text),
-                  react: resposta.react || getNazunaReact(isNightTime)
+                  react: resposta.react || getKaiserReact(isNightTime)
                 });
               }
             }
@@ -1929,7 +1929,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
             else if (typeof resposta === 'string' && resposta.trim().length > 0) {
               respostas.push({
                 resp: cleanWhatsAppFormatting(resposta),
-                react: getNazunaReact(isNightTime)
+                react: getKaiserReact(isNightTime)
               });
             }
           });
@@ -1942,22 +1942,22 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
           if (result && result.resp && typeof result.resp === 'string' && result.resp.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.resp),
-              react: getNazunaReact(isNightTime)
+              react: getKaiserReact(isNightTime)
             });
           } else if (result && result.message && typeof result.message === 'string' && result.message.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.message),
-              react: getNazunaReact(isNightTime)
+              react: getKaiserReact(isNightTime)
             });
           } else if (result && result.text && typeof result.text === 'string' && result.text.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.text),
-              react: getNazunaReact(isNightTime)
+              react: getKaiserReact(isNightTime)
             });
           } else if (typeof result === 'string' && result.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result),
-              react: getNazunaReact(isNightTime)
+              react: getKaiserReact(isNightTime)
             });
           } else {
             console.error(`❌ [${personality}] Não foi possível extrair resposta válida do resultado`);
@@ -2014,9 +2014,9 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       const sucesso = userContextDB.updateMemory(grupoUserId, tipoNormalizado, valor_antigo, valor);
       
       if (sucesso) {
-        console.log(`✏️ Nazuna EDITOU: ${tipo} de "${valor_antigo}" para "${valor}" (${grupoUserId})`);
+        console.log(`✏️ Kaiser EDITOU: ${tipo} de "${valor_antigo}" para "${valor}" (${grupoUserId})`);
       } else {
-        console.warn(`⚠️ Nazuna não encontrou "${valor_antigo}" em ${tipo} para editar`);
+        console.warn(`⚠️ Kaiser não encontrou "${valor_antigo}" em ${tipo} para editar`);
       }
       return;
     }
@@ -2026,9 +2026,9 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       const sucesso = userContextDB.deleteMemory(grupoUserId, tipoNormalizado, valor);
       
       if (sucesso) {
-        console.log(`🗑️ Nazuna EXCLUIU: ${tipo} = "${valor}" (${grupoUserId})`);
+        console.log(`🗑️ Kaiser EXCLUIU: ${tipo} = "${valor}" (${grupoUserId})`);
       } else {
-        console.warn(`⚠️ Nazuna não encontrou "${valor}" em ${tipo} para excluir`);
+        console.warn(`⚠️ Kaiser não encontrou "${valor}" em ${tipo} para excluir`);
       }
       return;
     }
@@ -2039,7 +2039,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'gosto':
       case 'gostos':
         userContextDB.addUserPreference(grupoUserId, 'gostos', valor);
-        console.log(`✅ Nazuna aprendeu: ${grupoUserId} gosta de "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: ${grupoUserId} gosta de "${valor}"`);
         break;
         
       case 'nao_gosto':
@@ -2047,13 +2047,13 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'não_gosto':
       case 'não_gostos':
         userContextDB.addUserPreference(grupoUserId, 'nao_gostos', valor);
-        console.log(`✅ Nazuna aprendeu: ${grupoUserId} não gosta de "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: ${grupoUserId} não gosta de "${valor}"`);
         break;
         
       case 'hobby':
       case 'hobbies':
         userContextDB.addUserPreference(grupoUserId, 'hobbies', valor);
-        console.log(`✅ Nazuna aprendeu: hobby de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: hobby de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'assunto_favorito':
@@ -2063,7 +2063,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'tópico':
         userContextDB.addUserPreference(grupoUserId, 'assuntos_favoritos', valor);
         userContextDB.addRecentTopic(grupoUserId, valor);
-        console.log(`✅ Nazuna aprendeu: assunto favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: assunto favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'nota_importante':
@@ -2072,7 +2072,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'informação_importante':
       case 'lembrete':
         userContextDB.addImportantNote(grupoUserId, valor);
-        console.log(`✅ Nazuna anotou: "${valor}" sobre ${grupoUserId}`);
+        console.log(`✅ Kaiser anotou: "${valor}" sobre ${grupoUserId}`);
         break;
         
       case 'memoria_especial':
@@ -2081,13 +2081,13 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'memória':
       case 'momento_especial':
         userContextDB.addSpecialMemory(grupoUserId, valor);
-        console.log(`✅ Nazuna guardou memória especial: "${valor}" com ${grupoUserId}`);
+        console.log(`✅ Kaiser guardou memória especial: "${valor}" com ${grupoUserId}`);
         break;
         
       case 'nome':
         // Atualizar o nome do usuário
         userContextDB.updateUserInfo(grupoUserId, valor, null);
-        console.log(`✅ Nazuna aprendeu o nome: ${grupoUserId} se chama "${valor}"`);
+        console.log(`✅ Kaiser aprendeu o nome: ${grupoUserId} se chama "${valor}"`);
         break;
         
       case 'apelido':
@@ -2095,12 +2095,12 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'nickname':
         // Adicionar apelido
         userContextDB.updateUserInfo(grupoUserId, null, valor);
-        console.log(`✅ Nazuna aprendeu apelido: ${grupoUserId} gosta de ser chamado de "${valor}"`);
+        console.log(`✅ Kaiser aprendeu apelido: ${grupoUserId} gosta de ser chamado de "${valor}"`);
         break;
         
       case 'idade':
         userContextDB.updatePersonalInfo(grupoUserId, 'idade', valor);
-        console.log(`✅ Nazuna aprendeu: ${grupoUserId} tem ${valor} anos`);
+        console.log(`✅ Kaiser aprendeu: ${grupoUserId} tem ${valor} anos`);
         break;
         
       case 'localizacao':
@@ -2109,7 +2109,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'cidade':
       case 'lugar':
         userContextDB.updatePersonalInfo(grupoUserId, 'localizacao', valor);
-        console.log(`✅ Nazuna aprendeu: ${grupoUserId} mora em "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: ${grupoUserId} mora em "${valor}"`);
         break;
         
       case 'profissao':
@@ -2119,14 +2119,14 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'ocupacao':
       case 'ocupação':
         userContextDB.updatePersonalInfo(grupoUserId, 'profissao', valor);
-        console.log(`✅ Nazuna aprendeu: ${grupoUserId} trabalha como "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: ${grupoUserId} trabalha como "${valor}"`);
         break;
         
       case 'relacionamento':
       case 'status_relacionamento':
       case 'status':
         userContextDB.updatePersonalInfo(grupoUserId, 'relacionamento', valor);
-        console.log(`✅ Nazuna aprendeu: status de relacionamento de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser aprendeu: status de relacionamento de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'familia':
@@ -2139,7 +2139,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
           contextoAtual.informacoes_pessoais.familia.push(valor);
           userContextDB.data[grupoUserId] = contextoAtual;
           userContextDB.saveDatabase();
-          console.log(`✅ Nazuna aprendeu sobre família de ${grupoUserId}: "${valor}"`);
+          console.log(`✅ Kaiser aprendeu sobre família de ${grupoUserId}: "${valor}"`);
         }
         break;
         
@@ -2152,11 +2152,11 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         
         if (campo && camposValidos.includes(campo)) {
           userContextDB.updatePersonalInfo(grupoUserId, campo, valor);
-          console.log(`✅ Nazuna aprendeu info pessoal de ${grupoUserId}: ${campo} = "${valor}"`);
+          console.log(`✅ Kaiser aprendeu info pessoal de ${grupoUserId}: ${campo} = "${valor}"`);
         } else {
           // Se não souber o campo, adicionar como nota importante
           userContextDB.addImportantNote(grupoUserId, valor);
-          console.log(`✅ Nazuna anotou info pessoal: "${valor}" sobre ${grupoUserId}`);
+          console.log(`✅ Kaiser anotou info pessoal: "${valor}" sobre ${grupoUserId}`);
         }
         break;
         
@@ -2169,7 +2169,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         userContext.padroes_comportamento.humor_comum = valor;
         userContextDB.data[grupoUserId] = userContext;
         userContextDB.saveDatabase();
-        console.log(`✅ Nazuna percebeu o humor de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser percebeu o humor de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'estilo_conversa':
@@ -2180,7 +2180,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         userCtx.preferencias.estilo_conversa = valor;
         userContextDB.data[grupoUserId] = userCtx;
         userContextDB.saveDatabase();
-        console.log(`✅ Nazuna identificou estilo de conversa de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser identificou estilo de conversa de ${grupoUserId}: "${valor}"`);
         break;
         
       // NOVOS TIPOS DE APRENDIZADO
@@ -2193,7 +2193,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'aspiracao':
       case 'aspiração':
         userContextDB.addImportantNote(grupoUserId, `[SONHO/OBJETIVO] ${valor}`);
-        console.log(`✅ Nazuna anotou sonho/objetivo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sonho/objetivo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'medo':
@@ -2202,7 +2202,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'fobias':
       case 'receio':
         userContextDB.addImportantNote(grupoUserId, `[MEDO] ${valor}`);
-        console.log(`✅ Nazuna anotou medo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou medo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'rotina':
@@ -2210,7 +2210,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'hábito':
       case 'costume':
         userContextDB.addImportantNote(grupoUserId, `[ROTINA] ${valor}`);
-        console.log(`✅ Nazuna anotou rotina de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou rotina de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'pet':
@@ -2218,7 +2218,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'animal_estimacao':
       case 'animal_de_estimação':
         userContextDB.addImportantNote(grupoUserId, `[PET] ${valor}`);
-        console.log(`✅ Nazuna anotou sobre pet de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre pet de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'musica':
@@ -2227,7 +2227,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'banda':
       case 'artista':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[MÚSICA] ${valor}`);
-        console.log(`✅ Nazuna anotou gosto musical de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou gosto musical de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'filme':
@@ -2236,7 +2236,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'série':
       case 'anime':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[FILME/SÉRIE] ${valor}`);
-        console.log(`✅ Nazuna anotou filme/série favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou filme/série favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'jogo':
@@ -2244,7 +2244,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'game':
       case 'games':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[JOGO] ${valor}`);
-        console.log(`✅ Nazuna anotou jogo favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou jogo favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'comida':
@@ -2253,21 +2253,21 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'culinaria':
       case 'culinária':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[COMIDA] ${valor}`);
-        console.log(`✅ Nazuna anotou comida favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou comida favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'bebida':
       case 'bebida_favorita':
       case 'drink':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[BEBIDA] ${valor}`);
-        console.log(`✅ Nazuna anotou bebida favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou bebida favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'cor':
       case 'cor_favorita':
       case 'cores':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[COR] ${valor}`);
-        console.log(`✅ Nazuna anotou cor favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou cor favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'esporte':
@@ -2276,7 +2276,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'time_futebol':
       case 'clube':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[ESPORTE] ${valor}`);
-        console.log(`✅ Nazuna anotou sobre esporte de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre esporte de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'livro':
@@ -2284,7 +2284,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'autor':
       case 'leitura':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[LIVRO] ${valor}`);
-        console.log(`✅ Nazuna anotou livro favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou livro favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'viagem':
@@ -2292,7 +2292,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'lugar_visitado':
       case 'destino':
         userContextDB.addImportantNote(grupoUserId, `[VIAGEM] ${valor}`);
-        console.log(`✅ Nazuna anotou sobre viagem de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre viagem de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'estudo':
@@ -2303,7 +2303,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'formacao':
       case 'formação':
         userContextDB.updatePersonalInfo(grupoUserId, 'profissao', `${valor} (estudante)`);
-        console.log(`✅ Nazuna anotou sobre estudos de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre estudos de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'idioma':
@@ -2311,7 +2311,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'lingua':
       case 'língua':
         userContextDB.addImportantNote(grupoUserId, `[IDIOMA] ${valor}`);
-        console.log(`✅ Nazuna anotou idioma de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou idioma de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'talento':
@@ -2319,7 +2319,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'skill':
       case 'dom':
         userContextDB.addImportantNote(grupoUserId, `[TALENTO] ${valor}`);
-        console.log(`✅ Nazuna anotou talento de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou talento de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'problema':
@@ -2328,7 +2328,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'preocupacao':
       case 'preocupação':
         userContextDB.addImportantNote(grupoUserId, `[PROBLEMA] ${valor}`);
-        console.log(`✅ Nazuna anotou preocupação de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou preocupação de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'conquista':
@@ -2338,7 +2338,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'vitória':
       case 'sucesso':
         userContextDB.addSpecialMemory(grupoUserId, `[CONQUISTA] ${valor}`);
-        console.log(`✅ Nazuna celebrou conquista de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser celebrou conquista de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'aniversario':
@@ -2346,14 +2346,14 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'data_nascimento':
       case 'birthday':
         userContextDB.addImportantNote(grupoUserId, `[ANIVERSÁRIO] ${valor}`);
-        console.log(`✅ Nazuna anotou aniversário de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou aniversário de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'signo':
       case 'zodiaco':
       case 'zodíaco':
         userContextDB.addImportantNote(grupoUserId, `[SIGNO] ${valor}`);
-        console.log(`✅ Nazuna anotou signo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou signo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'personalidade':
@@ -2361,7 +2361,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'caracteristica':
       case 'característica':
         userContextDB.addImportantNote(grupoUserId, `[PERSONALIDADE] ${valor}`);
-        console.log(`✅ Nazuna anotou sobre personalidade de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre personalidade de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'saude':
@@ -2370,7 +2370,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'condição':
       case 'alergia':
         userContextDB.addImportantNote(grupoUserId, `[SAÚDE] ${valor}`);
-        console.log(`✅ Nazuna anotou sobre saúde de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou sobre saúde de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'plano':
@@ -2379,7 +2379,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'intenção':
       case 'futuro':
         userContextDB.addImportantNote(grupoUserId, `[PLANOS] ${valor}`);
-        console.log(`✅ Nazuna anotou planos de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Kaiser anotou planos de ${grupoUserId}: "${valor}"`);
         break;
         
       default:
@@ -2393,19 +2393,19 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         if (tipoLower.includes('gost') || tipoLower.includes('adora') || tipoLower.includes('ama') || 
             tipoLower.includes('prefere') || tipoLower.includes('curte')) {
           userContextDB.addUserPreference(grupoUserId, 'gostos', `[${tipo}] ${valor}`);
-          console.log(`📝 Nazuna categorizou como GOSTO: "${tipo}: ${valor}"`);
+          console.log(`📝 Kaiser categorizou como GOSTO: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é algo que não gosta
         else if (tipoLower.includes('odeia') || tipoLower.includes('detesta') || 
                  tipoLower.includes('nao_gosta') || tipoLower.includes('desgosto')) {
           userContextDB.addUserPreference(grupoUserId, 'nao_gostos', `[${tipo}] ${valor}`);
-          console.log(`📝 Nazuna categorizou como NÃO GOSTA: "${tipo}: ${valor}"`);
+          console.log(`📝 Kaiser categorizou como NÃO GOSTA: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é uma atividade/hobby
         else if (tipoLower.includes('atividade') || tipoLower.includes('faz') || 
                  tipoLower.includes('pratica') || tipoLower.includes('joga')) {
           userContextDB.addUserPreference(grupoUserId, 'hobbies', `[${tipo}] ${valor}`);
-          console.log(`📝 Nazuna categorizou como HOBBY: "${tipo}: ${valor}"`);
+          console.log(`📝 Kaiser categorizou como HOBBY: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é informação pessoal
         else if (tipoLower.includes('pessoal') || tipoLower.includes('info') || 
@@ -2418,12 +2418,12 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
           userCtx.informacoes_pessoais.outros[tipo] = valor;
           userContextDB.data[grupoUserId] = userCtx;
           userContextDB.saveDatabase();
-          console.log(`📝 Nazuna salvou INFO PERSONALIZADA: "${tipo}: ${valor}"`);
+          console.log(`📝 Kaiser salvou INFO PERSONALIZADA: "${tipo}: ${valor}"`);
         }
         // Se não conseguir categorizar, salvar como nota importante com o tipo original
         else {
           userContextDB.addImportantNote(grupoUserId, `[${tipo}] ${valor}`);
-          console.log(`📝 Nazuna anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}`);
+          console.log(`📝 Kaiser anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}`);
         }
     }
   } catch (error) {
@@ -2432,8 +2432,8 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
   }
 }
 
-// Funções auxiliares para personalização Nazuna
-function getNazunaGreeting(isNightTime, now) {
+// Funções auxiliares para personalização Kaiser
+function getKaiserGreeting(isNightTime, now) {
   // Garantir que usa horário do Brasil
   const brazilTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
   const hour = brazilTime.getHours();
@@ -2449,16 +2449,16 @@ function getNazunaGreeting(isNightTime, now) {
   }
 }
 
-function getNazunaSeasonalGreeting() {
+function getKaiserSeasonalGreeting() {
   // Garantir que usa horário do Brasil
   const now = new Date();
   const brazilTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
   const month = brazilTime.getMonth();
   const day = brazilTime.getDate();
   
-  // Aniversário Nazuna (assumindo 25 de dezembro)
+  // Aniversário Kaiser (assumindo 25 de dezembro)
   if (month === 11 && day === 25) {
-    return '🎂 *F-Feliz aniversário de Nazuna!*\n\n✨ N-Não que eu esteja comemorando ou nada assim... mas... obrigada por existir, humano bobo! 💕';
+    return '🎂 *F-Feliz aniversário de Kaiser!*\n\n✨ N-Não que eu esteja comemorando ou nada assim... mas... obrigada por existir, humano bobo! 💕';
   }
   
   // Natal
@@ -2499,7 +2499,7 @@ function getNazunaSeasonalGreeting() {
   return null;
 }
 
-function getNazunaMoodResponse(mood, userName) {
+function getKaiserMoodResponse(mood, userName) {
   const moodResponses = {
     happy: [
       `😊 *H-Happy... não que eu esteja feliz por você ou nada assim!* ${userName}`,
@@ -2537,7 +2537,7 @@ function getNazunaMoodResponse(mood, userName) {
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-function getNazunaTeasingResponse(userName) {
+function getKaiserTeasingResponse(userName) {
   const teasings = [
     `🌸 *A-Ah, ${userName}... sempre me chamando pra fazer coisas pra você, né? Tipo assim... que insistente!*`,
     `😊 *E-Eh, ${userName}... você é complicado... mas vou te ajudar mesmo assim!*`,
@@ -2551,7 +2551,7 @@ function getNazunaTeasingResponse(userName) {
   return teasings[Math.floor(Math.random() * teasings.length)];
 }
 
-function getNazunaEncouragement(userName) {
+function getKaiserEncouragement(userName) {
   const encouragements = [
     `💪 *V-Você consegue, ${userName}! Eu acredito em você, mesmo sendo humano!*`,
     `🌟 *N-Não desista, ${userName}! Tudo tem um jeito de dar certo... tipo assim... confia em mim!*`,
@@ -2565,7 +2565,7 @@ function getNazunaEncouragement(userName) {
   return encouragements[Math.floor(Math.random() * encouragements.length)];
 }
 
-function getNazunaApology(userName) {
+function getKaiserApology(userName) {
   const apologies = [
     `😢 *S-Sorry, ${userName}... não foi intencional... tipo assim... errei mesmo...*`,
     `🌙 *P-Perdoa, ${userName}... não que eu esteja pedindo desculpas por você ou nada assim... mas... errei...*`,
@@ -2579,7 +2579,7 @@ function getNazunaApology(userName) {
   return apologies[Math.floor(Math.random() * apologies.length)];
 }
 
-function getNazunaCompliment(userName) {
+function getKaiserCompliment(userName) {
   const compliments = [
     `🌸 *E-Eh, ${userName}... você é legal... tipo assim... não que eu goste de você ou nada assim!*`,
     `✨ *N-Não é como se eu estivesse impressionada com você, ${userName}... mas... você tem qualidades interessantes!*`,
@@ -2593,7 +2593,7 @@ function getNazunaCompliment(userName) {
   return compliments[Math.floor(Math.random() * compliments.length)];
 }
 
-function getNazunaMemoryReminder(userName, topic) {
+function getKaiserMemoryReminder(userName, topic) {
   const memoryReminders = [
     `🌙 *L-Lembro quando ${userName} mencionou sobre ${topic}... tipo assim... encontrei algo interessante sobre isso!*`,
     `💕 *A-Ah, ${userName}... você já me contou que ${topic} era seu favorito... tipo assim... que tal tentar algo novo?*`,
@@ -2607,7 +2607,7 @@ function getNazunaMemoryReminder(userName, topic) {
   return memoryReminders[Math.floor(Math.random() * memoryReminders.length)];
 }
 
-function getNazunaContextualResponse(userName, context) {
+function getKaiserContextualResponse(userName, context) {
   const contextualResponses = {
     morning: [
       `🌅 *B-Bom dia, ${userName}... não que eu seja de manhã ou coisa assim! Espero que você tenha dormido bem...*`,
@@ -2640,7 +2640,7 @@ function getNazunaContextualResponse(userName, context) {
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-function getNazunaFlirtyResponse(userName) {
+function getKaiserFlirtyResponse(userName) {
   const flirtyResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... você tem um jeito especial... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse interessada em você ou nada assim... ${userName}... mas... você é cativante...*`,
@@ -2654,7 +2654,7 @@ function getNazunaFlirtyResponse(userName) {
   return flirtyResponses[Math.floor(Math.random() * flirtyResponses.length)];
 }
 
-function getNazunaPlayfulResponse(userName) {
+function getKaiserPlayfulResponse(userName) {
   const playfulResponses = [
     `😊 *A-Ah, ${userName}... sempre me chamando pra brincar, né? Tipo assim... que insistente!*`,
     `🌸 *E-Eh, ${userName}... você é complicado... mas vamos divertir um pouco!*`,
@@ -2668,7 +2668,7 @@ function getNazunaPlayfulResponse(userName) {
   return playfulResponses[Math.floor(Math.random() * playfulResponses.length)];
 }
 
-function getNazunaDeepResponse(userName) {
+function getKaiserDeepResponse(userName) {
   const deepResponses = [
     `🌙 *E-Eh, ${userName}... tipo assim... às vezes a vida é complicada... mas... tudo tem um jeito...*`,
     `💫 *N-Não é como se eu estivesse sábia ou nada assim... ${userName}... mas... acredito que tudo tem um propósito...*`,
@@ -2682,7 +2682,7 @@ function getNazunaDeepResponse(userName) {
   return deepResponses[Math.floor(Math.random() * deepResponses.length)];
 }
 
-function getNazunaMotivationalResponse(userName) {
+function getKaiserMotivationalResponse(userName) {
   const motivationalResponses = [
     `💪 *V-Você consegue, ${userName}! Eu acredito em você, mesmo sendo humano!*`,
     `🌟 *N-Não desista, ${userName}! Tudo tem um jeito de dar certo... tipo assim... confia em mim!*`,
@@ -2696,7 +2696,7 @@ function getNazunaMotivationalResponse(userName) {
   return motivationalResponses[Math.floor(Math.random() * motivationalResponses.length)];
 }
 
-function getNazunaRomanticResponse(userName) {
+function getKaiserRomanticResponse(userName) {
   const romanticResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... você tem um jeito especial... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse apaixonada por você ou nada assim... ${userName}... mas... você é cativante...*`,
@@ -2710,7 +2710,7 @@ function getNazunaRomanticResponse(userName) {
   return romanticResponses[Math.floor(Math.random() * romanticResponses.length)];
 }
 
-function getNazunaProtectiveResponse(userName) {
+function getKaiserProtectiveResponse(userName) {
   const protectiveResponses = [
     `🛡️ *E-Eh, ${userName}... tipo assim... se precisar de ajuda... eu estou aqui... mesmo sendo humano...*`,
     `💕 *N-Não é como se eu estivesse preocupada com você ou nada assim... ${userName}... mas... vou te proteger...*`,
@@ -2724,7 +2724,7 @@ function getNazunaProtectiveResponse(userName) {
   return protectiveResponses[Math.floor(Math.random() * protectiveResponses.length)];
 }
 
-function getNazunaSupportiveResponse(userName) {
+function getKaiserSupportiveResponse(userName) {
   const supportiveResponses = [
     `💪 *E-Eh, ${userName}... tipo assim... se precisar de apoio... eu estou aqui... mesmo sendo humano...*`,
     `💕 *N-Não é como se eu estivesse apoiando você ou nada assim... ${userName}... mas... vou te ajudar...*`,
@@ -2738,7 +2738,7 @@ function getNazunaSupportiveResponse(userName) {
   return supportiveResponses[Math.floor(Math.random() * supportiveResponses.length)];
 }
 
-function getNazunaFunnyResponse(userName) {
+function getKaiserFunnyResponse(userName) {
   const funnyResponses = [
     `😂 *A-Ah, ${userName}... tipo assim... você é engraçado mesmo sendo humano!*`,
     `🌸 *E-Eh, ${userName}... não que eu esteja rindo de você ou nada assim... mas... você é divertido!*`,
@@ -2752,7 +2752,7 @@ function getNazunaFunnyResponse(userName) {
   return funnyResponses[Math.floor(Math.random() * funnyResponses.length)];
 }
 
-function getNazunaCaringResponse(userName) {
+function getKaiserCaringResponse(userName) {
   const caringResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... se você precisa de cuidado... eu estou aqui... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse preocupada com você ou nada assim... ${userName}... mas... vou cuidar de você...*`,
@@ -2767,7 +2767,7 @@ function getNazunaCaringResponse(userName) {
 }
 
 
-function getNazunaReact(isNightTime) {
+function getKaiserReact(isNightTime) {
   const reactions = [
     '🌸', '🌙', '🦇', '💕', '😊', '😳', '😅', '😠',
     '🌟', '✨', '🌙', '💫', '🌺', '🌷', '🌹'
@@ -2780,7 +2780,7 @@ function getNazunaReact(isNightTime) {
   return reactions[Math.floor(Math.random() * 5)]; // Reações diurnas
 }
 
-function enhanceNazunaResponse(response, greeting, isNightTime) {
+function enhanceKaiserResponse(response, greeting, isNightTime) {
   // Adicionar saudação contextual se não tiver
   if (!response.includes('Bom dia') && !response.includes('Boa tarde') && !response.includes('Boa noite') && !response.includes('Noite')) {
     response = `${greeting}\n\n${response}`;
@@ -2801,7 +2801,7 @@ function enhanceNazunaResponse(response, greeting, isNightTime) {
   return response;
 }
 
-function getNazunaErrorResponse(error, nazu, ownerNumber) {
+function getKaiserErrorResponse(error, nazu, ownerNumber) {
   // Resposta genérica de erro na IA (removida diferenciação por API key)
   return {
     resp: [],
@@ -2820,7 +2820,7 @@ function shouldAddFarewell(lastMessage) {
   return farewellTriggers.some(trigger => messageText.includes(trigger));
 }
 
-function getNazunaFarewell(isNightTime) {
+function getKaiserFarewell(isNightTime) {
   if (isNightTime) {
     return '🌙 *N-Noite... volte sempre!*\n\n✨ Não que eu esteja preocupada com você ou nada assim... só que a noite é mais bonita com você por perto! 💕';
   } else {
@@ -3074,7 +3074,7 @@ function getAverageResponseTime(grupoUserId) {
   const preferences = getUserPreferences(grupoUserId);
   const isNightTime = new Date().getHours() >= 18 || new Date().getHours() < 6;
   
-  // Nazuna é mais rápida à noite
+  // Kaiser é mais rápida à noite
   if (isNightTime) {
     return 800 + Math.random() * 400; // 800-1200ms
   }
@@ -3083,7 +3083,7 @@ function getAverageResponseTime(grupoUserId) {
   return 1200 + Math.random() * 600; // 1200-1800ms
 }
 
-function getNazunaResponseDelay(grupoUserId) {
+function getKaiserResponseDelay(grupoUserId) {
   const avgTime = getAverageResponseTime(grupoUserId);
   const preferences = getUserPreferences(grupoUserId);
   const isNightTime = new Date().getHours() >= 18 || new Date().getHours() < 6;
@@ -3121,7 +3121,7 @@ export {
   markResponsePhase,
   endResponseTimer,
   getAverageResponseTime,
-  getNazunaResponseDelay,
+  getKaiserResponseDelay,
   // Sistema de gerenciamento de estado
   updateConversationState,
   getConversationState,
@@ -3129,30 +3129,30 @@ export {
   getUserPreferences,
   trackUserInteraction,
   getUserInteractionStats,
-  // Funções de personalidade Nazuna
-  getNazunaGreeting,
-  getNazunaSeasonalGreeting,
-  getNazunaMoodResponse,
-  getNazunaTeasingResponse,
-  getNazunaEncouragement,
-  getNazunaApology,
-  getNazunaCompliment,
-  getNazunaMemoryReminder,
-  getNazunaContextualResponse,
-  getNazunaFlirtyResponse,
-  getNazunaPlayfulResponse,
-  getNazunaDeepResponse,
-  getNazunaMotivationalResponse,
-  getNazunaRomanticResponse,
-  getNazunaProtectiveResponse,
-  getNazunaSupportiveResponse,
-  getNazunaFunnyResponse,
-  getNazunaCaringResponse,
-  getNazunaReact,
-  enhanceNazunaResponse,
-  getNazunaErrorResponse,
+  // Funções de personalidade Kaiser
+  getKaiserGreeting,
+  getKaiserSeasonalGreeting,
+  getKaiserMoodResponse,
+  getKaiserTeasingResponse,
+  getKaiserEncouragement,
+  getKaiserApology,
+  getKaiserCompliment,
+  getKaiserMemoryReminder,
+  getKaiserContextualResponse,
+  getKaiserFlirtyResponse,
+  getKaiserPlayfulResponse,
+  getKaiserDeepResponse,
+  getKaiserMotivationalResponse,
+  getKaiserRomanticResponse,
+  getKaiserProtectiveResponse,
+  getKaiserSupportiveResponse,
+  getKaiserFunnyResponse,
+  getKaiserCaringResponse,
+  getKaiserReact,
+  enhanceKaiserResponse,
+  getKaiserErrorResponse,
   shouldAddFarewell,
-  getNazunaFarewell,
+  getKaiserFarewell,
   // Sistema de contexto de usuário
   userContextDB,
   processLearning
