@@ -19052,7 +19052,7 @@ case 'addaluguel':
 
           if (q.includes('youtube.com') || q.includes('youtu.be')) {
             videoUrl = q;
-            await reply('Aguarde um momentinho... ☀️');
+            await nazu.sendMessage(from, { react: { text: '🔍', key: info.key } });
 
             youtube.mp3(videoUrl, 128)
               .then(async (dlRes) => {
@@ -19095,8 +19095,8 @@ case 'addaluguel':
             return reply(`❌ Sistema de busca do YouTube não está disponível no momento.`);
           }
 
-          // Mensagem de pesquisa
-          await reply(`🔍 *Pesquisando no YouTube...*\n\n🎵 Música: *${q}*\n\n⏳ Aguarde um momento...`);
+          // Reação de pesquisa
+          await nazu.sendMessage(from, { react: { text: '🔍', key: info.key } });
 
           // Usando .then em vez de await para a pesquisa do YouTube
           youtube.search(q)
