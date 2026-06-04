@@ -8067,8 +8067,7 @@ if (isCmd && command && !isOwner) {
 	          text += `│ ${pet.emoji} **${pet.name}**${rarityText}\n` +
 	                    `│ 📝 ${pet.desc}\n` +
 	                    `│ 💰 Preço: ${pet.cost.toLocaleString()}\n` +
-	                    `│ ❤️ HP: ${pet.hp} | ⚔️ ATK: ${pet.attack} | 🛡️ DEF: ${pet.defense}\n` +
-	                    `│ 🍖 Alimentar: ${pet.feedCost ? pet.feedCost.toLocaleString() : '100'}\n│\n`;
+	                    `│ ❤️ HP: ${pet.hp} | ⚔️ ATK: ${pet.attack} | 🛡️ DEF: ${pet.defense}\n│\n`;
           });
 
           text += `╰─────────────────────⭓\n\n💡 *Use !adotar <nome> para adotar*`;
