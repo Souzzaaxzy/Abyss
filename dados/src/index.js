@@ -24359,9 +24359,14 @@ ${prefix}togglecmdvip premium_ia off`);
             })
             : 'N/A';
 
-          const now = new Date();
-          const dataAtual = now.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-          const horaAtual = now.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+          let lastDate = 'N/A';
+          let lastTime = 'N/A';
+
+          if (userData.lastActivity) {
+            const lastActive = new Date(userData.lastActivity);
+            lastDate = lastActive.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            lastTime = lastActive.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+          }
 
           const checkMessage = `╭━━━❰ 📊 ❱━━━╮\n` +
             `┃ 👤 @${userName}\n` +
@@ -24371,8 +24376,8 @@ ${prefix}togglecmdvip premium_ia off`);
             `┃ 🎨 » ${stickers}\n` +
             `┃ 📈 » ${total}\n` +
             `┣━━━━━━━━━━━━\n` +
-            `┃ 🕒 ${dataAtual}\n` +
-            `┃ ⏰ ${horaAtual}\n` +
+            `┃ 🕒 ${lastDate}\n` +
+            `┃ ⏰ ${lastTime}\n` +
             `╰━━━━━━━━━━━━╯`;
 
           await reply(checkMessage, {
