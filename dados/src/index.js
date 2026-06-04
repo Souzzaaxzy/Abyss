@@ -6525,8 +6525,12 @@ if (isCmd && command && !isOwner) {
           if (sub === 'inventario' || sub === 'inv') {
             recalcEquipmentBonuses(me, econ.shop);
             const entries = Object.entries(me.inventory || {}).filter(([, q]) => q > 0);
-            let text = '╭━━━⊱ 🎒 *INVENTÁRIO* 🎒 ⊱━━━╮\n│\n';
-            text += `│ ⚔️ Poder: *${me.power || 0}*\n│\n`;
+            let text = `╭─────────────────────⭓\n` +
+              `│      🎒 𝗞𝗔𝗜𝗦𝗘𝗥 𝗜𝗡𝗩 🎒\n` +
+              `├─────────────────────⭓\n` +
+              `│ 👤 Aventureiro » @${sender.split('@')[0]}\n` +
+              `│ ⚔️ Poder » ${me.power || 0}\n` +
+              `├──────── 𝗜𝗧𝗘𝗡𝗦 ────────⭓\n`;
             if (entries.length > 0) {
               for (const [k, q] of entries) {
                 const it = (econ.shop || {})[k];
@@ -6536,18 +6540,17 @@ if (isCmd && command && !isOwner) {
             } else {
               text += '│ 📭 (vazio)\n';
             }
-            text += '│\n';
             // Ferramentas
             const pk = me.tools?.pickaxe;
-            text += '╠━━━⊱ 🛠️ *FERRAMENTAS* 🛠️ ⊱━━━╣\n│\n';
+            text += `├───── 𝗙𝗘𝗥𝗥𝗔𝗠𝗘𝗡𝗧𝗔𝗦 ─────⭓\n`;
             if (pk) {
               const tierName = pk.tier || 'desconhecida';
               const dur = pk.dur ?? 0; const max = pk.max ?? (pk.tier === 'bronze' ? 20 : pk.tier === 'ferro' ? 60 : pk.tier === 'diamante' ? 150 : 0);
-              text += `│ ⛏️ Picareta ${tierName}\n│    Durabilidade: ${dur}/${max}\n`;
+              text += `│ ⛏️ Picareta ${tierName}\n│ 🛠️ Durabilidade » ${dur}/${max}\n`;
             } else {
               text += '│ ⛏️ Picareta — nenhuma\n';
             }
-            text += '│\n╰━━━━━━━━━━━━━━━━━━━━━━━━╯';
+            text += `╰─────────────────────⭓`;
             return reply(text);
           }
 
@@ -7837,24 +7840,26 @@ if (isCmd && command && !isOwner) {
         // Recalcula os bônus a partir dos itens equipados
         recalcEquipmentBonuses(me, econ.shop);
 
-        let text = `╭━━━⊱ ⚔️ *EQUIPAMENTOS* ⊱━━━╮\n`;
-        text += `│ 👤 Aventureiro: *${pushname}*\n`;
-        text += `╰━━━━━━━━━━━━━━━━━━━━╯\n\n`;
-        text += `🗡️ *Arma:* ${eq.weapon || '❌ Nenhuma'}\n`;
-        text += `🛡️ *Armadura:* ${eq.armor || '❌ Nenhuma'}\n`;
-        text += `⛑️ *Capacete:* ${eq.helmet || '❌ Nenhum'}\n`;
-        text += `👢 *Botas:* ${eq.boots || '❌ Nenhuma'}\n`;
-        text += `🛡️ *Escudo:* ${eq.shield || '❌ Nenhum'}\n`;
-        text += `💍 *Acessório:* ${eq.accessory || '❌ Nenhum'}\n\n`;
-        text += `╭━━━⊱ 📊 *ESTATÍSTICAS* ⊱━━━╮\n`;
-        text += `│ ⚔️ Poder de Ataque: +${me.attackBonus || 0}\n`;
-        text += `│ 🛡️ Poder de Defesa: +${me.defenseBonus || 0}\n`;
-        text += `│ ✨ Poder Total: ${me.power || 100}\n`;
-        text += `╰━━━━━━━━━━━━━━━━━━━━╯\n\n`;
-        text += `💡 *Dicas:*\n`;
-        text += `• Use ${prefix}forjar para criar equipamentos\n`;
-        text += `• Use ${prefix}encantar para melhorar\n`;
-        text += `• Use ${prefix}inventario para ver itens`;
+        let text = `╭─────────────────────⭓\n` +
+          `│      ⚔️ 𝗞𝗔𝗜𝗦𝗘𝗥 𝗚𝗘𝗔𝗥 ⚔️\n` +
+          `├─────────────────────⭓\n` +
+          `│ 👤 Aventureiro » @${sender.split('@')[0]}\n` +
+          `├─────────────────────⭓\n` +
+          `│ 🗡️ Arma » ${eq.weapon || '❌ Nenhuma'}\n` +
+          `│ 🛡️ Armadura » ${eq.armor || '❌ Nenhuma'}\n` +
+          `│ ⛑️ Elmo » ${eq.helmet || '❌ Nenhum'}\n` +
+          `│ 👢 Botas » ${eq.boots || '❌ Nenhuma'}\n` +
+          `│ 🛡️ Escudo » ${eq.shield || '❌ Nenhum'}\n` +
+          `│ 💍 Acessório » ${eq.accessory || '❌ Nenhum'}\n` +
+          `├──────── 𝗦𝗧𝗔𝗧𝗦 ────────⭓\n` +
+          `│ ⚔️ Ataque » +${me.attackBonus || 0}\n` +
+          `│ 🛡️ Defesa » +${me.defenseBonus || 0}\n` +
+          `│ ✨ Poder Total » ${me.power || 100}\n` +
+          `╰─────────────────────⭓\n\n` +
+          `💡 *Dicas:*\n` +
+          `• Use ${prefix}forjar para criar equipamentos\n` +
+          `• Use ${prefix}encantar para melhorar\n` +
+          `• Use ${prefix}inventario para ver itens`;
 
         return reply(text);
       }
