@@ -12,9 +12,18 @@ export default async function menuadm(prefix, botName = "MeuBot", userName = "Us
     moderatorsMenuTitle = "👥 MODERADORES",
     partnershipsMenuTitle = "🤝 PARCERIAS",
     activationsMenuTitle = "⚡ ATIVAÇÕES",
-    settingsMenuTitle = "🎨 CONFIGURAÇÕES"
+    settingsMenuTitle = "🎨 CONFIGURAÇÕES",
+    electionMenuTitle = "🏛️ SISTEMA DE ELEIÇÃO"
 } = {}) {
     return `${header}
+
+${menuTopBorder}
+│ ${electionMenuTitle}
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}eleicao (iniciar eleição)
+${middleBorder} ${menuItemIcon}${prefix}cand (se candidatar)
+${middleBorder} ${menuItemIcon}${prefix}tempeleicao (configurar tempos)
+${bottomBorder}
 
 ${menuTopBorder}
 │ ${adminMenuTitle}
