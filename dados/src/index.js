@@ -6215,79 +6215,59 @@ if (isCmd && command && !isOwner) {
             recalcEquipmentBonuses(me, econ.shop);
             const combatStats = calculateCombatStats(me, econ);
             
-            let text = `╭━━━⊱ ⚔️ *PERFIL RPG* ⚔️ ⊱━━━╮\n`;
-            text += `│ ${pushname}\n`;
-            text += `╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n`;
-            
-            text += `╭━━━⊱ 📊 *STATUS REAIS* ⊱━━━╮\n`;
-            text += `│ ⚔️ Ataque: ${combatStats.attack} (+${me.attackBonus || 0})\n`;
-            text += `│ 🛡️ Defesa: ${combatStats.defense} (+${me.defenseBonus || 0})\n`;
-            text += `│ ❤️ Vida: ${combatStats.hp} (+${me.hpBonus || 0})\n`;
-            text += `╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n`;
-            
-            const equips = me.equipments || {};
-            const shop = econ.shop || {};
-            text += `╭━━━⊱ 🛡️ *EQUIPAMENTOS* ⊱━━━╮\n`;
-            text += `│ ⚔️ Arma: ${equips.weapon ? shop[equips.weapon]?.name : 'Nenhuma'}\n`;
-            text += `│ 🛡️ Armadura: ${equips.armor ? shop[equips.armor]?.name : 'Nenhuma'}\n`;
-            text += `│ 🛡️ Escudo: ${equips.shield ? shop[equips.shield]?.name : 'Nenhum'}\n`;
-            text += `│ 💍 Acessório: ${equips.accessory ? shop[equips.accessory]?.name : 'Nenhum'}\n`;
-            text += `│ 🩸 Elmo: ${equips.helmet ? shop[equips.helmet]?.name : 'Nenhum'}\n`;
-            text += `│ 👢 Botas: ${equips.boots ? shop[equips.boots]?.name : 'Nenhuma'}\n`;
-            text += `╰━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n`;
-
-            text += `📊 *NÍVEL & EXPERIÊNCIA*\n`;
-            text += `├ Level: ${level}\n`;
-            text += `├ XP: ${expProgress} (${expPercent}%)\n`;
-            text += `├ Prestige: ${prestigeLevel}x (${prestigeMultiplier.toFixed(2)}x)\n`;
-            text += `└ Streak: ${streak} dia${streak !== 1 ? 's' : ''}\n\n`;
-
-            text += `💰 *FINANÇAS*\n`;
-            text += `├ Carteira: ${fmt(me.wallet)}\n`;
-            text += `├ Banco: ${fmt(me.bank)}\n`;
-            text += `├ Total: ${fmt(total)}\n`;
-            text += `└ Emprego: ${me.job ? econ.jobCatalog[me.job]?.name || me.job : 'Desempregado(a)'}\n\n`;
-
-            text += `🎭 *PERSONALIZAÇÃO*\n`;
-            text += `├ Classe: ${classeInfo}\n`;
-            text += `├ Clã: ${clanInfo}\n`;
-            text += `└ Casa: ${houseInfo}\n\n`;
-
-            text += `⚔️ *COMBATE*\n`;
-            text += `├ Vitórias: ${battlesWon}\n`;
-            text += `├ Derrotas: ${battlesLost}\n`;
-            text += `├ Win Rate: ${winRate}%\n`;
-            text += `└ Poder Total: ${combatStats.power}\n\n`;
-
-            text += `🛠️ *HABILIDADES (TOP 3)*\n`;
+            let text = `╭─────────────────────⭓\n` +
+              `│      ⚔️ 𝗞𝗔𝗜𝗦𝗘𝗥 𝗔𝗩𝗘𝗡𝗧𝗨𝗥𝗘𝗜𝗥𝗢 ⚔️\n` +
+              `├─────────────────────⭓\n` +
+              `│\n` +
+              `│ 👤 Usuário » @${sender.split('@')[0]}\n` +
+              `│ 🎖️ Patente » ${me.patent || 'Iniciante'}\n` +
+              `│ 🆙 Nível » ${level} (XP: ${expProgress})\n` +
+              `│ 💎 Prestige » ${prestigeLevel}x  🛡️ Streak » ${streak} dias\n` +
+              `│\n` +
+              `├──────── **𝗦𝗧𝗔𝗧𝗦** ────────⭓\n` +
+              `│\n` +
+              `│ ⚔️ ATK » ${combatStats.attack} (+${me.attackBonus || 0})\n` +
+              `│ 🛡️ DEF » ${combatStats.defense} (+${me.defenseBonus || 0})\n` +
+              `│ ❤️ HP  » ${combatStats.hp} / ${combatStats.maxHp || 1000}\n` +
+              `│ ⚡ Poder Total » ${combatStats.power}\n` +
+              `│\n` +
+              `├─────── **𝗦𝗢𝗖𝗜𝗔𝗟** ───────⭓\n` +
+              `│\n` +
+              `│ 💍 Status » ${relationshipEmoji ? `${relationshipType} com ${familySpouse}` : 'Solteiro(a)'}\n` +
+              `│ 🏠 Moradia » ${houseInfo}\n` +
+              `│ 🛡️ Clã » ${clanInfo}\n` +
+              `│ 👨‍👩‍👧‍👦 Filhos » ${familyChildren}\n` +
+              `│\n` +
+              `├────── **𝗘𝗖𝗢𝗡𝗢𝗠𝗜𝗔** ──────⭓\n` +
+              `│\n` +
+              `│ 💰 Carteira » ${fmt(me.wallet)}\n` +
+              `│ 🏦 Banco » ${fmt(me.bank)}\n` +
+              `│ ⚒️ Emprego » ${me.job ? econ.jobCatalog[me.job]?.name || me.job : 'Desempregado(a)'}\n` +
+              `│\n` +
+              `├────── **𝗖𝗢𝗠𝗕𝗔𝗧𝗘** ──────⭓\n` +
+              `│\n` +
+              `│ 🏆 Vitórias » ${battlesWon}  💀 Derrotas » ${battlesLost}\n` +
+              `│ 📈 Win Rate » ${winRate}%\n` +
+              `│\n` +
+              `├───── **𝗛𝗔𝗕𝗜𝗟𝗜𝗗𝗔𝗗𝗘𝗦** ─────⭓\n` +
+              `│\n`;
+              
             topSkills.forEach((sk, i) => {
-              const prefixChar = i === topSkills.length - 1 ? '└' : '├';
               const skillName = sk.name.charAt(0).toUpperCase() + sk.name.slice(1);
-              text += `${prefixChar} ${skillName}: Lv.${sk.level}\n`;
+              text += `│ ${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} ${skillName} » Lv.${sk.level}\n`;
             });
-            text += `\n`;
+            
+            text += `│\n` +
+              `├──── **𝗖𝗢𝗟𝗘𝗖𝗜𝗢𝗡𝗔́𝗩𝗘𝗜𝗦** ────⭓\n` +
+              `│\n` +
+              `│ 🏆 Conquistas: ${achievements}  🐾 Pets: ${pets}\n` +
+              `│ 💎 Premium: ${premiumItems}\n` +
+              `│ ⭐ Reputação: ${reputation}  ☯️ Karma: ${karma}\n` +
+              `│\n` +
+              `╰─────────────────────⭓\n\n` +
+              `✨ *Use !meustats para detalhes técnicos.*`;
 
-            text += `👨‍👩‍👧‍👦 *FAMÍLIA & RELACIONAMENTO*\n`;
-            if (relationshipEmoji) {
-              text += `├ ${relationshipEmoji} Status: ${relationshipType}\n`;
-              text += `├ Parceiro(a): ${familySpouse}\n`;
-            } else {
-              text += `├ 💔 Status: Solteiro(a)\n`;
-            }
-            text += `└ Filhos: ${familyChildren}\n\n`;
-
-            text += `🏆 *COLECIONÁVEIS*\n`;
-            text += `├ Conquistas: ${achievements}\n`;
-            text += `├ Pets: ${pets}\n`;
-            text += `└ Itens Premium: ${premiumItems}\n\n`;
-
-            text += `⭐ *REPUTAÇÃO*\n`;
-            text += `├ Pontos: ${reputation}\n`;
-            text += `└ Karma: ${karma}\n\n`;
-
-            text += `💎 Use ${prefix}meustats para ver estatísticas detalhadas`;
-
-            return reply(text, mentions.length > 0 ? { mentions } : undefined);
+            return reply(text, { mentions: [sender, ...mentions] });
           }
 
           if (sub === 'carteira' || sub === 'money' || sub === 'saldo' || sub === 'bal') {
