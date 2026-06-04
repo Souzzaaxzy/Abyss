@@ -19134,7 +19134,28 @@ case 'addaluguel':
                 ? videoInfo.data.description.slice(0, 100) + (videoInfo.data.description.length > 100 ? '...' : '')
                 : 'Sem descrição disponível';
 
-              const caption = `🎵 *Música Encontrada* 🎵\n\n📌 *Título:* ${videoInfo.data.title}\n👤 *Artista/Canal:* ${videoInfo.data.author.name}\n⏱ *Duração:* ${videoInfo.data.timestamp} (${videoInfo.data.seconds} segundos)\n👀 *Visualizações:* ${views}\n📅 *Publicado:* ${videoInfo.data.ago}\n📜 *Descrição:* ${description}\n🔗 *Link:* ${videoInfo.data.url}\n\n🎧 *Baixando e processando sua música, aguarde...*`;
+              const videoId = videoInfo.data.url.split('v=')[1] || videoInfo.data.url.split('/').pop();
+              const caption = `╭━━━〔 🎵 𝗞𝗔𝗜𝗦𝗘𝗥 • 𝗣𝗟𝗔𝗬 🎵 〕━━━╮\n` +
+                `┃\n` +
+                `┃ 🎵 ${videoInfo.data.title}\n` +
+                `┃ 🎤 ${videoInfo.data.author.name}\n` +
+                `┃\n` +
+                `┃ ───────────────────\n` +
+                `┃\n` +
+                `┃ ⏱️ 𝗗𝘂𝗿𝗮𝗰̧𝗮̃𝗼\n` +
+                `┃ ╰➤ ${videoInfo.data.timestamp}\n` +
+                `┃\n` +
+                `┃ 👀 𝗩𝗶𝘀𝘂𝗮𝗹𝗶𝘇𝗮𝗰̧𝗼̃𝗲𝘀\n` +
+                `┃ ╰➤ ${views}\n` +
+                `┃\n` +
+                `┃ 📅 𝗣𝘂𝗯𝗹𝗶𝗰𝗮𝗱𝗼\n` +
+                `┃ ╰➤ ${videoInfo.data.ago}\n` +
+                `┃\n` +
+                `┃ 🔗 𝗬𝗼𝘂𝗧𝘂𝗯𝗲\n` +
+                `┃ ╰➤ ${videoId}\n` +
+                `┃\n` +
+                `╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n` +
+                `🎧 Sua música está sendo preparada...`;
 
               nazu.sendMessage(from, {
                 image: { url: videoInfo.data.thumbnail },
