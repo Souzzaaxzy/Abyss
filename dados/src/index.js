@@ -8128,12 +8128,19 @@ if (isCmd && command && !isOwner) {
           return reply(`❌ Pet inválido! Use ${prefix}pets para ver seus pets e escolha um número.`);
         }
 
-        const pet = me.pets[index];
-        
-        // Custo base de alimentação (usa feedCost salvo ou padrão 100)
-        // Aumenta 5% por nível para acompanhar o poder do pet
-        let baseFoodCost = pet.feedCost || 100;
-        const foodCost = Math.floor(baseFoodCost * (1 + (pet.level - 1) * 0.05));
+	        const pet = me.pets[index];
+	        
+	        // Tabela de referência para garantir o custo correto mesmo em pets antigos
+	        const petReference = {
+	          lobo: 100, tigre: 200, fenix: 300, aguia: 150, dragao: 500,
+	          nyx: 5000, chrony: 3500, abyron: 2000, seraph: 4000, vex: 1500
+	        };
+	        
+	        // Busca o custo base: 1º no pet, 2º na referência por tipo, 3º padrão 100
+	        let baseFoodCost = pet.feedCost || petReference[pet.type] || 100;
+	        
+	        // Aumenta 5% por nível para acompanhar o poder do pet
+	        const foodCost = Math.floor(baseFoodCost * (1 + (pet.level - 1) * 0.05));
 
         if (me.wallet < foodCost) return reply(`💰 Você precisa de ${foodCost.toLocaleString()} moedas para comprar comida de ${pet.name}!\n\n💡 O custo aumenta conforme o nível do pet (Nível atual: ${pet.level})`);
         if (pet.hunger >= 100) return reply(`🍖 ${pet.emoji} *${pet.name}* já está satisfeito!`);
