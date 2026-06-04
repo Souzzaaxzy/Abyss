@@ -8064,11 +8064,11 @@ if (isCmd && command && !isOwner) {
 
           Object.entries(petTypes).forEach(([key, pet]) => {
             const rarityText = pet.rarity ? ` [${pet.rarity}]` : '';
-            text += `│ ${pet.emoji} **${pet.name}**${rarityText}\n` +
-                    `│ 📝 ${pet.desc}\n` +
-                    `│ 💰 Preço: ${pet.cost.toLocaleString()}\n` +
-                    `│ ❤️ HP: ${pet.hp} | ⚔️ ATK: ${pet.attack} | 🛡️ DEF: ${pet.defense}\n` +
-                    `│ 🍖 Manutenção: ${pet.feedCost ? pet.feedCost.toLocaleString() : '100'}\n│\n`;
+	          text += `│ ${pet.emoji} **${pet.name}**${rarityText}\n` +
+	                    `│ 📝 ${pet.desc}\n` +
+	                    `│ 💰 Preço: ${pet.cost.toLocaleString()}\n` +
+	                    `│ ❤️ HP: ${pet.hp} | ⚔️ ATK: ${pet.attack} | 🛡️ DEF: ${pet.defense}\n` +
+	                    `│ 🍖 Alimentar: ${pet.feedCost ? pet.feedCost.toLocaleString() : '100'}\n│\n`;
           });
 
           text += `╰─────────────────────⭓\n\n💡 *Use !adotar <nome> para adotar*`;
