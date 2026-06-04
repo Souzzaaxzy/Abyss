@@ -25132,7 +25132,7 @@ ${prefix}togglecmdvip premium_ia off`);
         elections.push(election);
         saveElections(elections);
 
-        const allParticipants = participants.map(p => p.id);
+        const allParticipants = groupMetadata.participants ? groupMetadata.participants.map(p => p.id) : [];
         let text = `🏛️ *ELEIÇÃO PARA ALPHA INICIADA!* 🐺\n\n`;
         text += `Todos os membros estão convidados a participar.\n\n`;
         text += `📢 Para se candidatar, envie:\n`;
