@@ -26177,24 +26177,34 @@ break;
         if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
         if (!isGroupAdmin) return reply('❌ Apenas administradores podem usar este comando.');
 
-        const quotedMsg = info.message?.extendedTextMessage?.contextInfo;
-        const pollId = quotedMsg?.stanzaId;
+        const contextInfo = info.message?.extendedTextMessage?.contextInfo || 
+                            info.message?.imageMessage?.contextInfo || 
+                            info.message?.videoMessage?.contextInfo || 
+                            info.message?.stickerMessage?.contextInfo;
+                            
+        const pollId = contextInfo?.stanzaId;
+        const quotedMsg = contextInfo?.quotedMessage;
         
-        if (!pollId || !quotedMsg.quotedMessage?.pollCreationMessage) {
+        // Verifica se a mensagem marcada é uma enquete (pollCreationMessage ou pollCreationMessageV2)
+        const isPoll = quotedMsg?.pollCreationMessage || quotedMsg?.pollCreationMessageV2 || quotedMsg?.pollCreationMessageV3;
+        
+        if (!pollId || !isPoll) {
           return reply('❌ Você precisa marcar uma enquete para verificar os resultados.');
         }
 
+        const pollData = isPoll;
         const votes = global.pollVotes ? global.pollVotes[pollId] : null;
         if (!votes || Object.keys(votes).length === 0) {
           return reply('📊 Ninguém votou nesta enquete ainda.');
         }
 
         const results = {};
-        const options = quotedMsg.quotedMessage.pollCreationMessage.options || quotedMsg.quotedMessage.pollCreationMessage.values || [];
+        const options = pollData.options || pollData.values || [];
         
         // Inicializa contadores
         options.forEach(opt => {
-          results[opt.optionName || opt] = 0;
+          const optName = typeof opt === 'string' ? opt : (opt.optionName || opt.name);
+          if (optName) results[optName] = 0;
         });
 
         // Conta os votos
