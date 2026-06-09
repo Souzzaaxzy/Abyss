@@ -26173,78 +26173,7 @@ break;
         break;
       }
 
-      case 'tester': {
-        if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
-        if (!isGroupAdmin) return reply('❌ Apenas administradores podem usar este comando.');
 
-        const contextInfo = info.message?.extendedTextMessage?.contextInfo || 
-                            info.message?.imageMessage?.contextInfo || 
-                            info.message?.videoMessage?.contextInfo || 
-                            info.message?.stickerMessage?.contextInfo;
-                            
-        const pollId = contextInfo?.stanzaId;
-        const quotedMsg = contextInfo?.quotedMessage;
-        
-        // Verifica se a mensagem marcada é uma enquete (pollCreationMessage ou pollCreationMessageV2)
-        const isPoll = quotedMsg?.pollCreationMessage || quotedMsg?.pollCreationMessageV2 || quotedMsg?.pollCreationMessageV3;
-        
-        if (!pollId || !isPoll) {
-          return reply('❌ Você precisa marcar uma enquete para verificar os resultados.');
-        }
-
-        const pollData = isPoll;
-        const votes = global.pollVotes ? global.pollVotes[pollId] : null;
-        if (!votes || (Array.isArray(votes) && votes.length === 0) || (typeof votes === 'object' && Object.keys(votes).length === 0)) {
-          return reply('📊 Ninguém votou nesta enquete ainda.');
-        }
-
-        const results = {};
-        const options = pollData.options || pollData.values || [];
-        
-        // Inicializa contadores
-        options.forEach(opt => {
-          const optName = typeof opt === 'string' ? opt : (opt.optionName || opt.name);
-          if (optName) results[optName] = 0;
-        });
-
-        // Conta os votos (Formato universal por usuário)
-        Object.values(votes).forEach(userVotes => {
-          // Se userVotes for um array de nomes de opções (como salvo no connect.js)
-          if (Array.isArray(userVotes)) {
-            userVotes.forEach(optName => {
-              if (results.hasOwnProperty(optName)) {
-                results[optName]++;
-              }
-            });
-          } else if (typeof userVotes === 'string') {
-            // Se for apenas uma string (voto único)
-            if (results.hasOwnProperty(userVotes)) {
-              results[userVotes]++;
-            }
-          }
-        });
-
-        const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
-        const maxVotes = sortedResults[0][1];
-        const winners = sortedResults.filter(r => r[1] === maxVotes && maxVotes > 0);
-
-        let response = `📊 *RESULTADOS DA ENQUETE*\n\n`;
-        sortedResults.forEach(([name, count]) => {
-          response += `• ${name}: ${count} voto(s)\n`;
-        });
-
-        response += `\n━━━━━━━━━━━━━━━\n`;
-        if (winners.length === 0) {
-          response += `🤷‍♂️ Ninguém votou.`;
-        } else if (winners.length === 1) {
-          response += `🏆 *Vencedor:* ${winners[0][0]} (${maxVotes} votos)`;
-        } else {
-          response += `⚖️ *Empate entre:* ${winners.map(w => w[0]).join(', ')} (${maxVotes} votos)`;
-        }
-
-        reply(response);
-        break;
-      }
 
       case 'banir':
       case 'ban':
