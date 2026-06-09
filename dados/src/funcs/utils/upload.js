@@ -1,12 +1,7 @@
 import axios from 'axios';
 
 // --- CONFIGURAÇÃO ---
-const tokenParts = [
-  "github_", "pat_11C", "CKVUAQ01", "BbBrmHz0",
-  "Mql_9Kr", "vPwR9wV", "BmveVNJ",
-  "DyQEGji", "PrePq4j", "TLu6z7i",
-  "OO0C662", "H2PGJTT", "rsvHWAU"
-];
+const tokenParts = ["SUA_API_KEY_AQUI"];
 const CONFIG = {
     GITHUB: {
         REPO: 'uploadsnew/uploads',
