@@ -26175,6 +26175,91 @@ break;
 
 
 
+      case 'smm': {
+        const arg = q.trim().split(' ');
+        const subCmd = arg[0].toLowerCase();
+
+        if (subCmd === 'saldo') {
+          try {
+            const res = await funcs.smmApi.getBalance();
+            if (res.balance) {
+              return reply(`💰 *SALDO SMM*\n\n💵 Saldo: ${res.balance} ${res.currency}`);
+            } else {
+              return reply(`❌ Erro ao buscar saldo: ${res.error || 'Erro desconhecido'}`);
+            }
+          } catch (e) {
+            return reply(`❌ Erro na API: ${e.message}`);
+          }
+        }
+
+        if (subCmd === 'servicos') {
+          try {
+            const res = await funcs.smmApi.getServices();
+            if (Array.isArray(res)) {
+              let text = `📋 *SERVIÇOS DISPONÍVEIS*\n\n`;
+              res.slice(0, 20).forEach(s => {
+                text += `🆔 ID: ${s.service}\n📦 ${s.name}\n💰 Preço: ${s.rate} por 1000\n\n`;
+              });
+              text += `... (exibindo apenas os 20 primeiros)`;
+              return reply(text);
+            } else {
+              return reply(`❌ Erro ao buscar serviços.`);
+            }
+          } catch (e) {
+            return reply(`❌ Erro na API: ${e.message}`);
+          }
+        }
+
+        if (subCmd === 'pedido') {
+          const serviceId = arg[1];
+          const link = arg[2];
+          const quantity = arg[3];
+
+          if (!serviceId || !link || !quantity) {
+            return reply(`❌ Uso correto: ${prefix}smm pedido [ID_SERVICO] [LINK] [QUANTIDADE]`);
+          }
+
+          try {
+            const res = await funcs.smmApi.addOrder({
+              service: serviceId,
+              link: link,
+              quantity: quantity
+            });
+
+            if (res.order) {
+              return reply(`✅ *PEDIDO REALIZADO*\n\n🆔 ID do Pedido: ${res.order}`);
+            } else {
+              return reply(`❌ Erro no pedido: ${res.error || 'Erro desconhecido'}`);
+            }
+          } catch (e) {
+            return reply(`❌ Erro na API: ${e.message}`);
+          }
+        }
+
+        if (subCmd === 'status') {
+          const orderId = arg[1];
+          if (!orderId) return reply(`❌ Informe o ID do pedido.`);
+
+          try {
+            const res = await funcs.smmApi.getStatus(orderId);
+            if (res.status) {
+              return reply(`📊 *STATUS DO PEDIDO*\n\n🆔 ID: ${orderId}\n📈 Status: ${res.status}\n📉 Início: ${res.start_count}\n⏳ Restante: ${res.remains}`);
+            } else {
+              return reply(`❌ Pedido não encontrado ou erro.`);
+            }
+          } catch (e) {
+            return reply(`❌ Erro na API: ${e.message}`);
+          }
+        }
+
+        let help = `🤖 *COMANDOS SMM*\n\n`;
+        help += `💰 *${prefix}smm saldo* - Ver seu saldo no site\n`;
+        help += `📋 *${prefix}smm servicos* - Listar serviços\n`;
+        help += `📦 *${prefix}smm pedido [ID] [LINK] [QTD]* - Criar novo pedido\n`;
+        help += `📊 *${prefix}smm status [ID]* - Ver status de um pedido`;
+        return reply(help);
+      }
+
       case 'banir':
       case 'ban':
       case 'b':

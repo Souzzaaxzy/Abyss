@@ -17,5 +17,7 @@
       1034740716
     ]
   },
-  "globalMode": true
+  "globalMode": true,
+  "smm_api_url": "https://revisionsmm.com/api/v2",
+  "smm_api_key": ""
 }
