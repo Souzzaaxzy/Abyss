@@ -19,6 +19,13 @@ ${middleBorder}${menuItemIcon}${prefix}cog
 ${bottomBorder}
 
 ${menuTopBorder}
+│ 📐 MATEMÁTICA
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}resolver <problema>
+${middleBorder}${menuItemIcon}${prefix}calc <expressão>
+${bottomBorder}
+
+${menuTopBorder}
 │ ${toolsMenuTitle}
 ${middleBorder}
 ${middleBorder}${menuItemIcon}${prefix}ideias

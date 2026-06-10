@@ -1400,11 +1400,11 @@ async function makeGroqRequest(modelo, texto, systemPrompt = null, historico = [
 
   // Mapear modelos NVIDIA para Groq
   const modelMap = {
-    'meta/llama-3.1-nemotron-70b-instruct': 'llama-3.1-70b-versatile',
-    'meta/llama-3.1-405b-instruct': 'llama-3.1-70b-versatile',
-    'meta/llama-3.3-70b-instruct': 'llama-3.1-70b-versatile'
+    'meta/llama-3.1-nemotron-70b-instruct': 'llama-3.3-70b-versatile',
+    'meta/llama-3.1-405b-instruct': 'llama-3.3-70b-versatile',
+    'meta/llama-3.3-70b-instruct': 'llama-3.3-70b-versatile'
   };
-  const groqModel = modelMap[modelo] || 'llama-3.1-70b-versatile';
+  const groqModel = modelMap[modelo] || 'llama-3.3-70b-versatile';
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {

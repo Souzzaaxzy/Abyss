@@ -30847,6 +30847,54 @@ ${prefix}calc converter 100 km mi`);
         break;
 
       // ═══════════════════════════════════════════════════════════════
+      // RESOLVER - Resolução de problemas com IA
+      // ═══════════════════════════════════════════════════════════════
+      case 'resolver':
+        if (!q) {
+          return reply(`📐 *Resolver Problemas Matemáticos*
+
+Use IA para resolver problemas passo a passo!
+
+💡 *Uso:*
+${prefix}resolver <problema>
+
+📝 *Exemplos:*
+${prefix}resolver Derive x² + 3x - 5
+${prefix}resolver integre x² dx
+${prefix}resolver Resolva: 2x + 4 = 10
+${prefix}resolver Qual a área de um círculo de raio 5?`);
+        }
+
+        try {
+          await reply("🔄 Resolvendo problema...");
+
+          const mathPrompt = `Resolva o seguinte problema matemático de forma clara e detalhada:
+
+PROBLEMA: ${q}
+
+Resolva passo a passo e explique cada etapa.`;
+
+          const response = await ia.makeCognimaRequest(
+            'meta/llama-3.1-nemotron-70b-instruct',
+            mathPrompt,
+            'Você é um professor de matemática expert. Responda de forma clara, passo a passo, usando formatação simples.',
+            [],
+            3
+          );
+
+          const result = response?.data?.choices?.[0]?.message?.content;
+          if (result) {
+            return reply(`📐 *Resolução*\n\n${result.trim()}`);
+          } else {
+            return reply("❌ Não foi possível resolver. Tente novamente!");
+          }
+        } catch (e) {
+          console.error('Erro resolver:', e.message);
+          return reply(`❌ Erro: ${e.message}`);
+        }
+        break;
+
+      // ═══════════════════════════════════════════════════════════════
       // EDIÇÃO DE ÁUDIO - Cortar, velocidade, etc
       // ═══════════════════════════════════════════════════════════════
       case 'cortaraudio':
