@@ -43,9 +43,9 @@ ${menuTopBorder}
 │ 👑 REAÇÕES POR NOME
 ${middleBorder}
 ${middleBorder}${menuItemIcon}${prefix}reacao - Ver lista
-${middleBorder}${menuItemIcon}${prefix}reacao <nome> <emoji> - Adicionar
-${middleBorder}${menuItemIcon}${prefix}reacao <nome> - Remover
-${middleBorder}${menuItemIcon}${prefix}reacao toggle - On/Off
+${middleBorder}${menuItemIcon}${prefix}reacao add <nome> <emoji>
+${middleBorder}${menuItemIcon}${prefix}reacao excluir <nome>
+${middleBorder}${menuItemIcon}${prefix}reacao toggle
 ${bottomBorder}
 
 ${menuTopBorder}

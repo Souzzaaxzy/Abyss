@@ -22732,9 +22732,10 @@ ${prefix}${command} 1a0b5879-bc22-4f4a
           if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
 
           const args = q.trim().split(' ');
+          const subCmd = args[0]?.toLowerCase();
           
           // !reacao - ver lista
-          if (!q.trim()) {
+          if (!subCmd) {
             const status = nameReactions.getStatus();
             const reactions = nameReactions.list();
             
@@ -22752,38 +22753,53 @@ ${prefix}${command} 1a0b5879-bc22-4f4a
 
 ${listText}
 
-💡 *Como usar:*
-${prefix}reacao <nome> <emoji> - Adicionar
-${prefix}reacao <nome> - Remover
+💡 *Comandos:*
+${prefix}reacao add <nome> <emoji> - Adicionar
+${prefix}reacao excluir <nome> - Remover
 ${prefix}reacao toggle - Ativar/Desativar
 
-📌 *Exemplo:* ${prefix}reacao leo 👑`);
+📌 *Exemplo:* ${prefix}reacao add leo 👑`);
           }
 
-          const nome = args[0];
-          const emoji = args[1];
-
           // !reacao toggle
-          if (nome === 'toggle' || nome === 'on' || nome === 'off') {
+          if (subCmd === 'toggle' || subCmd === 'on' || subCmd === 'off') {
             const newStatus = nameReactions.toggle();
             return reply(`✅ Sistema de reações ${newStatus ? 'ativado' : 'desativado'}!`);
           }
 
-          // !reacao <nome> <emoji> - adicionar
-          if (emoji) {
+          // !reacao add <nome> <emoji>
+          if (subCmd === 'add' || subCmd === 'criar' || subCmd === 'novo') {
+            const nome = args[1];
+            const emoji = args[2];
+            
+            if (!nome || !emoji) {
+              return reply(`❌ Uso: ${prefix}reacao add <nome> <emoji>\n\n📌 Exemplo: ${prefix}reacao add leo 👑`);
+            }
+            
             if (nameReactions.add(nome, emoji)) {
-              return reply(`✅ *Reação adicionada!*\n\n${emoji} Quando alguém disser "${nome}", o bot reagirá!`);
+              return reply(`✅ *Reação adicionada!*\n\n${emoji} Quando alguém disser "${nome}" (ou variações), o bot reagirá!`);
             } else {
               return reply('❌ Erro ao adicionar reação.');
             }
           }
 
-          // !reacao <nome> - remover
-          if (nameReactions.remove(nome)) {
-            return reply(`✅ Reação "${nome}" removida!`);
-          } else {
-            return reply(`❌ Reação "${nome}" não encontrada.`);
+          // !reacao excluir <nome>
+          if (subCmd === 'excluir' || subCmd === 'remover' || subCmd === 'delete' || subCmd === 'del') {
+            const nome = args[1];
+            
+            if (!nome) {
+              return reply(`❌ Uso: ${prefix}reacao excluir <nome>\n\n📌 Exemplo: ${prefix}reacao excluir leo`);
+            }
+            
+            if (nameReactions.remove(nome)) {
+              return reply(`✅ Reação "${nome}" removida!`);
+            } else {
+              return reply(`❌ Reação "${nome}" não encontrada.`);
+            }
           }
+
+          // Comando não reconhecido
+          return reply(`❌ Comando não reconhecido.\n\nUse: ${prefix}reacao para ver ajuda`);
 
         } catch (e) {
           console.error(e);
