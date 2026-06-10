@@ -26110,18 +26110,10 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
         break;
 
       case 'db':
+        // Usa a mesma verificação de permissão do comando !d
+        // isGroupAdmin já inclui admins, moderadores e alphas com permissão
         try {
           if (!isGroup) return reply("Este comando só funciona em grupos!");
-          
-          // Verificar se é admin, moderador ou alpha
-          const userRole = groupData?.usuarios?.[senderNormalized]?.funcao || groupData?.usuarios?.[sender]?.funcao;
-          const isModerator = userRole === 'moderador' || userRole === 'admin';
-          const isAlpha = sender === numerodono || isSubdono;
-          const isAdmin = isGroupAdmin;
-          
-          if (!isAdmin && !isModerator && !isAlpha) {
-            return reply("🚫 Você não tem permissão para usar este comando!");
-          }
           
           if (!menc_prt) return reply("Marque a mensagem da pessoa que deseja banir.");
           
