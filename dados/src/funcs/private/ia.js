@@ -1391,8 +1391,13 @@ async function makeGroqRequest(modelo, texto, systemPrompt = null, historico = [
     messages.push({ role: 'system', content: systemPrompt });
   }
   
+  // Limpar histórico - remover propriedades extras (timestamp, etc)
   if (historico && historico.length > 0) {
-    messages.push(...historico);
+    const historicoLimpo = historico.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+    messages.push(...historicoLimpo);
   }
   
   messages.push({ role: 'user', content: texto });
