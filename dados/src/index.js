@@ -26113,13 +26113,13 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
           await nazu.sendMessage(from, {
             delete: {
               remoteJid: from,
-              fromMe: true,
+              fromMe: false,
               id: info.key.id,
               participant: sender
             }
           });
         } catch (error) {
-          reply("ocorreu um erro ao apagar as mensagens 💔");
+          reply("Ocorreu um erro ao apagar as mensagens 💔");
         }
         break;
 
@@ -26129,7 +26129,7 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
         try {
           if (!isGroup) return reply("Este comando só funciona em grupos!");
           
-          if (!menc_prt) return reply("Marque a mensagem da pessoa que deseja banir.");
+          if (!menc_prt) return reply("👆 *Marque uma mensagem* para banir o usuário!");
           
           let dbStanzaId, dbParticipant;
           if (info.message.extendedTextMessage) {
@@ -26175,7 +26175,7 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
           await nazu.sendMessage(from, {
             delete: {
               remoteJid: from,
-              fromMe: true,
+              fromMe: false,
               id: info.key.id,
               participant: sender
             }
