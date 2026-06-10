@@ -1430,14 +1430,28 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
       };
 
     } catch (error) {
-      console.warn(`Tentativa ${attempt + 1} falhou:`, {
-        status: error.response?.status,
-        message: error.response?.data?.message || error.message
-      });
+      const status = error.response?.status;
+      const apiMessage = error.response?.data?.message || error.message;
+      
+      // Identificar tipo de erro
+      if (status === 401 || status === 403) {
+        console.error('[NVIDIA API] ❌ Erro de autenticação - API key inválida ou expirada!');
+      } else if (status === 404) {
+        console.error('[NVIDIA API] ❌ Erro 404 - Recurso não encontrado. Verifique sua API key e créditos.');
+      } else if (status === 429) {
+        console.error('[NVIDIA API] ⚠️ Rate limit atingido - muitas requisições.');
+      } else if (status >= 500) {
+        console.error('[NVIDIA API] ⚠️ Erro interno do servidor NVIDIA.');
+      }
+      
+      console.warn(`Tentativa ${attempt + 1}/${retries} falhou:`, { status, message: apiMessage });
 
       // retry handling — sem marcar status de API key
       if (attempt === retries - 1) {
-        throw new Error(`Falha na requisição após ${retries} tentativas: ${error.response?.data?.message || error.message}`);
+        const errorType = status === 401 || status === 403 ? 'AUTH' : 
+                         status === 404 ? 'NOT_FOUND' : 
+                         status === 429 ? 'RATE_LIMIT' : 'API_ERROR';
+        throw new Error(`[${errorType}] Falha na requisição após ${retries} tentativas: ${apiMessage}`);
       }
 
       await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
