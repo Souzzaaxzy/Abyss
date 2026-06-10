@@ -1404,7 +1404,7 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
         'https://integrate.api.nvidia.com/v1/chat/completions',
         {
           messages,
-          model: 'meta/llama-3.1-405b-instruct',
+          model: 'meta/llama-3.1-nemotron-70b-instruct',  // Modelo mais estável
           temperature: 0.7,
           max_tokens: 2000
         },
