@@ -42,10 +42,10 @@ ${bottomBorder}
 ${menuTopBorder}
 │ 👑 REAÇÕES POR NOME
 ${middleBorder}
-${middleBorder}${menuItemIcon}${prefix}reacao - Ver reações
-${middleBorder}${menuItemIcon}${prefix}reacao add <nome> <emoji>
-${middleBorder}${menuItemIcon}${prefix}reacao del <nome>
-${middleBorder}${menuItemIcon}${prefix}reacao toggle
+${middleBorder}${menuItemIcon}${prefix}reacao - Ver lista
+${middleBorder}${menuItemIcon}${prefix}reacao <nome> <emoji> - Adicionar
+${middleBorder}${menuItemIcon}${prefix}reacao <nome> - Remover
+${middleBorder}${menuItemIcon}${prefix}reacao toggle - On/Off
 ${bottomBorder}
 
 ${menuTopBorder}

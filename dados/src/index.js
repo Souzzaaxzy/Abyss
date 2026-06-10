@@ -22732,15 +22732,15 @@ ${prefix}${command} 1a0b5879-bc22-4f4a
           if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
 
           const args = q.trim().split(' ');
-          const subCmd = args[0]?.toLowerCase();
-
-          if (!subCmd || subCmd === 'menu' || subCmd === 'ajuda' || subCmd === 'help') {
+          
+          // !reacao - ver lista
+          if (!q.trim()) {
             const status = nameReactions.getStatus();
             const reactions = nameReactions.list();
             
             let listText = '';
             if (reactions.length > 0) {
-              listText = reactions.map(r => `• ${r.emoji} ${r.name}`).join('\n');
+              listText = reactions.map(r => `${r.emoji} ${r.name}`).join('\n');
             } else {
               listText = 'Nenhuma reação configurada';
             }
@@ -22752,24 +22752,25 @@ ${prefix}${command} 1a0b5879-bc22-4f4a
 
 ${listText}
 
-💡 *Comandos:*
-${prefix}reacao add <nome> <emoji> - Adicionar reação
-${prefix}reacao del <nome> - Remover reação
+💡 *Como usar:*
+${prefix}reacao <nome> <emoji> - Adicionar
+${prefix}reacao <nome> - Remover
 ${prefix}reacao toggle - Ativar/Desativar
-${prefix}reacao list - Ver todas
 
-📌 *Exemplo:*
-${prefix}reacao add leo 👑`);
+📌 *Exemplo:* ${prefix}reacao leo 👑`);
           }
 
-          if (subCmd === 'add' || subCmd === 'criar') {
-            const nome = args[1];
-            const emoji = args[2];
-            
-            if (!nome || !emoji) {
-              return reply(`❌ Uso: ${prefix}reacao add <nome> <emoji>\n\nExemplo: ${prefix}reacao add leo 👑`);
-            }
-            
+          const nome = args[0];
+          const emoji = args[1];
+
+          // !reacao toggle
+          if (nome === 'toggle' || nome === 'on' || nome === 'off') {
+            const newStatus = nameReactions.toggle();
+            return reply(`✅ Sistema de reações ${newStatus ? 'ativado' : 'desativado'}!`);
+          }
+
+          // !reacao <nome> <emoji> - adicionar
+          if (emoji) {
             if (nameReactions.add(nome, emoji)) {
               return reply(`✅ *Reação adicionada!*\n\n${emoji} Quando alguém disser "${nome}", o bot reagirá!`);
             } else {
@@ -22777,36 +22778,12 @@ ${prefix}reacao add leo 👑`);
             }
           }
 
-          if (subCmd === 'del' || subCmd === 'remover' || subCmd === 'delete') {
-            const nome = args[1];
-            
-            if (!nome) {
-              return reply(`❌ Uso: ${prefix}reacao del <nome>\n\nExemplo: ${prefix}reacao del leo`);
-            }
-            
-            if (nameReactions.remove(nome)) {
-              return reply(`✅ Reação "${nome}" removida!`);
-            } else {
-              return reply(`❌ Reação "${nome}" não encontrada.`);
-            }
+          // !reacao <nome> - remover
+          if (nameReactions.remove(nome)) {
+            return reply(`✅ Reação "${nome}" removida!`);
+          } else {
+            return reply(`❌ Reação "${nome}" não encontrada.`);
           }
-
-          if (subCmd === 'toggle' || subCmd === 'on' || subCmd === 'off') {
-            const newStatus = nameReactions.toggle();
-            return reply(`✅ Sistema de reações ${newStatus ? 'ativado' : 'desativado'}!`);
-          }
-
-          if (subCmd === 'list' || subCmd === 'lista') {
-            const reactions = nameReactions.list();
-            if (reactions.length === 0) {
-              return reply('📝 Nenhuma reação configurada.\n\nUse: ' + prefix + 'reacao add <nome> <emoji>');
-            }
-            const listText = reactions.map(r => `${r.emoji} ${r.name}`).join('\n');
-            return reply(`👑 *Reações configuradas:*\n\n${listText}`);
-          }
-
-          // Se não reconhecido, mostra ajuda
-          return reply(`❌ Comando não reconhecido.\n\nUse: ${prefix}reacao para ver ajuda`);
 
         } catch (e) {
           console.error(e);
