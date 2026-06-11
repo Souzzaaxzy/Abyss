@@ -1351,14 +1351,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
 
       // YouTube
       if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
-        const { getProvider } = await import('./funcs/downloads/provider.js');
-        const provider = getProvider();
-        if (provider === 'yt') {
-          const ytdlp = await import('./funcs/downloads/ytdlp.js');
-          downloadModule = ytdlp;
-        } else {
-          downloadModule = youtube;
-        }
+        downloadModule = youtube;
         platformName = 'YouTube';
       }
       // TikTok
@@ -19428,18 +19421,7 @@ case 'addaluguel':
             await react('🔍', nazu, info.key, from);
 
             await nazu.sendMessage(from, { react: { text: '⏳', key: info.key } });
-            
-            const { getProvider } = await import('./funcs/downloads/provider.js');
-            const provider = getProvider();
-            let mp3Module;
-            if (provider === 'yt') {
-              const ytdlp = await import('./funcs/downloads/ytdlp.js');
-              mp3Module = ytdlp;
-            } else {
-              mp3Module = youtube;
-            }
-            
-            mp3Module.mp3(videoUrl, 128)
+            youtube.mp3(videoUrl, 128)
               .then(async (dlRes) => {
                 if (!dlRes.ok)
                   return nazu.sendMessage(from, { text: `❌ Erro ao baixar o áudio: ${dlRes.msg}` }, { quoted: info });
@@ -19484,21 +19466,8 @@ case 'addaluguel':
           // Reação de pesquisa
           await nazu.sendMessage(from, { react: { text: '🔍', key: info.key } });
 
-          // Verifica qual provedor está selecionado
-          const { getProvider } = await import('./funcs/downloads/provider.js');
-          const provider = getProvider();
-          let searchModule, dlModule;
-          if (provider === 'yt') {
-            const ytdlp = await import('./funcs/downloads/ytdlp.js');
-            searchModule = ytdlp;
-            dlModule = ytdlp;
-          } else {
-            searchModule = youtube;
-            dlModule = youtube;
-          }
-
           // Usando .then em vez de await para a pesquisa do YouTube
-          searchModule.search(q)
+          youtube.search(q)
             .then(async (result) => {
               if (!result.ok) return reply(`${result.msg}`);
               videoInfo = result;
@@ -19527,7 +19496,7 @@ case 'addaluguel':
               }, { quoted: info }).catch((sendErr) => console.error('Erro ao enviar mensagem de resultado (busca):', sendErr));
 
               await nazu.sendMessage(from, { react: { text: '⏳', key: info.key } });
-              dlModule.mp3(videoUrl, 128)
+              youtube.mp3(videoUrl, 128)
                 .then(async (dlRes) => {
                   if (!dlRes.ok) return nazu.sendMessage(from, { text: `❌ Erro ao baixar o áudio: ${dlRes.msg}` }, { quoted: info });
 
@@ -21902,24 +21871,11 @@ Precisa de ajuda? Entre em contato:
           const customDesign = getMenuDesignWithDefaults(customBotName, pushname);
 
           // Aplica o design personalizado ao menu
-          let menuText;
-          
-          if (typeof menuFunction === 'function') {
-            if (typeof menuFunction.then === 'function') {
-              menuText = await menuFunction;
-            } else {
-              // Verifica se é o menuDono para passar o provider
-              if (menuType === 'dono') {
-                const { getProviderName } = await import('./funcs/downloads/provider.js');
-                const providerName = getProviderName();
-                menuText = await menuFunction(prefix, customBotName, pushname, customDesign, providerName);
-              } else {
-                menuText = await menuFunction(prefix, customBotName, pushname, customDesign);
-              }
-            }
-          } else {
-            menuText = 'Menu não disponível';
-          }
+          const menuText = typeof menuFunction === 'function' ?
+            (typeof menuFunction.then === 'function' ?
+              await menuFunction :
+              await menuFunction(prefix, customBotName, pushname, customDesign)) :
+            'Menu não disponível';
 
           const lerMaisPrefix = getMenuLerMaisText();
 
@@ -22669,52 +22625,7 @@ case 'addcmd-subdono':
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
         }
         break;
-            case 'select':
-        try {
-          if (!isOwnerOrSub) return reply("⚠️ Este comando é exclusivo para o dono!");
-          
-          if (!q) return reply(`📥 *Seletor de Provedor de Downloads*
-
-🔹 *Provedores disponíveis:*
-• vex → VexAPI (padrão)
-• yt → YT-DLP
-
-📝 *Como usar:*
-• ${prefix}select vex
-• ${prefix}select yt
-
-⚡ A escolha será salva e utilizada em todos os downloads!`);
-          
-          const prov = q.trim().toLowerCase();
-          
-          if (prov !== 'vex' && prov !== 'yt') {
-            return reply(`⚠️ Provedor inválido!
-
-Use:
-• ${prefix}select vex - VexAPI
-• ${prefix}select yt - YT-DLP`);
-          }
-          
-          const { setProvider, getProviderName } = await import('./funcs/downloads/provider.js');
-          const success = setProvider(prov);
-          
-          if (success) {
-            const novoProvider = getProviderName();
-            await reply(`✅ *Provedor alterado com sucesso!*
-
-📥 Provedor atual: ${novoProvider}
-
-⚡ Todos os downloads agora usarão este provedor.`);
-          } else {
-            await reply("❌ Erro ao salvar configuração. Tente novamente!");
-          }
-        } catch (e) {
-          console.error(e);
-          await reply("❌ Ocorreu um erro ao alterar o provedor!");
-        }
-        break;
-
-case 'prefixo':
+      case 'prefixo':
       case 'prefix':
         try {
           if (!isOwnerOrSub) return reply("Este comando é exclusivo para o meu dono!");
