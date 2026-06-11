@@ -298,11 +298,11 @@ const formatAIResponse = (text) => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🎵 LAYOUT DO PLAYER DE MÚSICA (Sincronizado com imagem)
+// 🎵 LAYOUT DO PLAYER DE MÚSICA
 // ═══════════════════════════════════════════════════════════════
 const formatMusicPlayer = (title, artist, duration = null, progress = null, volume = null) => {
-  // Largura proporcional à imagem (~500-600px = ~55-60 caracteres)
-  const maxWidth = 58;
+  // Largura equilibrada (sincronizado mas bonito)
+  const maxWidth = 50;
   
   // Função para criar linha de progresso
   const createProgressBar = (progressPercent) => {
@@ -322,61 +322,33 @@ const formatMusicPlayer = (title, artist, duration = null, progress = null, volu
   const safeTitle = title || 'Música desconhecida';
   const safeArtist = artist || 'Artista desconhecido';
   
-  const titleDisplay = truncate(safeTitle, maxWidth - 6);
+  const titleDisplay = truncate(safeTitle, maxWidth - 10);
   const artistDisplay = truncate(safeArtist, maxWidth);
   
-  // Barra de progresso (sem tempos)
-  let progressBarStr = '';
-  if (progress !== null) {
-    progressBarStr = createProgressBar(progress);
-  } else {
-    // Barra vazia quando não tem progresso
-    progressBarStr = createProgressBar(0);
-  }
+  // Barra de progresso
+  const progressBarStr = createProgressBar(progress !== null ? progress : 0);
   
-  // Layout do player - exatamente como na imagem
+  // Layout
   const innerWidth = maxWidth;
   
-  // Helper para criar linha com espaçamento dinâmico
-  const line = (content) => {
-    return `│ ${content}${' '.repeat(Math.max(0, innerWidth - content.length))} │\n`;
-  };
-  
-  const lineWithEmoji = (content, emoji) => {
-    const spaces = innerWidth - content.length - 2;
-    return `│ ${content}${' '.repeat(Math.max(1, spaces))} ${emoji} │\n`;
-  };
+  const pad = (str, len) => str + ' '.repeat(Math.max(0, len - str.length));
   
   let player = `├${'─'.repeat(innerWidth + 2)}┤\n`;
-  player += lineWithEmoji('iPhone', '🅴');
-  player += line('');
+  player += `│ ${pad('iPhone', innerWidth - 1)} 🅴 │\n`;
+  player += `│                                          │\n`;
+  player += `│ ${pad(titleDisplay, innerWidth)} │\n`;
+  player += `│ ${pad(artistDisplay, innerWidth)} │\n`;
+  player += `│                                          │\n`;
+  player += `│ ${progressBarStr} │\n`;
+  player += `│                                          │\n`;
+  player += `│       ◀◀      ❚❚      ▶▶              │\n`;
+  player += `│                                    ◉    │\n`;
+  player += `│                                          │\n`;
   
-  // Título
-  player += line(titleDisplay);
-  
-  // Artista
-  player += line(artistDisplay);
-  
-  player += line('');
-  
-  // Barra de progresso (só a barra, sem tempos)
-  player += line(progressBarStr);
-  
-  player += line('');
-  
-  // Controles centralizados
-  const controls = '◀◀      ❚❚      ▶▶';
-  const ctrlSpaces = Math.max(0, Math.floor((innerWidth - controls.length) / 2));
-  player += `│${' '.repeat(ctrlSpaces)}${controls}${' '.repeat(innerWidth - ctrlSpaces - controls.length)}│\n`;
-  player += `│${' '.repeat(innerWidth - 3)}◉     │\n`;
-  player += line('');
-  
-  // Volume
   if (volume !== null) {
     const volBar = createProgressBar(volume);
-    const volText = `🔊 ${volBar} 🔊`;
-    player += line(volText);
-    player += line('');
+    player += `│ 🔊 ${volBar} 🔊        │\n`;
+    player += `│                                          │\n`;
   }
   
   player += `╰${'─'.repeat(innerWidth + 2)}╯`;
