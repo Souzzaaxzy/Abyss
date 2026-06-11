@@ -62,11 +62,14 @@ async function getDirectUrl(url, format = 'bestaudio/bestvideo') {
 
 // Busca vídeos
 async function search(query) {
-  // Verificar se yt-dlp est00e1 instalado
   try {
-    await execAsync('which yt-dlp');
+    await execAsync('yt-dlp --version');
   } catch {
-    return { ok: false, msg: '⚠️ YT-DLP não está instalado! Use: pip install yt-dlp' };
+    try {
+      await execAsync('pip install yt-dlp');
+    } catch {
+      return { ok: false, msg: 'YT-DLP nao instalado! Execute: pip install yt-dlp' };
+    }
   }
   const cacheKey = `search:${query}`;
   const cached = cache.get(cacheKey);
