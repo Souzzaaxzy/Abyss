@@ -310,14 +310,19 @@ const formatMusicPlayer = (title, artist, duration = null, progress = null, volu
     return '█'.repeat(filled) + '▓'.repeat(Math.min(empty, 1)) + '░'.repeat(Math.max(empty - 1, 0));
   };
   
-  // Truncar texto para caber
+  // Truncar texto para caber (com proteção contra undefined/null)
   const truncate = (text, maxLen) => {
+    if (!text || typeof text !== 'string') return '';
     if (text.length <= maxLen) return text;
     return text.substring(0, maxLen - 3) + '...';
   };
   
-  const titleDisplay = truncate(title, maxWidth - 6);
-  const artistDisplay = truncate(artist, maxWidth);
+  // Tratar valores undefined/null
+  const safeTitle = title || 'Música desconhecida';
+  const safeArtist = artist || 'Artista desconhecido';
+  
+  const titleDisplay = truncate(safeTitle, maxWidth - 6);
+  const artistDisplay = truncate(safeArtist, maxWidth);
   
   let progressBar = '';
   let timeDisplay = '';
