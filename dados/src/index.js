@@ -34483,35 +34483,35 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
         // ═══════════════════════════════════════════════════════════════
         // 🤖 NPC AUTOMÁTICO - Responde a TODOS os eventos
         // ═══════════════════════════════════════════════════════════════
-        if (npcManager?.isEnabled() && !info.key.fromMe) {
+        if (isGroup && npcManager?.isEnabled(from) && !info.key.fromMe) {
           // Detecta tipo de mensagem e faz NPC responder
           const detectedEvent = npcManager.detectEvent(body, sender, pushname);
           
           if (detectedEvent) {
-            await npcManager.trigger(nazu, from, detectedEvent, sender, pushname, {});
+            await npcManager.trigger(nazu, from, detectedEvent, sender, pushname, {}, from);
           }
           
           // Responde a mensagens de mídia
           if (type === 'imageMessage' && !isCmd) {
-            await npcManager.trigger(nazu, from, 'foto_enviada', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'foto_enviada', sender, pushname, {}, from);
           } else if (type === 'videoMessage' && !isCmd) {
-            await npcManager.trigger(nazu, from, 'video_enviado', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'video_enviado', sender, pushname, {}, from);
           } else if (type === 'audioMessage' && !isCmd) {
-            await npcManager.trigger(nazu, from, 'audio_enviado', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'audio_enviado', sender, pushname, {}, from);
           } else if (type === 'stickerMessage' && !isCmd) {
-            await npcManager.trigger(nazu, from, 'sticker_enviado', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'sticker_enviado', sender, pushname, {}, from);
           } else if (type === 'documentMessage' && !isCmd) {
-            await npcManager.trigger(nazu, from, 'documento_enviado', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'documento_enviado', sender, pushname, {}, from);
           }
           
           // Responde a links compartilhados
           if (budy2.includes('http') || budy2.includes('www.')) {
-            await npcManager.trigger(nazu, from, 'link_compartilhado', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'link_compartilhado', sender, pushname, {}, from);
           }
           
           // Responde a mensagens com perguntas (interação)
           if (!isCmd && (body.endsWith('?') || body.includes('?')) && Math.random() < 0.3) {
-            await npcManager.trigger(nazu, from, 'mensagem_enviada', sender, pushname, {});
+            await npcManager.trigger(nazu, from, 'mensagem_enviada', sender, pushname, {}, from);
           }
         }
     };
