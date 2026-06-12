@@ -324,7 +324,7 @@ const formatMusicPlayer = (title, artist, duration = null, progress = null, volu
   const totalSeconds = duration || 194;
   const currentSeconds = progress !== null ? Math.floor(totalSeconds * progress) : 72;
   
-  const barWidth = 40;
+  const barWidth = 35; // Reduzido em 5 caracteres
   const filledBars = Math.floor((currentSeconds / totalSeconds) * barWidth);
   const emptyBars = barWidth - filledBars;
   
@@ -355,12 +355,12 @@ const formatMusicPlayer = (title, artist, duration = null, progress = null, volu
   // Linha 3: Artista
   player += ` ${line(artistDisplay)}\n`;
   
-  // Linha 4: Barra de progresso
+  // Linha 4: Barra de progresso (5 caracteres mais curta)
   player += ` ${line(progressBar)}\n`;
   
-  // Linha 5: Controles
-  const controls = '⇆  ◁  ❚❚  ▷  ↻';
-  player += `${' '.repeat(innerWidth - controls.length + 1)}${controls}\n`;
+  // Linha 5: Controles (5 espaços extras à esquerda)
+  const controls = '     ⇆  ◁  ❚❚  ▷  ↻';
+  player += ` ${line(controls)}`;
   
   // Linha 6: Barra de volume
   const volumeLine = `🔈  ${volumeBar}  🔊`;
