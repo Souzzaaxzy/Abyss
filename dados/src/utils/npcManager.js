@@ -1,40 +1,122 @@
 // ═══════════════════════════════════════════════════════════════
-// 🤖 SISTEMA DE NPCs - GERENCIADOR PRINCIPAL
+// 🤖 SISTEMA DE NPCs - GERENCIADOR PRINCIPAL (APRIMORADO)
 // ═══════════════════════════════════════════════════════════════
-import { NPC_PERSONALITIES, DEFAULT_ACTIVE_NPC } from './npcPersonalities.js';
 import * as ia from '../funcs/private/ia.js';
 import fs from 'fs';
-import path from 'path';
 
 const DATABASE_DIR = './dados';
 const NPC_CONFIG_FILE = `${DATABASE_DIR}/npc_config.json`;
 const NPC_MEMORY_FILE = `${DATABASE_DIR}/npc_memory.json`;
 
 // ═══════════════════════════════════════════════════════════════
-// 📊 CONFIGURAÇÕES DOS NPCs
+// 🎭 NPCS COM RESPOSTAS PRÉ-DEFINIDAS
 // ═══════════════════════════════════════════════════════════════
-const DEFAULT_CONFIG = {
-  enabled: false,
-  cooldown: 30000, // 30 segundos entre falas
-  jornalEnabled: false,
-  jornalHour: 20, // 8 da noite
-  activeNPCs: [DEFAULT_ACTIVE_NPC], // NPCs que podem falar
-  lastMessageTime: 0,
-  eventsLog: [] // Log de eventos recentes
+const NPC_RESPONSES = {
+  kaiser: {
+    level_up: [
+      "Opa! {user} subiu de level! Agora é level {level} 🎉",
+      "{user} tá ficandão forte hein! Level {level} já! 😏",
+      "Nada mal {user}! Subiu pro level {level}! 💪"
+    ],
+    conquista_desbloqueada: [
+      "Ooh {user} desbloqueou: {conquest}! 🏆",
+      "Isso aí {user}! {conquest} conquistado! 🎊",
+      "{user} conseguiu a conquista {conquest}! 👏"
+    ],
+    pet_adotado: [
+      "Aaaw {user} adotou um pet! 🐾",
+      "Que fofo {user}! Agora tem um companheiro! 🐱",
+      "{user} é o novo tutor de {pet}! 🥰"
+    ],
+    pet_level_up: [
+      "{pet} de {user} subiu de level! {level} 🔥",
+      "O {pet} tá evoluindo! Level {level}! ✨",
+      "{user} seu pet {pet} tá fortescendo! 💪"
+    ],
+    pet_derrota: [
+      "Aff... {pet} de {user} perdeu... 😢",
+      "{user}, {pet} foi derrotado... vai tentar de novo? 💪",
+      "O {pet} de {user} não tá tendo sorte hoje... 😅"
+    ],
+    dungeon_vitoria: [
+      "Incrível {user}! Venceu a dungeon {dungeon}! 🏆",
+      "Isso aí {user}! Conquistou {dungeon}! 💪",
+      "Vencedor! {user} dominou {dungeon}! 🎉"
+    ],
+    dungeon_derrota: [
+      "{user} foi derrotado em {dungeon}... vai tentar de novo? 💪",
+      "A dungeon {dungeon} venceu dessa vez... mas você volta! 🔄",
+      "{user} não desiste! {dungeon} vai ser sua! 💪"
+    ],
+    roubar_sucesso: [
+      "{user} roubou {amount} de {target}! 💰",
+      "Cuidado {target}! {user} te roubou {amount}! 😱",
+      "O {user} fez uma limpa em {target}! 💸"
+    ],
+    roubar_falhou: [
+      "{user} tentou roubar {target} mas foi pego! 😂",
+      "O plano de {user} falhou... {target} pegou ele! 😅",
+      "{target} não caiu nessa! {user} foi flagrado! 📸"
+    ],
+    cassino_roleta_vitoria: [
+      "{user} acertou {result} na roleta! +{amount} 💰",
+      "O sorte tá com {user}! {result} saiu! 🎰",
+      "{user} tá ganhando na roleta! {result}! ✨"
+    ],
+    cassino_roleta_perda: [
+      "{user} perdeu na roleta... apostou em {bet} 😅",
+      "A casa venceu dessa vez! {user} perdeu em {bet} 💸",
+      "{user} não teve sorte na roleta... apostou em {bet} 🎲"
+    ],
+    cassino_slots_jackpot: [
+      "JACKPOT! {user} inúmeras {amount} nos slots! 🎰🎰🎰",
+      "MEU DEUS! {user} conseguiu {amount} no jackpot! 💎",
+      "ISSO É INSANO! {user} ganhou {amount}! 🎰💰"
+    ],
+    cassino_slots_vitoria: [
+      "{user} ganhou {amount} nos slots! 🎰",
+      "Slots sortudo! {user} levou {amount}! ✨",
+      "{user} tá com a mão quente! +{amount} 🎲"
+    ],
+    cassino_slots_perda: [
+      "{user} perdeu {amount} nos slots... 💸",
+      "Os slots não estavam com {user} hoje... perdeu {amount} 🎱",
+      "{user} tá devendo pro cassino agora... {amount} 😅"
+    ],
+    eleicao_candidatura: [
+      "{user} entrou na corrida eleitoral! 🗳️",
+      "Novo candidato! {user} tá disputando a eleição! 📢",
+      "{user} quer ser o líder! Vote nele! 🗳️"
+    ],
+    default: [
+      "Hmm interesting... {user} did something 🌙",
+      "I see what {user} is doing... 👀",
+      "Noted! {event} happened 👀"
+    ],
+    novo_alpha: [
+      "{user} virou Alpha! 🏆",
+      "O novo Alpha é {user}! 👑",
+      "{user} está no topo! Alpha confirmado! ⭐"
+    ],
+    voto_positivo: [
+      "{user} recebeu um upvote! 👍",
+      "Alguém curtiu o que {user} fez! 💖",
+      "{user} tá subindo no ranking! 📈"
+    ]
+  }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🧠 MEMÓRIA DOS NPCs
+// 📊 CONFIGURAÇÕES
 // ═══════════════════════════════════════════════════════════════
-const DEFAULT_MEMORY = {
-  rememberedPhrases: {}, // userId -> array de frases ditas
-  contradictions: [], // contradições detectadas
-  recentEvents: [], // eventos recentes { tipo, userId, data, desc }
-  dailyStats: {
-    date: null,
-    messagesCount: {},
-    topActive: []
-  }
+const DEFAULT_CONFIG = {
+  enabled: false,
+  cooldown: 15000,
+  jornalEnabled: false,
+  jornalHour: 20,
+  activeNPCs: ['kaiser'],
+  autoRespond: true,
+  responseChance: 0.7
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -64,12 +146,12 @@ const loadMemory = () => {
   try {
     if (fs.existsSync(NPC_MEMORY_FILE)) {
       const data = fs.readFileSync(NPC_MEMORY_FILE, 'utf-8');
-      return { ...DEFAULT_MEMORY, ...JSON.parse(data) };
+      return JSON.parse(data);
     }
   } catch (e) {
-    console.error('[NPC] Erro ao carregar memória:', e.message);
+    return { recentEvents: [], recentNPCMessages: [] };
   }
-  return { ...DEFAULT_MEMORY };
+  return { recentEvents: [], recentNPCMessages: [] };
 };
 
 const saveMemory = (memory) => {
@@ -87,335 +169,147 @@ class NPCManager {
   constructor() {
     this.config = loadConfig();
     this.memory = loadMemory();
-    this.cooldowns = new Map(); // npcId -> lastMessageTime
-    this.globalCooldown = false;
-    
-    // Inicializa cooldowns
-    Object.keys(NPC_PERSONALITIES).forEach(id => {
-      this.cooldowns.set(id, 0);
-    });
+    this.cooldowns = new Map();
+    this.cooldowns.set('kaiser', 0);
   }
 
-  // Verifica se o sistema está ativo
-  isEnabled() {
-    return this.config.enabled;
-  }
+  isEnabled() { return this.config.enabled; }
+  isAutoRespond() { return this.config.autoRespond !== false; }
 
-  // Verifica se pode falar (cooldown)
   canSpeak(npcId) {
     const now = Date.now();
     const lastTime = this.cooldowns.get(npcId) || 0;
-    return (now - lastTime) >= this.config.cooldown && !this.globalCooldown;
+    return (now - lastTime) >= this.config.cooldown;
   }
 
-  // Marca que o NPC falou
   markSpoken(npcId) {
     this.cooldowns.set(npcId, Date.now());
-    this.config.lastMessageTime = Date.now();
-    saveConfig(this.config);
-  }
-
-  // Bloqueio global temporário
-  setGlobalCooldown(ms = 5000) {
-    this.globalCooldown = true;
-    setTimeout(() => {
-      this.globalCooldown = false;
-    }, ms);
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // 📝 GERAÇÃO DE RESPOSTA COM IA
+  // 🎯 MÉTODO PRINCIPAL: Registrar evento E fazer NPC responder
   // ═══════════════════════════════════════════════════════════════
-  async generateResponse(npcId, event, context = {}) {
+  async trigger(nazu, from, eventType, userId, userName, eventData = {}) {
     if (!this.isEnabled()) return null;
     
-    const npc = NPC_PERSONALITIES[npcId];
-    if (!npc) return null;
-
-    // Verifica se o NPC tem interesse no evento
-    const eventType = event.type?.toLowerCase() || '';
-    const hasInterest = npc.interesses.some(i => eventType.includes(i)) || Math.random() < 0.3;
-    
-    if (!hasInterest) return null;
-
-    // Prepara contexto
-    const contextInfo = this.buildContext(npcId, event, context);
-    
-    // Prepara prompt para IA
-    const systemPrompt = npc.personalidade;
-    const userPrompt = `
-EVENTO ACONTECENDO:
-${event.description}
-
-${contextInfo}
-
-gere uma resposta curta e natural como ${npc.nome} reagiria a isso.`;
-
-    try {
-      const response = await ia.makeCognimaRequest(
-        'meta/llama-3.3-70b-instruct',
-        userPrompt,
-        systemPrompt,
-        [],
-        2 // menos retries para não travar
-      );
-
-      const content = response?.data?.choices?.[0]?.message?.content;
-      if (content) {
-        return `${npc.emoji} ${content.trim()}`;
-      }
-    } catch (e) {
-      console.error(`[NPC] Erro ao gerar resposta para ${npcId}:`, e.message);
+    // Chance de resposta
+    if (Math.random() > this.config.responseChance) {
+      return null;
     }
 
-    return null;
-  }
+    const npcId = 'kaiser';
 
-  // Constrói contexto para a IA
-  buildContext(npcId, event, context) {
-    let contextStr = '';
-
-    // Memórias recentes
-    if (this.memory.recentEvents.length > 0) {
-      const recentEvents = this.memory.recentEvents.slice(-5);
-      contextStr += '\nEVENTOS RECENTES DO GRUPO:\n';
-      recentEvents.forEach(e => {
-        contextStr += `- ${e.desc} (${this.timeAgo(e.data)})\n`;
-      });
-    }
-
-    // Contradições
-    if (this.memory.contradictions.length > 0) {
-      const recentContra = this.memory.contradictions.slice(-3);
-      if (recentContra.some(c => c.userId === event.userId)) {
-        contextStr += '\n⚠️ LEMBRETE: Este usuário pode estar se contradizendo!\n';
-      }
-    }
-
-    // Frases lembradas
-    if (event.userId && this.memory.rememberedPhrases[event.userId]) {
-      const phrases = this.memory.rememberedPhrases[event.userId].slice(-3);
-      if (phrases.length > 0) {
-        contextStr += '\nFRASES ANTERIORES DESTE USUÁRIO:\n';
-        phrases.forEach(p => {
-          contextStr += `- "${p.text}" (${this.timeAgo(p.date)})\n`;
-        });
-      }
-    }
-
-    return contextStr;
-  }
-
-  // Formata tempo relativo
-  timeAgo(date) {
-    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-    if (seconds < 60) return 'agora';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}min`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-    return `${Math.floor(seconds / 86400)}d`;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 📰 GERAR JORNAL DIÁRIO
-  // ═══════════════════════════════════════════════════════════════
-  async generateDailyNews() {
-    if (!this.config.jornalEnabled) return null;
-
-    const today = new Date().toDateString();
-    if (this.memory.dailyStats.date === today) return null;
-
-    // Pega eventos do dia
-    const todayEvents = this.memory.recentEvents.filter(e => {
-      const eventDate = new Date(e.data).toDateString();
-      return eventDate === today;
-    });
-
-    if (todayEvents.length === 0) return null;
-
-    const npc = NPC_PERSONALITIES.journalist;
-    
-    // Prepara resumo dos eventos
-    const eventsSummary = todayEvents.map(e => `- ${e.desc}`).join('\n');
-
-    const systemPrompt = npc.personalidade;
-    const userPrompt = `
-CRIE O KAISER NEWS DIÁRIO com os seguintes eventos de HOJE:
-
-${eventsSummary}
-
-Crie uma edição resumida e divertida do jornal. Use formato:
-📰 *KAISER NEWS - [data de hoje]*
-
-[Manchete principal]
-
-[Resumo dos principais eventos em 3-4 linhas]
-
-Use tom jornalístico mas descontraído.`;
-
-    try {
-      const response = await ia.makeCognimaRequest(
-        'meta/llama-3.3-70b-instruct',
-        userPrompt,
-        systemPrompt,
-        [],
-        2
-      );
-
-      const content = response?.data?.choices?.[0]?.message?.content;
-      if (content) {
-        return content.trim();
-      }
-    } catch (e) {
-      // Só mostra warning uma vez por sessão para não poluir o terminal
-      if (!this._jornalErrorShown) {
-        this._jornalErrorShown = true;
-        console.warn('[NPC] ⚠️ Jornal desativado - API Groq indisponível');
-      }
-    }
-
-    // Desativa jornal automaticamente se API falhar
-    this.config.jornalEnabled = false;
-    return null;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 📝 REGISTRAR EVENTO
-  // ═══════════════════════════════════════════════════════════════
-  recordEvent(type, userId, description, metadata = {}) {
-    const event = {
-      id: Date.now(),
-      type,
-      userId,
-      desc: description,
-      data: new Date().toISOString(),
-      metadata
-    };
-
-    this.memory.recentEvents.push(event);
-    
-    // Mantém só últimos 100 eventos
-    if (this.memory.recentEvents.length > 100) {
-      this.memory.recentEvents = this.memory.recentEvents.slice(-100);
-    }
-
-    saveMemory(this.memory);
-    return event;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 🧠 LEMBRAR FRASE
-  // ═══════════════════════════════════════════════════════════════
-  rememberPhrase(userId, text, messageType = 'text') {
-    if (!this.memory.rememberedPhrases[userId]) {
-      this.memory.rememberedPhrases[userId] = [];
-    }
-
-    this.memory.rememberedPhrases[userId].push({
-      text,
-      date: new Date().toISOString(),
-      type: messageType
-    });
-
-    // Mantém só últimas 10 frases por usuário
-    if (this.memory.rememberedPhrases[userId].length > 10) {
-      this.memory.rememberedPhrases[userId] = this.memory.rememberedPhrases[userId].slice(-10);
-    }
-
-    saveMemory(this.memory);
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 🔍 DETECTAR CONTRADIÇÃO
-  // ═══════════════════════════════════════════════════════════════
-  checkContradiction(userId, newText) {
-    const phrases = this.memory.rememberedPhrases[userId] || [];
-    
-    // Verifica contradições simples
-    const contradictions = [
-      { positivo: /nunca\s+vou/i, negativo: /agora\s+vou|irei|resolvedor/i },
-      { positivo: /sempre\s+/i, negativo: /nunca\s+/i },
-      { positivo: /não\s+gosto/i, negativo: /gosto\s+disso|adorei|amo/i },
-      { positivo: /não\s+vou\s+casar/i, negativo: /casar|vou\s+casar|me\s+cas/i },
-    ];
-
-    for (const contra of contradictions) {
-      const hasPositive = phrases.some(p => contra.positivo.test(p.text));
-      const hasNegative = contra.negativo.test(newText);
-      
-      if (hasPositive && hasNegative) {
-        const existing = this.memory.contradictions.find(
-          c => c.userId === userId && c.type === 'contradição'
-        );
-        
-        if (!existing) {
-          this.memory.contradictions.push({
-            userId,
-            type: 'contradição',
-            data: new Date().toISOString(),
-            desc: `Usuário mudou de ideia sobre: "${newText}"`
-          });
-          saveMemory(this.memory);
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  // 🎯 TRIGGER NPC - Gera e envia resposta do NPC para o grupo
-  // ═══════════════════════════════════════════════════════════════
-  async triggerNPC(nazu, from, event, context = {}) {
-    if (!this.isEnabled()) return null;
-    
-    // Seleciona NPC aleatório dos ativos
-    const activeNPCs = this.config.activeNPCs;
-    if (activeNPCs.length === 0) return null;
-    
-    const npcId = activeNPCs[Math.floor(Math.random() * activeNPCs.length)];
-    
     // Verifica cooldown
     if (!this.canSpeak(npcId)) return null;
 
+    // Prepara dados para substituição
+    const replacements = {
+      user: userName || userId.split('@')[0],
+      target: eventData.targetName || 'alguém',
+      amount: eventData.amount ? eventData.amount.toLocaleString() : '0',
+      level: eventData.level || '?',
+      pet: eventData.petName || 'pet',
+      dungeon: eventData.dungeonName || 'dungeon',
+      conquest: eventData.conquestName || 'conquista',
+      result: eventData.result || '?',
+      bet: eventData.bet || '?',
+      event: eventType
+    };
+
     // Gera resposta
-    const response = await this.generateResponse(npcId, event, context);
-    
+    const response = this.generateResponse(npcId, eventType, replacements);
+
     if (response) {
-      // Marca que o NPC falou
+      // Marca que NPC falou
       this.markSpoken(npcId);
       
+      // Salva no histórico para evitar duplicatas
+      this.memory.recentNPCMessages = this.memory.recentNPCMessages || [];
+      this.memory.recentNPCMessages.push({
+        type: eventType,
+        userId,
+        time: Date.now()
+      });
+      
+      // Mantém só últimos 50
+      if (this.memory.recentNPCMessages.length > 50) {
+        this.memory.recentNPCMessages = this.memory.recentNPCMessages.slice(-50);
+      }
+      saveMemory(this.memory);
+
       // Envia resposta
       try {
         await nazu.sendMessage(from, { text: response });
+        console.log(`[NPC] ${npcId} respondeu: ${response.substring(0, 50)}...`);
         return response;
       } catch (e) {
-        console.error('[NPC] Erro ao enviar mensagem:', e.message);
+        console.error('[NPC] Erro ao enviar:', e.message);
       }
     }
-    
+
     return null;
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // 🧠 HOOK PARA INTEGRAR COM QUALQUER SISTEMA
-  // ═══════════════════════════════════════════════════════════════
-  // Uso: npcManager.triggerFromSystem(nazu, from, 'novo_evento', userId, 'descrição', {extra: data})
+  // Alias para compatibility
   async triggerFromSystem(nazu, from, eventType, userId, description, metadata = {}) {
-    if (!this.isEnabled()) return null;
-    
-    const event = {
-      type: eventType,
-      userId,
-      description,
-      metadata
+    const userName = metadata.userName || userId.split('@')[0];
+    const eventData = {
+      targetName: metadata.targetName,
+      amount: metadata.amount,
+      level: metadata.level,
+      petName: metadata.petName,
+      dungeonName: metadata.dungeonName,
+      conquestName: metadata.conquestName,
+      result: metadata.result,
+      bet: metadata.bet
     };
+    return await this.trigger(nazu, from, eventType, userId, userName, eventData);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 💬 GERAR RESPOSTA (Template)
+// ═══════════════════════════════════════════════════════════════
+  generateResponse(npcId, eventType, replacements) {
+    const npcResponses = NPC_RESPONSES[npcId] || NPC_RESPONSES.kaiser;
     
-    // Registra o evento
-    this.recordEvent(eventType, userId, description, metadata);
+    let templates;
     
-    // Trigger o NPC
-    return await this.triggerNPC(nazu, from, event, metadata);
+    // Procura templates específicos
+    if (npcResponses[eventType]) {
+      templates = npcResponses[eventType];
+    } else if (eventType.includes('level')) {
+      templates = npcResponses.level_up || npcResponses.default;
+    } else if (eventType.includes('pet') && eventType.includes('level')) {
+      templates = npcResponses.pet_level_up || npcResponses.pet_adotado || npcResponses.default;
+    } else if (eventType.includes('pet') && eventType.includes('derrot')) {
+      templates = npcResponses.pet_derrota || npcResponses.default;
+    } else if (eventType.includes('pet')) {
+      templates = npcResponses.pet_adotado || npcResponses.default;
+    } else if (eventType.includes('conqu')) {
+      templates = npcResponses.conquista_desbloqueada || npcResponses.default;
+    } else if (eventType.includes('roubar') || eventType.includes('roubo')) {
+      templates = eventType.includes('falhou') ? npcResponses.roubar_falhou : npcResponses.roubar_sucesso;
+    } else if (eventType.includes('cassino') || eventType.includes('slot') || eventType.includes('roleta')) {
+      if (eventType.includes('jackpot')) templates = npcResponses.cassino_slots_jackpot;
+      else if (eventType.includes('vitori')) templates = npcResponses.cassino_slots_vitoria;
+      else if (eventType.includes('perda')) templates = npcResponses.cassino_slots_perda;
+      else templates = npcResponses.cassino_slots_vitoria;
+    } else if (eventType.includes('dungeon')) {
+      templates = eventType.includes('vitori') ? npcResponses.dungeon_vitoria : npcResponses.dungeon_derrota;
+    } else {
+      templates = npcResponses.default;
+    }
+    
+    // Seleciona template aleatório
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    
+    // Substitui placeholders
+    let response = template;
+    for (const [key, value] of Object.entries(replacements)) {
+      response = response.replace(new RegExp(`{${key}}`, 'gi'), value);
+    }
+    
+    return response;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -424,33 +318,33 @@ Use tom jornalístico mas descontraído.`;
   toggle(enabled) {
     this.config.enabled = enabled;
     saveConfig(this.config);
-    return enabled ? 'NPCs ativados!' : 'NPCs desativados!';
+    return enabled ? '✅ NPCs ativados!' : '❌ NPCs desativados!';
   }
 
   setCooldown(seconds) {
     this.config.cooldown = seconds * 1000;
     saveConfig(this.config);
-    return `Cooldown definido para ${seconds} segundos!`;
+    return `⏱️ Cooldown definido para ${seconds}s!`;
   }
 
-  toggleJornal(enabled) {
-    this.config.jornalEnabled = enabled;
+  setResponseChance(chance) {
+    this.config.responseChance = Math.min(1, Math.max(0, chance));
     saveConfig(this.config);
-    return enabled ? 'Jornal diário ativado!' : 'Jornal diário desativado!';
+    return `🎯 Chance de resposta: ${Math.round(this.config.responseChance * 100)}%`;
   }
 
   getStatus() {
     return {
       ativo: this.config.enabled,
+      autoRespond: this.isAutoRespond(),
       cooldown: `${this.config.cooldown / 1000}s`,
+      chance: `${Math.round(this.config.responseChance * 100)}%`,
       jornal: this.config.jornalEnabled ? 'Ativo' : 'Inativo',
-      eventosRegistrados: this.memory.recentEvents.length
+      eventos: this.memory.recentEvents?.length || 0
     };
   }
 }
 
 // Instância única
 const npcManager = new NPCManager();
-
 export default npcManager;
-export { NPCManager, NPC_PERSONALITIES };

@@ -7957,7 +7957,7 @@ if (isCmd && command && !isOwnerOrSub) {
               me.cooldowns.rob = Date.now() + 10 * 60 * 1000;
               saveEconomy(econ);
               // 🤖 EVENTO NPC - ROUBO SUCEDIDO
-              npcManager?.recordEvent('roubo_sucesso', sender, `${sender.split('@')[0]} roubou ${fmt(amt)} de ${getUserName(mentioned)}!`);
+              await npcManager?.trigger(nazu, from, 'roubar_sucesso', sender, pushname, { targetName: getUserName(mentioned), amount: amt });
               return reply(`🦹 Sucesso! Você roubou ${fmt(amt)} de @${getUserName(mentioned)}.`, { mentions: [mentioned] });
             } else {
               const multa = 80 + Math.floor(Math.random() * 121); // 80-200
@@ -7966,7 +7966,7 @@ if (isCmd && command && !isOwnerOrSub) {
               me.cooldowns.rob = Date.now() + 10 * 60 * 1000;
               saveEconomy(econ);
               // 🤖 EVENTO NPC - ROUBO FALHOU
-              npcManager?.recordEvent('roubo_falhou', sender, `${sender.split('@')[0]} tentou roubar ${getUserName(mentioned)} e foi pego!`);
+              await npcManager?.trigger(nazu, from, 'roubar_falhou', sender, pushname, { targetName: getUserName(mentioned) });
               return reply(`🚨 Você foi pego! Pagou ${fmt(pay)} de multa para @${getUserName(mentioned)}.`, { mentions: [mentioned] });
             }
           }
@@ -8076,7 +8076,7 @@ if (isCmd && command && !isOwnerOrSub) {
             if (leveledUp) {
               text += `\n\n⚡ *LEVEL UP!* Agora você é level ${me.level}!`;
               // 🤖 EVENTO NPC - LEVEL UP
-              npcManager?.recordEvent('level_up', sender, `${sender.split('@')[0]} subiu para level ${me.level}!`);
+              await npcManager?.trigger(nazu, from, 'level_up', sender, pushname, { level: me.level });
             }
 
             text += `\n\n💡 Volte amanhã para manter a sequência!`;
@@ -8181,7 +8181,7 @@ if (isCmd && command && !isOwnerOrSub) {
           if (unlocked && !me.achievements[ach.id]) {
             me.achievements[ach.id] = Date.now();
             // 🤖 EVENTO NPC - NOVA CONQUISTA
-            npcManager?.recordEvent('conquista_desbloqueada', sender, `${sender.split('@')[0]} desbloqueou a conquista: ${ach.name}! 🏆`);
+            await npcManager?.trigger(nazu, from, 'conquista_desbloqueada', sender, pushname, { conquestName: ach.name });
           }
           if (unlocked) unlockedCount++;
 
@@ -8380,7 +8380,7 @@ if (isCmd && command && !isOwnerOrSub) {
         text += `⚠️ Lembre-se: seus pets precisam de cuidados regulares!`;
 
         // 🤖 EVENTO NPC - ADOÇÃO DE PET
-        npcManager?.recordEvent('pet_adotado', sender, `${sender.split('@')[0]} adotou ${pet.emoji} ${pet.name}!`);
+        await npcManager?.trigger(nazu, from, 'pet_adotado', sender, pushname, { petName: pet.emoji + ' ' + pet.name });
 
         return reply(text);
         break;
@@ -8892,7 +8892,7 @@ if (isCmd && command && !isOwnerOrSub) {
             battleLog += `│ ⚔️ ATK +${atkGain} | 🛡️ DEF +${defGain} | ❤️ HP +${hpGain}\n`;
             battleLog += `╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
             // 🤖 EVENTO NPC - PET LEVEL UP
-            npcManager?.recordEvent('pet_level_up', sender, `${myPet.emoji} ${myPet.name} do(a) ${sender.split('@')[0]} subiu para level ${myPet.level}!`);
+            await npcManager?.trigger(nazu, from, 'pet_level_up', sender, pushname, { petName: myPet.emoji + ' ' + myPet.name, level: myPet.level });
           }
         } else {
           oppPet.wins = (oppPet.wins || 0) + 1;
@@ -8903,7 +8903,7 @@ if (isCmd && command && !isOwnerOrSub) {
           battleLog += `╰━━━━━━━━━━━━━━━━━━━━━━━╯\n\n`;
           battleLog += `💪 Continue treinando para melhorar!`;
           // 🤖 EVENTO NPC - PET DERROTA
-          npcManager?.recordEvent('pet_derrota', sender, `${myPet.emoji} ${myPet.name} de ${sender.split('@')[0]} perdeu a batalha!`);
+          await npcManager?.trigger(nazu, from, 'pet_derrota', sender, pushname, { petName: myPet.emoji + ' ' + myPet.name });
         }
 
         me.lastPetBattle = Date.now();
@@ -9301,10 +9301,10 @@ if (isCmd && command && !isOwnerOrSub) {
             text += `│\n`;
             text += `╰━━━━━━━━━━━━━━━━━━━━━╯`;
             // 🤖 EVENTO NPC - DUNGEON VITÓRIA
-            npcManager?.recordEvent('dungeon_vitoria', sender, `${sender.split('@')[0]} venceu a dungeon ${dungeon.emoji} ${dungeon.name}!`);
+            await npcManager?.trigger(nazu, from, 'dungeon_vitoria', sender, pushname, { dungeonName: dungeon.emoji + ' ' + dungeon.name });
             // 🤖 EVENTO NPC - DUNGEON LEVEL UP
             if (leveledUp) {
-              npcManager?.recordEvent('dungeon_level_up', sender, `${sender.split('@')[0]} subiu ${levelsGained} nível(eis) na dungeon!`);
+              await npcManager?.trigger(nazu, from, 'level_up', sender, pushname, { level: levelsGained });
             }
           } else {
             text += `│\n`;
@@ -9332,7 +9332,7 @@ if (isCmd && command && !isOwnerOrSub) {
           text += `└━━━━━━━━━━━━━━━━━━━━┘\n\n`;
           text += `💪 *Fortaleça-se e tente novamente!*`;
           // 🤖 EVENTO NPC - DUNGEON DERROTA
-          npcManager?.recordEvent('dungeon_derrota', sender, `${sender.split('@')[0]} foi derrotado na dungeon ${dungeon.emoji} ${dungeon.name}!`);
+          await npcManager?.trigger(nazu, from, 'dungeon_derrota', sender, pushname, { dungeonName: dungeon.emoji + ' ' + dungeon.name });
 
           saveEconomy(econ);
           return reply(text);
@@ -11523,7 +11523,7 @@ if (isCmd && command && !isOwnerOrSub) {
         me.lastVote[target] = now;
 
         // 🤖 EVENTO NPC - VOTO POSITIVO
-        npcManager?.recordEvent('voto_positivo', target, `${pushname} deu upvote em ${target.split('@')[0]}!`);
+        await npcManager?.trigger(nazu, from, 'voto_positivo', target, target.split('@')[0]);
 
         let text = `╭━━━⊱ 👍 *VOTO POSITIVO* ⊱━━━╮\n`;
         text += `╰━━━━━━━━━━━━━━━━━━━━╯\n\n`;
@@ -11938,12 +11938,12 @@ if (isCmd && command && !isOwnerOrSub) {
           me.wallet += winnings - bet;
           text += `🏆 *VITÓRIA RARA!*\n💰 +${winnings.toLocaleString()} (${multiplier}x)`;
           // 🤖 EVENTO NPC - ROLETA VITÓRIA
-          npcManager?.recordEvent('cassino_roleta_vitoria', sender, `${sender.split('@')[0]} acertou ${winColor.toUpperCase()} na roleta! +${winnings.toLocaleString()}`);
+          await npcManager?.trigger(nazu, from, 'cassino_roleta_vitoria', sender, pushname, { result: winColor.toUpperCase(), amount: winnings });
         } else {
           me.wallet -= bet;
           text += `💀 *VOCÊ PERDEU!*\n💸 -${bet.toLocaleString()}\n🎰 A roleta parece viciada...`;
           // 🤖 EVENTO NPC - ROLETA PERDA
-          npcManager?.recordEvent('cassino_roleta_perda', sender, `${sender.split('@')[0]} perdeu na roleta apostou em ${normalizedChoice.toUpperCase()}...`);
+          await npcManager?.trigger(nazu, from, 'cassino_roleta_perda', sender, pushname, { bet: normalizedChoice.toUpperCase() });
         }
 
         text += `\n\n╰━━━━━━━━━━━━━━━━━━━━╯`;
@@ -12030,26 +12030,26 @@ if (isCmd && command && !isOwnerOrSub) {
           me.wallet -= bet;
           text += `💀 *BUST!* Você passou de 21!\n💸 -${bet.toLocaleString()}\n🃏 Que azar...`;
           // 🤖 EVENTO NPC - BLACKJACK BUST
-          npcManager?.recordEvent('cassino_blackjack_bust', sender, `${sender.split('@')[0]} estourou no blackjack (passou de 21)!`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_perda', sender, pushname);
         } else if (dealerValue > 21 || playerValue > dealerValue) {
           // Ganhos reduzidos
           const winnings = playerValue === 21 && playerCards.length === 2 ? Math.floor(bet * 1.8) : Math.floor(bet * 1.4);
           me.wallet += winnings - bet;
           text += `🏆 *VITÓRIA RARA!*\n💰 +${(winnings - bet).toLocaleString()}`;
           // 🤖 EVENTO NPC - BLACKJACK VITÓRIA
-          npcManager?.recordEvent('cassino_blackjack_vitoria', sender, `${sender.split('@')[0]} venceu no blackjack! +${(winnings - bet).toLocaleString()}`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_vitoria', sender, pushname, { amount: winnings - bet });
         } else if (playerValue === dealerValue) {
           // Empate agora perde 30% da aposta
           const loss = Math.floor(bet * 0.3);
           me.wallet -= loss;
           text += `🤝 *EMPATE!*\n💸 Taxa de empate: -${loss.toLocaleString()}`;
           // 🤖 EVENTO NPC - BLACKJACK EMPATE
-          npcManager?.recordEvent('cassino_blackjack_empate', sender, `${sender.split('@')[0]} empatou no blackjack!`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_perda', sender, pushname);
         } else {
           me.wallet -= bet;
           text += `💀 *DEALER VENCEU!*\n💸 -${bet.toLocaleString()}\n🃏 O dealer parece ter sorte demais...`;
           // 🤖 EVENTO NPC - BLACKJACK PERDA
-          npcManager?.recordEvent('cassino_blackjack_perda', sender, `${sender.split('@')[0]} perdeu no blackjack para o dealer!`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_perda', sender, pushname);
         }
 
         text += `\n\n╰━━━━━━━━━━━━━━━━━━━━╯`;
@@ -12117,7 +12117,7 @@ if (isCmd && command && !isOwnerOrSub) {
           text += `🎉 *JACKPOT RARO!* 🎉\n`;
           text += `💰 Você ganhou ${winnings.toLocaleString()}! (${multi}x)`;
           // 🤖 EVENTO NPC - SLOTS JACKPOT
-          npcManager?.recordEvent('cassino_slots_jackpot', sender, `${sender.split('@')[0]} conseguiu JACKPOT de ${winnings.toLocaleString()} nos slots! 🎰🎰🎰`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_jackpot', sender, pushname, { amount: winnings });
         } else if (slot1 === slot2 || slot2 === slot3 || slot1 === slot3) {
           // 2 iguais - agora paga menos
           const winnings = Math.floor(bet * 1.1);
@@ -12125,12 +12125,12 @@ if (isCmd && command && !isOwnerOrSub) {
           text += `⭐ *PAR!*\n`;
           text += `💰 Você ganhou ${(winnings - bet).toLocaleString()}! (1.1x)`;
           // 🤖 EVENTO NPC - SLOTS VITÓRIA
-          npcManager?.recordEvent('cassino_slots_vitoria', sender, `${sender.split('@')[0]} ganhou ${(winnings - bet).toLocaleString()} nos slots!`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_vitoria', sender, pushname, { amount: winnings - bet });
         } else {
           me.wallet -= bet;
           text += `💀 *PERDEU!*\n💸 -${bet.toLocaleString()}\n🎰 A máquina parece viciada...`;
           // 🤖 EVENTO NPC - SLOTS PERDA
-          npcManager?.recordEvent('cassino_slots_perda', sender, `${sender.split('@')[0]} perdeu ${bet.toLocaleString()} nos slots...`);
+          await npcManager?.trigger(nazu, from, 'cassino_slots_perda', sender, pushname, { amount: bet });
         }
 
         text += `\n\n╰━━━━━━━━━━━━━━━━━━━━╯`;
@@ -25632,7 +25632,7 @@ ${prefix}togglecmdvip premium_ia off`);
         saveElections(elections);
 
         // 🤖 EVENTO NPC - NOVA CANDIDATURA
-        npcManager?.recordEvent('eleicao_candidatura', sender, `${sender.split('@')[0]} se candidatou para a eleição! 🗳️`);
+        await npcManager?.trigger(nazu, from, 'eleicao_candidatura', sender, pushname);
 
         return reply(`✅ @${sender.split('@')[0]} foi adicionado à lista de candidatos.`, { mentions: [sender] });
         break;
@@ -33388,7 +33388,7 @@ ${groupData.rules.length}. ${q}`);
           // ═══════════════════════════════════════════════════════════════
           // 🤖 EVENTO NPC - USUÁRIO VIRAL ALPHA
           // ═══════════════════════════════════════════════════════════════
-          npcManager?.recordEvent('novo_alpha', alphaToAdd, `${getUserName(alphaToAdd)} virou Alpha!`);
+          await npcManager?.trigger(nazu, from, 'novo_alpha', alphaToAdd, getUserName(alphaToAdd));
         } catch (e) {
           console.error('Erro no comando addalpha:', e);
           await reply("Ocorreu um erro ao adicionar Alpha 💔");
