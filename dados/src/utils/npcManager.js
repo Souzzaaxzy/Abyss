@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-// 🤖 SISTEMA DE NPCs - GERENCIADOR PRINCIPAL (APRIMORADO)
+// 🤖 SISTEMA DE NPCs - GERENCIADOR COMPLETO
 // ═══════════════════════════════════════════════════════════════
+import { NPC_PERSONALITIES, DEFAULT_ACTIVE_NPC } from './npcPersonalities.js';
 import * as ia from '../funcs/private/ia.js';
 import fs from 'fs';
 
@@ -9,7 +10,7 @@ const NPC_CONFIG_FILE = `${DATABASE_DIR}/npc_config.json`;
 const NPC_MEMORY_FILE = `${DATABASE_DIR}/npc_memory.json`;
 
 // ═══════════════════════════════════════════════════════════════
-// 🎭 NPCS COM RESPOSTAS PRÉ-DEFINIDAS
+// 🎭 NPCS COM PERSONALIDADES E RESPOSTAS
 // ═══════════════════════════════════════════════════════════════
 const NPC_RESPONSES = {
   kaiser: {
@@ -69,7 +70,7 @@ const NPC_RESPONSES = {
       "{user} não teve sorte na roleta... apostou em {bet} 🎲"
     ],
     cassino_slots_jackpot: [
-      "JACKPOT! {user} inúmeras {amount} nos slots! 🎰🎰🎰",
+      "JACKPOT! {user} inúmerou {amount} nos slots! 🎰🎰🎰",
       "MEU DEUS! {user} conseguiu {amount} no jackpot! 💎",
       "ISSO É INSANO! {user} ganhou {amount}! 🎰💰"
     ],
@@ -88,11 +89,6 @@ const NPC_RESPONSES = {
       "Novo candidato! {user} tá disputando a eleição! 📢",
       "{user} quer ser o líder! Vote nele! 🗳️"
     ],
-    default: [
-      "Hmm interesting... {user} did something 🌙",
-      "I see what {user} is doing... 👀",
-      "Noted! {event} happened 👀"
-    ],
     novo_alpha: [
       "{user} virou Alpha! 🏆",
       "O novo Alpha é {user}! 👑",
@@ -102,21 +98,53 @@ const NPC_RESPONSES = {
       "{user} recebeu um upvote! 👍",
       "Alguém curtiu o que {user} fez! 💖",
       "{user} tá subindo no ranking! 📈"
+    ],
+    default: [
+      "Hm... {event} aconteceu com {user} 🌙",
+      "Interessante... {user} fez algo 👀",
+      "Isso é novo... 👀"
+    ]
+  },
+  luna: {
+    level_up: [
+      "✨ {user} subiu pro level {level}! Lindo!",
+      "{user} tá ficando mais forte! Level {level} 🌟",
+      "Estrela em ascensão! {user} chegou no level {level}! ✨"
+    ],
+    pet_adotado: [
+      "Aww {user} adotou um pet! 🐾 Fofo!",
+      "{user} tem um novo companheiro agora! 🐱",
+      "Alerta de dono de pet! {user} adotou {pet}! 💕"
+    ],
+    default: [
+      "Interesting... 👀",
+      "I noticed that! 🌙",
+      "Interesting development... ✨"
+    ]
+  },
+  journalist: {
+    default: [
+      "📰 Notícia: {event} 🌙",
+      "📢 Reportando: {event}...",
+      "🔔 Atualização: {event}"
     ]
   }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 📊 CONFIGURAÇÕES
+// 📊 CONFIGURAÇÕES DOS NPCs
 // ═══════════════════════════════════════════════════════════════
 const DEFAULT_CONFIG = {
   enabled: false,
-  cooldown: 15000,
+  cooldown: 15000, // 15 segundos entre falas
   jornalEnabled: false,
-  jornalHour: 20,
+  jornalHour: 20, // 8 da noite
+  jornalMinute: 0,
   activeNPCs: ['kaiser'],
   autoRespond: true,
-  responseChance: 0.7
+  responseChance: 0.7, // 70% de chance de responder
+  useAI: true, // Usar IA para melhorar respostas
+  personalities: NPC_PERSONALITIES
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -170,11 +198,22 @@ class NPCManager {
     this.config = loadConfig();
     this.memory = loadMemory();
     this.cooldowns = new Map();
-    this.cooldowns.set('kaiser', 0);
+    this.jornalTimer = null;
+    
+    // Inicializa cooldowns
+    Object.keys(NPC_RESPONSES).forEach(id => {
+      this.cooldowns.set(id, 0);
+    });
+    
+    // Inicializa jornal se ativo
+    if (this.config.jornalEnabled) {
+      this.initJornal();
+    }
   }
 
   isEnabled() { return this.config.enabled; }
   isAutoRespond() { return this.config.autoRespond !== false; }
+  isJornalEnabled() { return this.config.jornalEnabled; }
 
   canSpeak(npcId) {
     const now = Date.now();
@@ -184,6 +223,115 @@ class NPCManager {
 
   markSpoken(npcId) {
     this.cooldowns.set(npcId, Date.now());
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 📰 JORNAL DIÁRIO
+  // ═══════════════════════════════════════════════════════════════
+  initJornal() {
+    if (this.jornalTimer) {
+      clearInterval(this.jornalTimer);
+    }
+    
+    // Agenda envio do jornal diariamente
+    const scheduleJornal = () => {
+      const now = new Date();
+      const targetHour = this.config.jornalHour || 20;
+      const targetMinute = this.config.jornalMinute || 0;
+      
+      const nextJornal = new Date();
+      nextJornal.setHours(targetHour, targetMinute, 0, 0);
+      
+      if (nextJornal <= now) {
+        nextJornal.setDate(nextJornal.getDate() + 1);
+      }
+      
+      const delay = nextJornal - now;
+      console.log(`[NPC] Jornal agendado para ${nextJornal.toLocaleString('pt-BR')}`);
+      
+      setTimeout(() => {
+        this.sendJornal();
+        // Repete a cada 24h
+        this.jornalTimer = setInterval(() => this.sendJornal(), 24 * 60 * 60 * 1000);
+      }, delay);
+    };
+    
+    scheduleJornal();
+  }
+
+  async sendJornal() {
+    const news = await this.generateDailyNews();
+    if (news && global.nazu && global.from) {
+      try {
+        await global.nazu.sendMessage(global.from, { text: news });
+        console.log('[NPC] 📰 Jornal enviado!');
+      } catch (e) {
+        console.error('[NPC] Erro ao enviar jornal:', e.message);
+      }
+    }
+  }
+
+  async generateDailyNews() {
+    const today = new Date().toDateString();
+    const recentEvents = this.memory.recentEvents?.filter(e => 
+      new Date(e.time || e.data).toDateString() === today
+    ) || [];
+    
+    if (recentEvents.length === 0) return null;
+    
+    // Selecionar NPC journalist
+    const npc = NPC_PERSONALITIES.journalist || NPC_PERSONALITIES.kaiser;
+    
+    // Resumo dos eventos
+    const eventsSummary = recentEvents.slice(-10).map(e => 
+      `- ${e.description || e.desc || 'Evento'}`
+    ).join('\n');
+    
+    // Tentar gerar com IA
+    if (this.config.useAI) {
+      try {
+        const prompt = `Crie o KAISER NEWS diário com base nestes eventos de HOJE:
+
+${eventsSummary}
+
+Data: ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+
+Formato:
+📰 *KAISER NEWS - [data]*
+
+[Bom dia/tarde/noite]
+
+[Resumo dos principais eventos em formato de jornal - 3 a 5 manchetes]
+
+[Encerramento]
+
+Use tom jornalístico mas descontraído. Máximo 500 caracteres.`;
+        
+        const response = await ia.makeCognimaRequest(
+          'moonshotai/kimi-k2.6',
+          prompt,
+          npc.personalidade || 'Você é Kaiser, uma vampira moderna que gosta de tecnologia e redes sociais.',
+          [],
+          2
+        );
+        
+        const content = response?.data?.choices?.[0]?.message?.content?.trim();
+        if (content && content.length <= 600) {
+          return content;
+        }
+      } catch (e) {
+        console.warn('[NPC] Erro ao gerar jornal com IA:', e.message);
+      }
+    }
+    
+    // Fallback: template simples
+    return `📰 *KAISER NEWS - ${new Date().toLocaleDateString('pt-BR')}*
+
+Bom dia! Aqui está o resumo dos acontecimentos de hoje:
+
+${eventsSummary}
+
+Isso é tudo por hoje! 🌙`;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -197,7 +345,9 @@ class NPCManager {
       return null;
     }
 
-    const npcId = 'kaiser';
+    // Seleciona NPC ativo
+    const activeNPCs = this.config.activeNPCs || ['kaiser'];
+    const npcId = activeNPCs[Math.floor(Math.random() * activeNPCs.length)];
 
     // Verifica cooldown
     if (!this.canSpeak(npcId)) return null;
@@ -217,7 +367,7 @@ class NPCManager {
     };
 
     // Gera resposta
-    const response = this.generateResponse(npcId, eventType, replacements);
+    let response = await this.generateResponse(npcId, eventType, replacements);
 
     if (response) {
       // Marca que NPC falou
@@ -235,6 +385,22 @@ class NPCManager {
       if (this.memory.recentNPCMessages.length > 50) {
         this.memory.recentNPCMessages = this.memory.recentNPCMessages.slice(-50);
       }
+      
+      // Salva evento no histórico
+      this.memory.recentEvents = this.memory.recentEvents || [];
+      this.memory.recentEvents.push({
+        type: eventType,
+        userId,
+        userName: userName || userId.split('@')[0],
+        description: response,
+        time: Date.now(),
+        data: eventData
+      });
+      
+      if (this.memory.recentEvents.length > 100) {
+        this.memory.recentEvents = this.memory.recentEvents.slice(-100);
+      }
+      
       saveMemory(this.memory);
 
       // Envia resposta
@@ -266,11 +432,29 @@ class NPCManager {
     return await this.trigger(nazu, from, eventType, userId, userName, eventData);
   }
 
+  // Alias antigo para compatibilidade
+  recordEvent(type, userId, description, metadata = {}) {
+    this.memory.recentEvents = this.memory.recentEvents || [];
+    this.memory.recentEvents.push({
+      type,
+      userId,
+      description,
+      time: Date.now(),
+      data: metadata
+    });
+    if (this.memory.recentEvents.length > 100) {
+      this.memory.recentEvents = this.memory.recentEvents.slice(-100);
+    }
+    saveMemory(this.memory);
+    return { type, userId, description };
+  }
+
   // ═══════════════════════════════════════════════════════════════
-  // 💬 GERAR RESPOSTA (Template)
-// ═══════════════════════════════════════════════════════════════
-  generateResponse(npcId, eventType, replacements) {
+  // 💬 GERAR RESPOSTA (Template + IA)
+  // ═══════════════════════════════════════════════════════════════
+  async generateResponse(npcId, eventType, replacements) {
     const npcResponses = NPC_RESPONSES[npcId] || NPC_RESPONSES.kaiser;
+    const npcConfig = this.config.personalities?.[npcId] || NPC_PERSONALITIES[npcId];
     
     let templates;
     
@@ -296,6 +480,12 @@ class NPCManager {
       else templates = npcResponses.cassino_slots_vitoria;
     } else if (eventType.includes('dungeon')) {
       templates = eventType.includes('vitori') ? npcResponses.dungeon_vitoria : npcResponses.dungeon_derrota;
+    } else if (eventType.includes('alpha')) {
+      templates = npcResponses.novo_alpha || npcResponses.default;
+    } else if (eventType.includes('voto')) {
+      templates = npcResponses.voto_positivo || npcResponses.default;
+    } else if (eventType.includes('eleicao') || eventType.includes('candidatura')) {
+      templates = npcResponses.eleicao_candidatura || npcResponses.default;
     } else {
       templates = npcResponses.default;
     }
@@ -309,7 +499,48 @@ class NPCManager {
       response = response.replace(new RegExp(`{${key}}`, 'gi'), value);
     }
     
+    // Tenta melhorar com IA (opcional)
+    if (this.config.useAI && Math.random() < 0.5) {
+      try {
+        const aiResponse = await this.enhanceWithAI(response, eventType, npcConfig);
+        if (aiResponse && aiResponse !== response && aiResponse.length <= 150) {
+          return aiResponse;
+        }
+      } catch (e) {
+        // Falhou IA, usa template direto
+      }
+    }
+    
     return response;
+  }
+
+  // Melhora resposta com IA usando a personalidade do NPC
+  async enhanceWithAI(baseResponse, eventType, npcConfig) {
+    try {
+      const personality = npcConfig?.personalidade || NPC_PERSONALITIES.kaiser.personalidade;
+      
+      const prompt = `Melhore esta mensagem de NPC de forma natural (máx 120 caracteres):
+"${baseResponse}"
+Evento: ${eventType}
+
+Retorne apenas a mensagem melhorada, sem explicações. Use a personalidade do NPC.`;
+      
+      const response = await ia.makeCognimaRequest(
+        'moonshotai/kimi-k2.6',
+        prompt,
+        personality,
+        [],
+        1
+      );
+      
+      const content = response?.data?.choices?.[0]?.message?.content?.trim();
+      if (content && content.length <= 150) {
+        return content;
+      }
+    } catch (e) {
+      // Silent fail
+    }
+    return baseResponse;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -333,14 +564,44 @@ class NPCManager {
     return `🎯 Chance de resposta: ${Math.round(this.config.responseChance * 100)}%`;
   }
 
+  toggleJornal(enabled) {
+    this.config.jornalEnabled = enabled;
+    saveConfig(this.config);
+    
+    if (enabled) {
+      this.initJornal();
+      return '✅ Jornal diário ativado! 📰';
+    } else {
+      if (this.jornalTimer) {
+        clearInterval(this.jornalTimer);
+        this.jornalTimer = null;
+      }
+      return '❌ Jornal diário desativado!';
+    }
+  }
+
+  setJornalTime(hour, minute = 0) {
+    this.config.jornalHour = hour;
+    this.config.jornalMinute = minute;
+    saveConfig(this.config);
+    
+    if (this.config.jornalEnabled) {
+      this.initJornal();
+    }
+    
+    return `⏰ Jornal agendado para ${hour}:${minute.toString().padStart(2, '0')}!`;
+  }
+
   getStatus() {
     return {
       ativo: this.config.enabled,
       autoRespond: this.isAutoRespond(),
       cooldown: `${this.config.cooldown / 1000}s`,
       chance: `${Math.round(this.config.responseChance * 100)}%`,
-      jornal: this.config.jornalEnabled ? 'Ativo' : 'Inativo',
-      eventos: this.memory.recentEvents?.length || 0
+      jornal: this.config.jornalEnabled ? `Ativo (${this.config.jornalHour}:${(this.config.jornalMinute || 0).toString().padStart(2, '0')})` : 'Inativo',
+      useAI: this.config.useAI ? 'Sim' : 'Não',
+      eventos: this.memory.recentEvents?.length || 0,
+      personalities: Object.keys(this.config.personalities || NPC_PERSONALITIES)
     };
   }
 }
@@ -348,3 +609,4 @@ class NPCManager {
 // Instância única
 const npcManager = new NPCManager();
 export default npcManager;
+export { NPCManager, NPC_RESPONSES, NPC_PERSONALITIES };
