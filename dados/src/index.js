@@ -5003,11 +5003,20 @@ if (  isGroup &&  groupData.antistickerplus &&  !isGroupAdmin &&  !isOwner &&  !
             };
             processResponses(0);
           } else {
-            console.warn(`⚠️ [${personality}] Nenhuma resposta válida retornada pela IA. respAssist.resp:`, respAssist.resp);
+            // Fallback: sempre gerar uma resposta se a IA não retornou nada válido
+            const fallbackRespostas = [
+              'Hm... deixa eu pensar... 🌙',
+              'Ahn... que silêncio... tá me fazendo pensar aqui! 😅',
+              'N-Não sei o que responder agora... pode perguntar de outra forma?',
+              'Tô pensando... dá um tempinho! 😊',
+              'Ué... não tenho uma resposta pronta pra isso... 🤔'
+            ];
+            const fallback = fallbackRespostas[Math.floor(Math.random() * fallbackRespostas.length)];
+            reply(fallback);
           }
         }).catch((assistentError) => {
           console.error('Erro no assistente virtual:', assistentError.message);
-          reply('🤖 Erro técnico no assistente virtual. Tente novamente em alguns minutos.');
+          reply('Hm... acho que minha conexão tremeu um pouco... me dá mais uma chance? 🌙');
         });
       }
     }
