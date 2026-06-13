@@ -83,6 +83,9 @@ Olá, ${playerName}!
 • !fut topglobal
 • !fut rankingclubes
 
+🔧 *ADMIN* (apenas admins do grupo)
+• !fut admin - ver comandos
+
 💡 Use *!fut entrar* para começar!`;
 }
 
