@@ -6103,20 +6103,17 @@ if (isCmd && command && !isOwnerOrSub) {
           const { getMenuFut } = await import('./games/futebol/menu.js');
           const futImagePath = __dirname + '/../midias/menufut.jpg';
           const futVideoPath = __dirname + '/../midias/menufut.mp4';
-          const futGifPath = __dirname + '/../midias/menufut.gif';
           
-          // Prioridade: MP4 > GIF > JPG
-          const hasVideo = fs.existsSync(futVideoPath);
-          const hasGif = fs.existsSync(futGifPath);
-          const mediaPath = hasVideo ? futVideoPath : (hasGif ? futGifPath : futImagePath);
+          // Prioridade: MP4 > JPG
+          const mediaPath = fs.existsSync(futVideoPath) ? futVideoPath : futImagePath;
+          const mediaBuffer = fs.readFileSync(mediaPath);
           const menuText = getMenuFut(pushname);
           const lerMaisPrefix = getMenuLerMaisText();
 
-          // Envia como video usando URL (funciona melhor com arquivos grandes)
           await nazu.sendMessage(from, {
-            video: { url: `file://${mediaPath}` },
+            video: mediaBuffer,
             caption: lerMaisPrefix + menuText,
-            gifPlayback: hasGif && !hasVideo,
+            gifPlayback: false,
             mimetype: 'video/mp4'
           }, {
             quoted: info
