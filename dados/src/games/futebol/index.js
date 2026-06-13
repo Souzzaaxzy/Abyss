@@ -496,6 +496,89 @@ export async function handleFutCommand(args, messageInfo, reply) {
       return reply(`✅ Título *${foundTitle}* equipado!`);
     
     // ═══════════════════════════════════════════════════════════════
+    // TEMPORADA E RANKING
+    // ═══════════════════════════════════════════════════════════════
+    case 'temporada':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      const seasonStatus = db.getSeasonStatus();
+      if (!seasonStatus.active) {
+        return reply('🏆 *TEMPORADA ENCERRADA*\n\nAguarde a nova temporada!');
+      }
+      const rewards = db.getSeasonRewards();
+      let seasonText = `🏆 *TEMPORADA ${seasonStatus.number}*\n\n`;
+      seasonText += `⏰ *${seasonStatus.daysLeft} dias* restantes\n\n`;
+      seasonText += `🎁 *RECOMPENSAS:*\n`;
+      seasonText += `🥇 1º Lugar: ${rewards.top1.coins.toLocaleString()} coins + ${rewards.top1.xp} XP + Título\n`;
+      seasonText += `🏅 Top 10: ${rewards.top10.coins.toLocaleString()} coins + ${rewards.top10.xp} XP\n`;
+      seasonText += `⭐ Top 100: ${rewards.top100.coins.toLocaleString()} coins + ${rewards.top100.xp} XP`;
+      return reply(seasonText);
+    
+    case 'reputacao':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      const rep = player.reputation || 50;
+      const badge = db.getReputationBadge(rep);
+      let repText = `📊 *REPUTAÇÃO*\n\n`;
+      repText += `${player.name}\n`;
+      repText += `Valor: ${rep}/100\n`;
+      repText += `Badge: ${badge}\n\n`;
+      repText += `📈 *Como aumentar:*\n`;
+      repText += `• Vitórias (+2)\n`;
+      repText += `• MVPs (+3)\n`;
+      repText += `• Conquistas (+1)\n\n`;
+      repText += `📉 *Como diminuir:*\n`;
+      repText += `• Derrotas (-1)\n`;
+      repText += `• Abandono (-5)`;
+      return reply(repText);
+    
+    case 'rivalidade':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      const rivalUser = messageInfo.mentionedJid?.[0];
+      if (!rivalUser) {
+        return reply('📌 Use: *!fut rivalidade @usuario*');
+      }
+      const rivalData = db.getPlayer(rivalUser);
+      if (!rivalData) {
+        return reply('❌ Jogador não encontrado!');
+      }
+      const rivalryLevel = db.getRivalry(sender, rivalUser);
+      const rivalryLabel = db.getRivalryLevel(rivalryLevel);
+      let rivalText = `⚔️ *RIVALIDADE*\n\n`;
+      rivalText += `${player.name} vs ${rivalData.name}\n\n`;
+      rivalText += `Nível: ${rivalryLevel}%\n`;
+      rivalText += `Status: ${rivalryLabel}\n\n`;
+      rivalText += `💡 A rivalidade aumenta a cada partida entre vocês!\n`;
+      rivalText += `🔥 Partidas com rivalidade alta dão +XP e +Coins`;
+      return reply(rivalText);
+    
+    case 'rivalidades':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      const myRivalries = player.rivalries || {};
+      const rivalsList = Object.entries(myRivalries)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      
+      if (rivalsList.length === 0) {
+        return reply('⚔️ *MINHAS RIVALIDADES*\n\n📭 Nenhuma rivalidade ainda!\n\nJogue contra outros jogadores para criar!');
+      }
+      
+      let rivalsText = `⚔️ *MINHAS RIVALIDADES*\n\n`;
+      for (const [rivalId, level] of rivalsList) {
+        const rivalPlayer = db.getPlayer(rivalId);
+        const name = rivalPlayer?.name || 'Desconhecido';
+        const label = db.getRivalryLevel(level);
+        rivalsText += `⚔️ ${name}: ${level}% - ${label}\n`;
+      }
+      return reply(rivalsText);
+    
+    // ═══════════════════════════════════════════════════════════════
     // SALDO
     // ═══════════════════════════════════════════════════════════════
     case 'saldo':
@@ -1108,37 +1191,69 @@ export async function handleFutCommand(args, messageInfo, reply) {
           return reply('✅ Partidas X1 pendentes limpas!');
         }
         
+        case 'setrep': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          const rep = parseInt(args[2]);
+          if (!targetUser || rep === undefined || rep < 0 || rep > 100) {
+            return reply('📌 Use: *!fut admin setrep @user [0-100]*');
+          }
+          const repPlayer = db.getPlayer(targetUser);
+          if (!repPlayer) {
+            return reply('❌ Jogador não encontrado!');
+          }
+          repPlayer.reputation = rep;
+          db.save();
+          return reply(`✅ Reputação de @${targetUser.split('@')[0]} definida para *${rep}*!\n\n${db.getReputationBadge(rep)}`);
+        }
+        
+        case 'addrep': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          const amount = parseInt(args[2]);
+          if (!targetUser || !amount) {
+            return reply('📌 Use: *!fut admin addrep @user [valor]*');
+          }
+          const addRepPlayer = db.getPlayer(targetUser);
+          if (!addRepPlayer) {
+            return reply('❌ Jogador não encontrado!');
+          }
+          const newRep = db.updateReputation(targetUser, amount);
+          return reply(`✅ Reputação de @${targetUser.split('@')[0]} ajustada!\n\nNova reputação: ${newRep}`);
+        }
+        
+        case 'season': {
+          const action = args[1];
+          if (action === 'reset') {
+            const result = db.resetSeason();
+            return reply(`🔄 *TEMPORADA RESETADA!*\n\n${result.message}`);
+          }
+          if (action === 'config') {
+            const days = parseInt(args[2]);
+            const resetDiv = args[3] === 'true';
+            if (days) db.seasonConfig.durationDays = days;
+            if (resetDiv !== undefined) db.seasonConfig.resetDivisions = resetDiv;
+            db.save();
+            return reply(`✅ Config: ${db.seasonConfig.durationDays} dias, Reset div: ${db.seasonConfig.resetDivisions}`);
+          }
+          const status = db.getSeasonStatus();
+          if (!status.active) {
+            return reply('🏆 TEMPORADA ENCERRADA\n\nUse !fut admin season reset');
+          }
+          return reply(`🏆 TEMPORADA ${status.number}\nDias restantes: ${status.daysLeft}`);
+        }
+        
         case 'help':
         default: {
           return reply(`🔧 *COMANDOS ADMIN DO FUT*
 
 *⚠️ Apenas admins do grupo*
 
-📌 *Gerenciar Jogadores:*
-• !fut admin addcoins @user [valor]
-• !fut admin remcoins @user [valor]
-• !fut admin setovr @user [1-99]
-• !fut admin setenergy @user [0-200]
-• !fut admin setdiv @user [bronze/prata/ouro/platina/diamante]
-• !fut admin resetplayer @user
-
-📌 *XP e Evolução:*
-• !fut admin addxp @user [valor]
-• !fut admin setlevel @user [1-100]
-• !fut admin setevo @user [pontos]
-• !fut admin addevo @user [pontos]
-• !fut admin resetxp @user
-
-📌 *Treinos:*
-• !fut admin settreino @user [pac/sho/pas/dri/def/phy] [valor]
-
-📌 *Fut Solo:*
-• !fut admin setsolo @user reset
-
-📌 *Resetar Dados:*
-• !fut admin resetall - Resetar TUDO
-• !fut admin clubes - Resetar clubes
-• !fut admin x1reset - Limpar X1 pendentes`);
+📌 *Jogadores:* addcoins, remcoins, setovr, setenergy, setdiv, resetplayer
+📌 *XP:* addxp, setlevel, setevo, addevo, resetxp
+📌 *Reputação:* setrep @user [0-100], addrep @user [±valor]
+📌 *Temporada:* season (status), season reset, season config [dias] [true/false]
+📌 *Treinos:* settreino @user [attr] [valor]
+📌 *Solo:* setsolo @user reset
+📌 *Reset:* resetall, clubes, x1reset`);
         }
       }
     }

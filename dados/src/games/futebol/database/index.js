@@ -231,7 +231,11 @@ class FootballDB {
       },
       // Sistema de Missões Semanais
       weeklyMissions: null,
-      weeklyReset: 0
+      weeklyReset: 0,
+      // Sistema de Reputação
+      reputation: 50, // 0-100, começa em 50
+      // Sistema de Rivalidades
+      rivalries: {} // { userId: level }
     };
     
     this.players[userId] = player;
@@ -241,6 +245,136 @@ class FootballDB {
 
   hasPlayer(userId) {
     return !!this.players[userId];
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SISTEMA DE REPUTAÇÃO
+  // ═══════════════════════════════════════════════════════════════
+
+  updateReputation(userId, amount) {
+    const player = this.players[userId];
+    if (!player) return null;
+    
+    player.reputation = Math.max(0, Math.min(100, (player.reputation || 50) + amount));
+    this.save();
+    return player.reputation;
+  }
+
+  getReputationBadge(reputation) {
+    if (reputation >= 90) return '⭐ Lendário';
+    if (reputation >= 75) return '🌟 Profissional';
+    if (reputation >= 60) return '👍 Confiável';
+    if (reputation >= 40) return '😐 Neutro';
+    if (reputation >= 20) return '⚠️ Questionável';
+    return '❌ Reprovado';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SISTEMA DE RIVALIDADE
+  // ═══════════════════════════════════════════════════════════════
+
+  updateRivalry(userId1, userId2, amount) {
+    const p1 = this.players[userId1];
+    const p2 = this.players[userId2];
+    if (!p1 || !p2) return null;
+    
+    if (!p1.rivalries) p1.rivalries = {};
+    if (!p2.rivalries) p2.rivalries = {};
+    
+    // Aumentar rivalidade mútua
+    p1.rivalries[userId2] = Math.min(100, (p1.rivalries[userId2] || 0) + amount);
+    p2.rivalries[userId1] = Math.min(100, (p2.rivalries[userId1] || 0) + amount);
+    
+    this.save();
+    return {
+      player1: p1.rivalries[userId2],
+      player2: p2.rivalries[userId1]
+    };
+  }
+
+  getRivalry(userId1, userId2) {
+    const p1 = this.players[userId1];
+    if (!p1 || !p1.rivalries) return 0;
+    return p1.rivalries[userId2] || 0;
+  }
+
+  getRivalryLevel(level) {
+    if (level >= 80) return '🔥 Odio Máximo';
+    if (level >= 60) return '⚔️ Rivalidade Alta';
+    if (level >= 40) return '😤 Rivalidade Média';
+    if (level >= 20) return '🤔 Desconfiança';
+    if (level >= 5) return '👀 Observando';
+    return '—';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SISTEMA DE TEMPORADAS
+  // ═══════════════════════════════════════════════════════════════
+
+  seasonConfig = {
+    active: true,
+    number: 1,
+    startDate: Date.now(),
+    durationDays: 30,
+    resetDivisions: true,
+    keepXP: true,
+    keepOVR: true,
+    keepAchievements: true
+  };
+
+  getSeasonStatus() {
+    const now = Date.now();
+    const durationMs = this.seasonConfig.durationDays * 24 * 60 * 60 * 1000;
+    const endDate = this.seasonConfig.startDate + durationMs;
+    const remainingMs = endDate - now;
+    
+    if (remainingMs <= 0) {
+      return { active: false, ended: true };
+    }
+    
+    const daysLeft = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+    
+    return {
+      active: true,
+      number: this.seasonConfig.number,
+      daysLeft: daysLeft,
+      endDate: endDate,
+      resetDivisions: this.seasonConfig.resetDivisions
+    };
+  }
+
+  resetSeason() {
+    this.seasonConfig.number++;
+    this.seasonConfig.startDate = Date.now();
+    
+    // Resetar divisões se configurado
+    if (this.seasonConfig.resetDivisions) {
+      Object.values(this.players).forEach(player => {
+        player.division = { id: 'bronze_3', points: 0, winStreak: 0 };
+        player.seasonStats = { ...player.stats };
+      });
+    }
+    
+    // Manter XP, OVR, conquistas, títulos
+    // Resetar ranking global
+    this.globalRanking = { players: [], clubs: [] };
+    this.save();
+    
+    return {
+      newSeason: this.seasonConfig.number,
+      message: `🏆 Temporada ${this.seasonConfig.number} começou!`
+    };
+  }
+
+  getSeasonRewards() {
+    // Recompensas da temporada atual
+    const ranking = this.globalRanking?.players || [];
+    
+    return {
+      top1: { coins: 50000, xp: 5000, title: 'Campeão da Temporada' },
+      top10: { coins: 10000, xp: 1000, title: 'Elite da Temporada' },
+      top100: { coins: 2500, xp: 250, title: 'Destaque da Temporada' }
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -593,6 +727,9 @@ class FootballDB {
     this.addXP(userId, xpReward);
     player.economy.fcCoins += coinsReward;
     player.economy.totalEarned += coinsReward;
+    
+    // +3 reputação por MVP
+    this.updateReputation(userId, 3);
     
     // Verificar conquistas de MVP
     this.checkAchievements(userId, 'mvp', player.mvpCount);
@@ -1123,26 +1260,43 @@ class FootballDB {
     const p1 = match.player1;
     const p2 = match.player2;
     
+    // Obter dados dos jogadores do banco
+    const p1Data = this.players[p1.id];
+    const p2Data = this.players[p2.id];
+    
+    // Calcular bônus de forma (-5% a +5%)
+    const form1 = this.getFormInfo(p1Data).bonus;
+    const form2 = this.getFormInfo(p2Data).bonus;
+    
+    // Calcular bônus de reputação (-2% a +2%)
+    const rep1 = ((p1Data.reputation || 50) - 50) / 50 * 0.02;
+    const rep2 = ((p2Data.reputation || 50) - 50) / 50 * 0.02;
+    
+    // Calcular rivalidade (0 a 10%)
+    const rivalry = this.getRivalry(p1.id, p2.id);
+    const rivalryBonus = rivalry / 10; // máximo 10%
+    
     // Cálculo baseado em OVR e fator sorte
     const ovrDiff = p1.ovr - p2.ovr;
-    const luckFactor = (Math.random() - 0.5) * 20; // -10 a +10
+    const luckFactor = (Math.random() - 0.5) * 15; // -7.5 a +7.5 (reduzido)
     
-    // Probabilidade ajustada pelo OVR
-    const p1Chance = 50 + (ovrDiff * 2) + luckFactor;
+    // Probabilidade ajustada por OVR + forma + reputação + rivalidade
+    const p1Chance = 50 + (ovrDiff * 2) + (form1 * 100) + (rep1 * 100) + luckFactor;
     
-    // Gerar placar
+    // Gerar placar com bônus de rivalidade
     let score1, score2;
+    const rivalryMatch = rivalry >= 50; // Partida de rivalidade intensa
     
     if (Math.random() * 100 < p1Chance) {
       // Jogador 1 vence
-      const diff = Math.floor(Math.random() * 3) + 1;
-      score1 = Math.floor(Math.random() * 3) + 1;
+      const diff = Math.floor(Math.random() * (rivalryMatch ? 4 : 3)) + 1;
+      score1 = Math.floor(Math.random() * (rivalryMatch ? 4 : 3)) + 1;
       score2 = score1 - diff;
       if (score2 < 0) score2 = 0;
     } else {
       // Jogador 2 vence
-      const diff = Math.floor(Math.random() * 3) + 1;
-      score2 = Math.floor(Math.random() * 3) + 1;
+      const diff = Math.floor(Math.random() * (rivalryMatch ? 4 : 3)) + 1;
+      score2 = Math.floor(Math.random() * (rivalryMatch ? 4 : 3)) + 1;
       score1 = score2 - diff;
       if (score1 < 0) score1 = 0;
     }
@@ -1156,12 +1310,18 @@ class FootballDB {
       }
     }
     
+    // Atualizar rivalidade após partida intensa
+    if (rivalryMatch) {
+      this.updateRivalry(p1.id, p2.id, 5);
+    }
+    
     match.result = {
       score1,
       score2,
       winner: score1 > score2 ? p1.id : p2.id,
       loser: score1 > score2 ? p2.id : p1.id,
-      completedAt: Date.now()
+      completedAt: Date.now(),
+      rivalry: rivalryMatch
     };
     
     match.status = 'completed';
@@ -1169,19 +1329,21 @@ class FootballDB {
     // Atualizar estatísticas dos jogadores
     this.updateMatchStats(p1.id, p2.id, score1, score2, match.result.winner);
     
-    // Calcular pontos ganhos
+    // Calcular pontos ganhos (com bônus de rivalidade)
     const winnerPoints = this.calculateMatchPoints(p1.id, p2.id, true);
     const loserPoints = this.calculateMatchPoints(p2.id, p1.id, false);
     
     match.rewards = {
       winner: winnerPoints,
-      loser: loserPoints
+      loser: loserPoints,
+      rivalryBonus: rivalryMatch
     };
     
-    // Adicionar XP aos jogadores
-    // XP: +15 para vitória, +5 para derrota
-    const xpWinner = this.addXP(p1.id, score1 > score2 ? 15 : 5);
-    const xpLoser = this.addXP(p2.id, score1 > score2 ? 5 : 15);
+    // Adicionar XP aos jogadores (com bônus de rivalidade)
+    const baseXP = rivalryMatch ? 20 : 15;
+    const baseXPLoss = rivalryMatch ? 8 : 5;
+    const xpWinner = this.addXP(p1.id, score1 > score2 ? baseXP : baseXPLoss);
+    const xpLoser = this.addXP(p2.id, score1 > score2 ? baseXPLoss : baseXP);
     
     match.xpRewards = {
       winner: { xp: xpWinner.xpGained, leveledUp: xpWinner.leveledUp },
@@ -1231,12 +1393,16 @@ class FootballDB {
       if (winnerId === player1Id) {
         p1.stats.wins++;
         p1.division.winStreak++;
+        // Reputação +2 por vitória
+        this.updateReputation(player1Id, 2);
       } else if (score1 === score2) {
         p1.stats.draws++;
         p1.division.winStreak = 0;
       } else {
         p1.stats.losses++;
         p1.division.winStreak = 0;
+        // Reputação -1 por derrota
+        this.updateReputation(player1Id, -1);
       }
     }
     
@@ -1247,12 +1413,16 @@ class FootballDB {
       if (winnerId === player2Id) {
         p2.stats.wins++;
         p2.division.winStreak++;
+        // Reputação +2 por vitória
+        this.updateReputation(player2Id, 2);
       } else if (score1 === score2) {
         p2.stats.draws++;
         p2.division.winStreak = 0;
       } else {
         p2.stats.losses++;
         p2.division.winStreak = 0;
+        // Reputação -1 por derrota
+        this.updateReputation(player2Id, -1);
       }
     }
   }

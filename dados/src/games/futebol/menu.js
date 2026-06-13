@@ -98,6 +98,9 @@ Olá, ${playerName}!
 • !fut forma - Ver sua forma
 • !fut conquistas - Suas conquistas
 • !fut titulos - Títulos
+• !fut temporada - Ver temporada
+• !fut reputacao - Ver reputação
+• !fut rivalidades - Ver rivalidades
 
 🔧 *ADMIN* (apenas admins do grupo)
 • !fut admin - ver comandos
