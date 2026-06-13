@@ -6103,20 +6103,34 @@ if (isCmd && command && !isOwnerOrSub) {
           const { getMenuFut } = await import('./games/futebol/menu.js');
           const futGifPath = __dirname + '/../midias/menufut.gif';
           const futImagePath = __dirname + '/../midias/menufut.jpg';
-          const useVideo = fs.existsSync(__dirname + '/../midias/menufut.mp4');
-          const mediaPath = useVideo ? __dirname + '/../midias/menufut.mp4' : (fs.existsSync(futGifPath) ? futGifPath : futImagePath);
+          const futVideoPath = __dirname + '/../midias/menufut.mp4';
+          const useVideo = fs.existsSync(futVideoPath);
+          const isGif = fs.existsSync(futGifPath);
+          const mediaPath = useVideo ? futVideoPath : (isGif ? futGifPath : futImagePath);
           const mediaBuffer = fs.readFileSync(mediaPath);
           const menuText = getMenuFut(pushname);
           const lerMaisPrefix = getMenuLerMaisText();
 
-          await nazu.sendMessage(from, {
-            [useVideo ? 'video' : 'image']: mediaBuffer,
-            caption: lerMaisPrefix + menuText,
-            gifPlayback: useVideo,
-            mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
-          }, {
-            quoted: info
-          });
+          if (isGif) {
+            // GIFs precisam ser enviados como video com gifPlayback: true
+            await nazu.sendMessage(from, {
+              video: mediaBuffer,
+              caption: lerMaisPrefix + menuText,
+              gifPlayback: true,
+              mimetype: 'video/mp4'
+            }, {
+              quoted: info
+            });
+          } else {
+            await nazu.sendMessage(from, {
+              [useVideo ? 'video' : 'image']: mediaBuffer,
+              caption: lerMaisPrefix + menuText,
+              gifPlayback: false,
+              mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
+            }, {
+              quoted: info
+            });
+          }
         } catch (error) {
           console.error('Erro ao enviar menufut:', error);
           reply("❌ Erro ao carregar menufut");
