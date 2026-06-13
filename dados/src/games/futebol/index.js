@@ -235,6 +235,173 @@ export async function handleFutCommand(args, messageInfo, reply) {
       return reply('❌ Você não tem desafios pendentes.');
     
     // ═══════════════════════════════════════════════════════════════
+    // FUT SOLO
+    // ═══════════════════════════════════════════════════════════════
+    case 'solo':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const difficulty = subCommand || 'normal';
+      const validDiffs = ['normal', 'dificil', 'extremo'];
+      
+      if (!validDiffs.includes(difficulty)) {
+        return reply(`📌 *MODOS DISPONÍVEIS:*
+• !fut solo normal - Recompensas menores, mais fácil
+• !fut solo dificil - Mais difícil, melhores recompensas
+• !fut solo extremo - Muito difícil, melhores recompensas
+
+⚡ Custo: 30 de energia`);
+      }
+      
+      const soloResult = db.simulateSoloMatch(sender, difficulty);
+      if (!soloResult.success) {
+        return reply(`❌ ${soloResult.error}`);
+      }
+      
+      let soloText = `⚽ *FUT SOLO*\n\n`;
+      soloText += `${player.name} ${soloResult.playerGoals} x ${soloResult.enemyGoals} CPU\n`;
+      soloText += `Dificuldade: ${difficulty.toUpperCase()}\n\n`;
+      
+      if (soloResult.result === 'win') soloText += `🏆 *VITÓRIA!*\n`;
+      else if (soloResult.result === 'draw') soloText += `🤝 *EMPATE*\n`;
+      else soloText += `❌ *DERROTA*\n`;
+      
+      soloText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      soloText += `💰 +${soloResult.coinsGained} FC Coins\n`;
+      soloText += `⭐ +${soloResult.xpGained} XP`;
+      if (soloResult.xpBonus > 0) soloText += ` (+${soloResult.xpBonus}% bônus)`;
+      soloText += `\n⚡ Energia: ${player.energy.current}/200 (-30)`;
+      
+      if (soloResult.streak > 1) {
+        soloText += `\n🔥 Sequência: ${soloResult.streak}`;
+        if (soloResult.streakBonus > 0) soloText += ` (+${soloResult.streakBonus}% bônus)`;
+      }
+      
+      if (soloResult.leveledUp) {
+        soloText += `\n\n🎉 *SUBIU DE NÍVEL!*`;
+        soloResult.newLevel.forEach(lvl => {
+          soloText += `\n📊 Nível ${lvl.level} (+${lvl.evoPoints} Pontos de Evolução)`;
+        });
+        soloText += `\n💡 Use *!fut evoluir [atributo] [pontos]* para melhorar!`;
+      }
+      
+      return reply(soloText);
+    
+    case 'soloscore':
+    case 'rankingsolo':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const soloRanking = db.getSoloRanking();
+      if (soloRanking.length === 0) {
+        return reply('📭 Nenhum jogador no ranking ainda!\n\nJogue *!fut solo* para entrar!');
+      }
+      
+      let rankText = `🏆 *RANKING FUT SOLO*\n\n`;
+      soloRanking.forEach((p, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+        rankText += `${medal} ${p.name}\n`;
+        rankText += `   Vitórias: ${p.victories} | WR: ${p.winRate}%\n`;
+      });
+      
+      return reply(rankText);
+    
+    // ═══════════════════════════════════════════════════════════════
+    // XP E EVOLUÇÃO
+    // ═══════════════════════════════════════════════════════════════
+    case 'xp':
+    case 'nivel':
+    case 'level':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const xpInfo = db.getXPInfo(sender);
+      const xpNeeded = db.getXPForLevel(xpInfo.level);
+      const barLength = 15;
+      const filled = Math.round((xpInfo.currentXP / xpNeeded) * barLength);
+      const bar = '█'.repeat(filled) + '░'.repeat(barLength - filled);
+      
+      let xpText = `⭐ *XP FUTEBOL*\n\n`;
+      xpText += `📊 Nível: ${xpInfo.level}\n`;
+      xpText += `${bar}\n`;
+      xpText += `${xpInfo.currentXP}/${xpNeeded} XP\n\n`;
+      xpText += `💎 Pontos de Evolução: ${xpInfo.evolutionPoints}\n`;
+      xpText += `📈 XP Total: ${xpInfo.totalXP}\n`;
+      
+      if (xpInfo.xpBonus > 0) {
+        xpText += `\n🎯 Bônus: +${xpInfo.xpBonus}% (Aprendizado Rápido)`;
+      }
+      
+      if (xpInfo.evolutionPoints > 0) {
+        xpText += `\n\n💡 Use *!fut evoluir [atributo] [pontos]* para melhorar!`;
+      }
+      
+      return reply(xpText);
+    
+    case 'evoluir':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const evoAttr = args[1];
+      const evoPoints = parseInt(args[2]);
+      
+      if (!evoAttr || !evoPoints || evoPoints < 1) {
+        const xpInfo = db.getXPInfo(sender);
+        let evoHelp = `💎 *EVOLUIR ATRIBUTOS*\n\n`;
+        evoHelp += `Pontos disponíveis: ${xpInfo.evolutionPoints}\n\n`;
+        evoHelp += `📌 *COMO USAR:*\n`;
+        evoHelp += `*!fut evoluir [atributo] [pontos]*\n\n`;
+        evoHelp += `*ATRIBUTOS:*\n`;
+        evoHelp += `• pac - Ritmo\n`;
+        evoHelp += `• sho - Chute\n`;
+        evoHelp += `• pas - Passe\n`;
+        evoHelp += `• dri - Drible\n`;
+        evoHelp += `• def - Defesa\n`;
+        evoHelp += `• phy - Físico\n\n`;
+        evoHelp += `*EXEMPLO:*\n`;
+        evoHelp += `*!fut evoluir pac 2*\n`;
+        evoHelp += `*→ PAC +2, OVR aumenta!*`;
+        return reply(evoHelp);
+      }
+      
+      const evoResult = db.useEvolutionPoint(sender, evoAttr, evoPoints);
+      if (!evoResult.success) {
+        return reply(`❌ ${evoResult.error}`);
+      }
+      
+      return reply(`💎 *EVOLUÇÃO REALIZADA!*\n\n`
+        + `📈 ${evoResult.attribute.toUpperCase()}: ${evoResult.newValue - evoResult.pointsUsed} → ${evoResult.newValue} (+${evoResult.pointsUsed})\n`
+        + `🎮 OVR: ${evoResult.oldOVR} → ${evoResult.newOVR}\n\n`
+        + `💎 Pontos restantes: ${evoResult.remainingPoints}`);
+    
+    case 'atributos':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      let attrText = `⚡ *ATRIBUTOS*\n\n`;
+      attrText += `🎮 OVR: ${player.ovr}\n\n`;
+      attrText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      Object.entries(player.attributes).forEach(([attr, val]) => {
+        const attrDisplay = attr.toUpperCase();
+        attrText += `${attrDisplay}: ${val}\n`;
+      });
+      attrText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      
+      const playerXPInfo = db.getXPInfo(sender);
+      attrText += `\n💎 Pontos de Evolução: ${playerXPInfo.evolutionPoints}`;
+      
+      if (playerXPInfo.evolutionPoints > 0) {
+        attrText += `\n💡 Use *!fut evoluir [attr] [pts]*`;
+      }
+      
+      return reply(attrText);
+    
+    // ═══════════════════════════════════════════════════════════════
     // SALDO
     // ═══════════════════════════════════════════════════════════════
     case 'saldo':
@@ -682,9 +849,76 @@ export async function handleFutCommand(args, messageInfo, reply) {
           if (!targetPlayer) {
             return reply('❌ Jogador não encontrado!');
           }
-          targetPlayer.xp += xp;
+          const xpResult = db.addXP(targetUser, xp);
+          let msg = `✅ Adicionados *${xpResult.xpGained} XP* para @${targetUser.split('@')[0]}!`;
+          if (xpResult.leveledUp) {
+            msg += `\n🎉 Subiu para Nível ${xpResult.levelsGained[0].level}!`;
+          }
+          return reply(msg);
+        }
+        
+        case 'setlevel': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          const level = parseInt(args[2]);
+          if (!targetUser || !level || level < 1 || level > 100) {
+            return reply('📌 Use: *!fut admin setlevel @user [1-100]*');
+          }
+          const lvlPlayer = db.getPlayer(targetUser);
+          if (!lvlPlayer) {
+            return reply('❌ Jogador não encontrado!');
+          }
+          if (!lvlPlayer.xp) {
+            lvlPlayer.xp = { level: 1, currentXP: 0, evolutionPoints: 0, totalXP: 0 };
+          }
+          lvlPlayer.xp.level = level;
+          lvlPlayer.xp.currentXP = 0;
           db.save();
-          return reply(`✅ Adicionados *${xp} XP* para @${targetUser.split('@')[0]}!\n\n📊 XP atual: ${targetPlayer.xp}`);
+          return reply(`✅ Nível de @${targetUser.split('@')[0]} definido para *${level}*!`);
+        }
+        
+        case 'setevo': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          const evoPoints = parseInt(args[2]);
+          if (!targetUser || evoPoints === undefined || evoPoints < 0) {
+            return reply('📌 Use: *!fut admin setevo @user [pontos]*');
+          }
+          const evoPlayer = db.getPlayer(targetUser);
+          if (!evoPlayer) {
+            return reply('❌ Jogador não encontrado!');
+          }
+          if (!evoPlayer.xp) {
+            evoPlayer.xp = { level: 1, currentXP: 0, evolutionPoints: 0, totalXP: 0 };
+          }
+          evoPlayer.xp.evolutionPoints = evoPoints;
+          db.save();
+          return reply(`✅ Pontos de Evolução de @${targetUser.split('@')[0]} definidos para *${evoPoints}*!`);
+        }
+        
+        case 'resetxp': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          if (!targetUser) {
+            return reply('📌 Use: *!fut admin resetxp @user*');
+          }
+          const resetResult = db.resetPlayerXP(targetUser);
+          if (!resetResult.success) {
+            return reply(`❌ ${resetResult.error}`);
+          }
+          return reply(`✅ XP resetado para @${targetUser.split('@')[0]}!\n\nVoltou ao Nível 1.`);
+        }
+        
+        case 'setsolo': {
+          const targetUser = messageInfo.mentionedJid?.[0];
+          const resetSolo = args[2] === 'reset';
+          if (!targetUser) {
+            return reply('📌 Use: *!fut admin setsolo @user reset*');
+          }
+          const soloPlayer = db.getPlayer(targetUser);
+          if (!soloPlayer) {
+            return reply('❌ Jogador não encontrado!');
+          }
+          soloPlayer.soloStats = { victories: 0, draws: 0, losses: 0, streak: 0, bestStreak: 0, totalPlayed: 0 };
+          db.save();
+          return reply(`✅ Estatísticas Solo de @${targetUser.split('@')[0]} resetadas!`);
         }
         
         case 'resetplayer': {
@@ -749,11 +983,19 @@ export async function handleFutCommand(args, messageInfo, reply) {
 📌 *Gerenciar Jogadores:*
 • !fut admin addcoins @user [valor]
 • !fut admin remcoins @user [valor]
-• !fut admin addxp @user [valor]
 • !fut admin setovr @user [1-99]
 • !fut admin setenergy @user [0-200]
 • !fut admin setdiv @user [bronze/prata/ouro/platina/diamante]
 • !fut admin resetplayer @user
+
+📌 *XP e Evolução:*
+• !fut admin addxp @user [valor]
+• !fut admin setlevel @user [1-100]
+• !fut admin setevo @user [pontos]
+• !fut admin resetxp @user
+
+📌 *Fut Solo:*
+• !fut admin setsolo @user reset
 
 📌 *Resetar Dados:*
 • !fut admin resetall - Resetar TUDO

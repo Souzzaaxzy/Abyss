@@ -197,7 +197,22 @@ class FootballDB {
       history: [],
       currentClub: null,
       salary: 0,
-      weeklySalary: 0
+      weeklySalary: 0,
+      // Sistema de XP e Evolução
+      xp: {
+        level: 1,
+        currentXP: 0,
+        evolutionPoints: 0, // Pontos para distribuir em atributos
+        totalXP: 0
+      },
+      soloStats: {
+        victories: 0,
+        draws: 0,
+        losses: 0,
+        streak: 0,
+        bestStreak: 0,
+        totalPlayed: 0
+      }
     };
     
     this.players[userId] = player;
@@ -207,6 +222,330 @@ class FootballDB {
 
   hasPlayer(userId) {
     return !!this.players[userId];
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SISTEMA DE XP E NÍVEIS
+  // ═══════════════════════════════════════════════════════════════
+
+  // Calcular XP necessário para o próximo nível
+  getXPForLevel(level) {
+    // Progressão: nível * 100 + (nível - 1) * 20
+    // Nível 1→2: 100, 2→3: 140, 3→4: 180, etc.
+    return Math.floor(level * 100 + (level - 1) * 20);
+  }
+
+  // Calcular bônus de XP baseado nas habilidades
+  getXPBonus(player) {
+    let bonus = 0;
+    if (player.skills) {
+      const aprendizado = player.skills.find(s => s.id === 'aprendizado_rapido');
+      if (aprendizado) {
+        bonus = aprendizado.level * 5; // +5% por nível
+      }
+    }
+    return bonus / 100; // Retorna multiplicador (1.05, 1.10, 1.15)
+  }
+
+  // Adicionar XP a um jogador
+  addXP(userId, amount) {
+    const player = this.players[userId];
+    if (!player) return { success: false, error: 'Jogador não encontrado' };
+    if (!player.xp) {
+      player.xp = { level: 1, currentXP: 0, evolutionPoints: 0, totalXP: 0 };
+    }
+
+    // Aplicar bônus de habilidade
+    const bonus = this.getXPBonus(player);
+    const finalAmount = Math.floor(amount * bonus);
+    
+    player.xp.totalXP += finalAmount;
+    player.xp.currentXP += finalAmount;
+
+    const result = {
+      success: true,
+      xpGained: finalAmount,
+      bonusApplied: bonus > 1 ? Math.round((bonus - 1) * 100) : 0
+    };
+
+    // Verificar subida de nível
+    const xpNeeded = this.getXPForLevel(player.xp.level);
+    const levelsGained = [];
+
+    while (player.xp.currentXP >= xpNeeded && player.xp.level < 100) {
+      player.xp.currentXP -= xpNeeded;
+      player.xp.level++;
+      
+      // Dar pontos de evolução (2 por nível)
+      const evoPoints = 2;
+      player.xp.evolutionPoints += evoPoints;
+      
+      levelsGained.push({
+        level: player.xp.level,
+        evoPoints: evoPoints
+      });
+
+      // Verificar marcos de nível
+      this.checkLevelMilestone(player, player.xp.level);
+    }
+
+    if (levelsGained.length > 0) {
+      result.leveledUp = true;
+      result.levelsGained = levelsGained;
+      result.totalEvolutionPoints = player.xp.evolutionPoints;
+    }
+
+    this.save();
+    return result;
+  }
+
+  // Verificar marcos de nível e dar recompensas
+  checkLevelMilestone(player, level) {
+    const milestones = {
+      10: { coins: 1000, message: '🏆 Nível 10! +1.000 FC Coins' },
+      25: { coins: 2500, message: '⭐ Nível 25! +2.500 FC Coins' },
+      50: { coins: 5000, message: '👑 Nível 50! +5.000 FC Coins' },
+      75: { coins: 10000, message: '🌟 Nível 75! +10.000 FC Coins' },
+      100: { coins: 25000, message: '💎 Nível 100! +25.000 FC Coins - LENDÁRIO!' }
+    };
+
+    if (milestones[level]) {
+      player.economy.fcCoins += milestones[level].coins;
+      player.economy.totalEarned += milestones[level].coins;
+      player.milestoneReward = milestones[level].message;
+    }
+  }
+
+  // Usar pontos de evolução
+  useEvolutionPoint(userId, attribute, points) {
+    const player = this.players[userId];
+    if (!player) return { success: false, error: 'Jogador não encontrado' };
+    if (!player.xp || player.xp.evolutionPoints < points) {
+      return { success: false, error: 'Pontos de evolução insuficientes!' };
+    }
+
+    const validAttrs = ['pac', 'sho', 'pas', 'dri', 'def', 'phy'];
+    const attrLower = attribute.toLowerCase();
+    if (!validAttrs.includes(attrLower)) {
+      return { success: false, error: 'Atributo inválido! Use: pac, sho, pas, dri, def, phy' };
+    }
+
+    const currentValue = player.attributes[attrLower];
+    if (currentValue + points > 99) {
+      return { success: false, error: `Máximo 99 para ${attrLower.toUpperCase()}!` };
+    }
+
+    player.attributes[attrLower] += points;
+    player.xp.evolutionPoints -= points;
+    
+    // Recalcular OVR
+    const oldOVR = player.ovr;
+    player.ovr = this.calculateOVR(player.attributes);
+    
+    this.save();
+
+    return {
+      success: true,
+      attribute: attrLower,
+      pointsUsed: points,
+      newValue: player.attributes[attrLower],
+      oldOVR: oldOVR,
+      newOVR: player.ovr,
+      remainingPoints: player.xp.evolutionPoints
+    };
+  }
+
+  // Obter informações de XP
+  getXPInfo(userId) {
+    const player = this.players[userId];
+    if (!player) return null;
+    if (!player.xp) {
+      player.xp = { level: 1, currentXP: 0, evolutionPoints: 0, totalXP: 0 };
+    }
+
+    const xpNeeded = this.getXPForLevel(player.xp.level);
+    const bonus = this.getXPBonus(player);
+
+    return {
+      level: player.xp.level,
+      currentXP: player.xp.currentXP,
+      xpNeeded: xpNeeded,
+      progress: Math.round((player.xp.currentXP / xpNeeded) * 100),
+      evolutionPoints: player.xp.evolutionPoints,
+      totalXP: player.xp.totalXP,
+      xpBonus: bonus > 1 ? Math.round((bonus - 1) * 100) : 0,
+      ovr: player.ovr
+    };
+  }
+
+  // Resetar XP de um jogador
+  resetPlayerXP(userId) {
+    const player = this.players[userId];
+    if (!player) return { success: false, error: 'Jogador não encontrado' };
+    
+    player.xp = { level: 1, currentXP: 0, evolutionPoints: 0, totalXP: 0 };
+    this.save();
+    return { success: true };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // FUT SOLO
+  // ═══════════════════════════════════════════════════════════════
+
+  // Configurações do Fut Solo
+  soloConfig = {
+    normal: { xpWin: 6, coinsWin: 200, xpDraw: 3, coinsDraw: 100, xpLoss: 1, coinsLoss: 50 },
+    dificil: { xpWin: 8, coinsWin: 300, xpDraw: 4, coinsDraw: 150, xpLoss: 2, coinsLoss: 75 },
+    extremo: { xpWin: 12, coinsWin: 500, xpDraw: 6, coinsDraw: 250, xpLoss: 3, coinsLoss: 100 },
+    streakBonus: { 3: 0.10, 5: 0.20, 10: 0.35 }
+  };
+
+  // Simular partida Fut Solo
+  simulateSoloMatch(userId, difficulty) {
+    const player = this.players[userId];
+    if (!player) return { success: false, error: 'Jogador não encontrado' };
+
+    // Verificar energia
+    if (!player.energy || player.energy.current < 30) {
+      return { success: false, error: '⚡ Energia insuficiente! (mínimo 30)' };
+    }
+
+    // Consumir energia (30 por partida)
+    player.energy.current -= 30;
+    
+    // Calcular OVR do adversário baseado na dificuldade
+    const playerOVR = player.ovr;
+    let enemyOVR;
+    
+    switch (difficulty) {
+      case 'normal':
+        enemyOVR = playerOVR + Math.floor(Math.random() * 5) - 2; // -2 a +2
+        break;
+      case 'dificil':
+      case 'dificil':
+        enemyOVR = playerOVR + Math.floor(Math.random() * 5) + 3; // +3 a +7
+        break;
+      case 'extremo':
+        enemyOVR = playerOVR + Math.floor(Math.random() * 8) + 8; // +8 a +15
+        break;
+      default:
+        enemyOVR = playerOVR;
+    }
+    
+    enemyOVR = Math.min(99, Math.max(40, enemyOVR));
+
+    // Simular resultado baseado nas estatísticas
+    const playerStrength = playerOVR + player.attributes.dri * 0.2 + player.attributes.sho * 0.1;
+    const enemyStrength = enemyOVR * 1.2;
+    const randomFactor = Math.random();
+    
+    // Calcular probabilidades
+    const winChance = playerStrength / (playerStrength + enemyStrength);
+    let result;
+    let playerGoals, enemyGoals;
+
+    if (randomFactor < winChance - 0.15) {
+      result = 'win';
+      playerGoals = Math.floor(Math.random() * 3) + 2;
+      enemyGoals = Math.floor(Math.random() * playerGoals);
+    } else if (randomFactor > winChance + 0.15) {
+      result = 'loss';
+      enemyGoals = Math.floor(Math.random() * 3) + 2;
+      playerGoals = Math.floor(Math.random() * enemyGoals);
+    } else {
+      result = 'draw';
+      playerGoals = Math.floor(Math.random() * 3) + 1;
+      enemyGoals = playerGoals;
+    }
+
+    // Atualizar estatísticas solo
+    if (!player.soloStats) {
+      player.soloStats = { victories: 0, draws: 0, losses: 0, streak: 0, bestStreak: 0, totalPlayed: 0 };
+    }
+    player.soloStats.totalPlayed++;
+
+    // Atualizar streak
+    if (result === 'win') {
+      player.soloStats.victories++;
+      player.soloStats.streak++;
+      if (player.soloStats.streak > player.soloStats.bestStreak) {
+        player.soloStats.bestStreak = player.soloStats.streak;
+      }
+    } else if (result === 'loss') {
+      player.soloStats.losses++;
+      player.soloStats.streak = 0;
+    } else {
+      player.soloStats.draws++;
+    }
+
+    // Calcular recompensas
+    const config = this.soloConfig[difficulty] || this.soloConfig.normal;
+    let xpReward, coinsReward;
+
+    if (result === 'win') {
+      xpReward = config.xpWin;
+      coinsReward = config.coinsWin;
+    } else if (result === 'draw') {
+      xpReward = config.xpDraw;
+      coinsReward = config.coinsDraw;
+    } else {
+      xpReward = config.xpLoss;
+      coinsReward = config.coinsLoss;
+    }
+
+    // Bônus de sequência
+    let streakBonus = 0;
+    for (const [streak, bonus] of Object.entries(this.soloConfig.streakBonus)) {
+      if (player.soloStats.streak >= parseInt(streak)) {
+        streakBonus = bonus;
+      }
+    }
+
+    xpReward = Math.floor(xpReward * (1 + streakBonus));
+    coinsReward = Math.floor(coinsReward * (1 + streakBonus));
+
+    // Adicionar XP
+    const xpResult = this.addXP(userId, xpReward);
+
+    // Adicionar coins
+    player.economy.fcCoins += coinsReward;
+    player.economy.totalEarned += coinsReward;
+
+    this.save();
+
+    return {
+      success: true,
+      result: result,
+      playerGoals: playerGoals,
+      enemyGoals: enemyGoals,
+      enemyOVR: enemyOVR,
+      difficulty: difficulty,
+      xpGained: xpResult.xpGained,
+      xpBonus: xpResult.bonusApplied,
+      coinsGained: coinsReward,
+      streak: player.soloStats.streak,
+      streakBonus: Math.round(streakBonus * 100),
+      leveledUp: xpResult.leveledUp,
+      newLevel: xpResult.leveledUp ? xpResult.levelsGained : null,
+      evolutionPoints: xpResult.leveledUp ? xpResult.totalEvolutionPoints : null
+    };
+  }
+
+  // Obter ranking solo
+  getSoloRanking() {
+    return Object.values(this.players)
+      .filter(p => p.soloStats && p.soloStats.victories > 0)
+      .sort((a, b) => b.soloStats.victories - a.soloStats.victories)
+      .slice(0, 10)
+      .map((p, i) => ({
+        rank: i + 1,
+        name: p.name,
+        victories: p.soloStats.victories,
+        winRate: p.soloStats.totalPlayed > 0 
+          ? Math.round((p.soloStats.victories / p.soloStats.totalPlayed) * 100) 
+          : 0,
+        bestStreak: p.soloStats.bestStreak
+      }));
   }
 
   calculateOVR(attributes) {
@@ -493,6 +832,16 @@ class FootballDB {
     match.rewards = {
       winner: winnerPoints,
       loser: loserPoints
+    };
+    
+    // Adicionar XP aos jogadores
+    // XP: +15 para vitória, +5 para derrota
+    const xpWinner = this.addXP(p1.id, score1 > score2 ? 15 : 5);
+    const xpLoser = this.addXP(p2.id, score1 > score2 ? 5 : 15);
+    
+    match.xpRewards = {
+      winner: { xp: xpWinner.xpGained, leveledUp: xpWinner.leveledUp },
+      loser: { xp: xpLoser.xpGained, leveledUp: xpLoser.leveledUp }
     };
     
     this.save();

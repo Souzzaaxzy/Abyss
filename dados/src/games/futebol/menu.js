@@ -57,10 +57,16 @@ Olá, ${playerName}!
 • !fut x1 @usuario
 • !fut ax1 - aceitar
 • !fut rx1 - recusar
+• !fut solo [normal/dificil/extremo]
 
 🏆 *DIVISÕES*
 • !fut divisoes
 • !fut ranking
+
+⭐ *XP & EVOLUÇÃO*
+• !fut xp - ver nível e XP
+• !fut evoluir [attr] [pts]
+• !fut atributos
 
 💪 *HABILIDADES*
 • !fut hab
@@ -74,7 +80,7 @@ Olá, ${playerName}!
 
 💼 *NEGOCIAÇÕES*
 • !fut prop @user [salário]
-• !fut negs - ver suas
+• !fut negs - ver
 • !fut ace [id] - aceitar
 • !fut repro [id] - recusar
 • !fut cnt [id] [valor]
@@ -82,6 +88,7 @@ Olá, ${playerName}!
 🌟 *GLOBAL*
 • !fut topglobal
 • !fut rankingclubes
+• !fut soloscore
 
 🔧 *ADMIN* (apenas admins do grupo)
 • !fut admin - ver comandos
@@ -141,12 +148,17 @@ export function getProfileMessage(player) {
     clubInfo = club?.name || 'Desconhecido';
   }
   
+  // Info de XP
+  const xpInfo = player.xp || { level: 1, currentXP: 0, evolutionPoints: 0 };
+  const xpNeeded = Math.floor(xpInfo.level * 100 + (xpInfo.level - 1) * 20);
+  
   return `
 ⚽ *PERFIL DE JOGADOR* ⚽
 
 👤 *Nome:* ${player.name}
 🏆 *Divisão:* ${divEmoji} ${divName}
 📊 *OVR:* ${player.ovr}
+⭐ *Nível:* ${xpInfo.level}
 💰 *FC Coins:* ${player.economy.fcCoins.toLocaleString()}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -157,6 +169,11 @@ export function getProfileMessage(player) {
 🛡️ DEF: ${player.attributes.def}
 💪 PHY: ${player.attributes.phy}
 ━━━━━━━━━━━━━━━━━━━━━━━━
+
+⭐ *XP FUTEBOL:*
+• Nível: ${xpInfo.level}
+• XP: ${xpInfo.currentXP}/${xpNeeded}
+• 💎 Pontos Evolução: ${xpInfo.evolutionPoints}
 
 🏅 *ESTATÍSTICAS:*
 • Partidas: ${player.stats.matches}
