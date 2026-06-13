@@ -3,46 +3,31 @@
 # Limite do WhatsApp: ~1MB
 
 GIF_PATH="/data/data/com.termux/files/home/KaiserBot/dados/midias/menufut.gif"
-OUTPUT_PATH="/data/data/com.termux/files/home/KaiserBot/dados/midias/menufut.mp4"
 
-echo "🎬 Reduzindo GIF para MP4..."
+echo "🎬 Reduzindo GIF para WhatsApp..."
 echo "📁 Original: $GIF_PATH"
 ls -lh "$GIF_PATH"
 
-# Converter GIF para MP4 otimizado
-ffmpeg -i "$GIF_PATH" \
-  -movflags +faststart \
-  -vf "scale=480:-1:flags=lanczos,fps=15" \
-  -c:v libx264 \
-  -crf 23 \
-  -preset fast \
-  -c:a aac \
-  -b:a 0k \
-  -y \
-  "$OUTPUT_PATH"
-
-echo ""
-echo "✅ Convertido!"
-ls -lh "$OUTPUT_PATH"
-
-# Verificar tamanho
-SIZE=$(stat -c%s "$OUTPUT_PATH" 2>/dev/null || stat -f%z "$OUTPUT_PATH" 2>/dev/null)
+# Verificar tamanho atual
+SIZE=$(stat -c%s "$GIF_PATH" 2>/dev/null || stat -f%z "$GIF_PATH" 2>/dev/null)
 MAX_SIZE=1048576  # 1MB
 
 if [ "$SIZE" -gt "$MAX_SIZE" ]; then
-  echo "⚠️ Ainda grande (${SIZE} bytes), reduzindo mais..."
+  echo "⚠️ GIF grande (${SIZE} bytes), reduzindo..."
+  
+  # Reduzir GIF: menor resolução e fps
   ffmpeg -i "$GIF_PATH" \
-    -movflags +faststart \
-    -vf "scale=320:-1:flags=lanczos,fps=10" \
-    -c:v libx264 \
-    -crf 28 \
-    -preset fast \
-    -c:a aac \
-    -b:a 0k \
+    -vf "scale=480:-1:flags=lanczos,fps=10,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer" \
+    -loop 0 \
     -y \
-    "$OUTPUT_PATH"
-  echo "✅ Convertido (versão otimizada)!"
-  ls -lh "$OUTPUT_PATH"
+    "$GIF_PATH.tmp.gif"
+  
+  mv "$GIF_PATH.tmp.gif" "$GIF_PATH"
+  
+  echo "✅ GIF reduzido!"
+  ls -lh "$GIF_PATH"
+else
+  echo "✅ GIF já está no tamanho certo!"
 fi
 
 echo ""

@@ -6101,11 +6101,10 @@ if (isCmd && command && !isOwnerOrSub) {
       case 'menufut': {
         try {
           const { getMenuFut } = await import('./games/futebol/menu.js');
+          const futGifPath = __dirname + '/../midias/menufut.gif';
           const futImagePath = __dirname + '/../midias/menufut.jpg';
-          const futVideoPath = __dirname + '/../midias/menufut.mp4';
           
-          // Prioridade: MP4 > JPG
-          const mediaPath = fs.existsSync(futVideoPath) ? futVideoPath : futImagePath;
+          const mediaPath = fs.existsSync(futGifPath) ? futGifPath : futImagePath;
           const mediaBuffer = fs.readFileSync(mediaPath);
           const menuText = getMenuFut(pushname);
           const lerMaisPrefix = getMenuLerMaisText();
@@ -6113,7 +6112,7 @@ if (isCmd && command && !isOwnerOrSub) {
           await nazu.sendMessage(from, {
             video: mediaBuffer,
             caption: lerMaisPrefix + menuText,
-            gifPlayback: false,
+            gifPlayback: true,
             mimetype: 'video/mp4'
           }, {
             quoted: info
