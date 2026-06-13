@@ -126,10 +126,9 @@ export function getMenuFut(playerName = 'Jogador') {
 ⚔️ Rivalidades → !fut rivalidades
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔧 *ADMIN*
+⚠️ *ADMINISTRAÇÃO*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚙️ Comandos  → !fut admin
-⚙️ Menu ADM  → !futadm
+🔧 Use *!fut admin* para acessar os comandos administrativos
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 Use *!fut entrar* para começar!`;
