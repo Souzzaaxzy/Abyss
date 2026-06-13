@@ -1688,18 +1688,78 @@ Exemplo:
         
         case 'help':
         default: {
-          return reply(`🔧 *COMANDOS ADMIN DO FUT*
+          return reply(`🔧 *COMANDOS ADMIN DO FUTEBOL*
 
 *⚠️ Apenas admins do grupo*
 
-📌 *Jogadores:* addcoins, remcoins, setovr, setenergy, setdiv, resetplayer
-📌 *XP:* addxp, setlevel, setevo, addevo, resetxp
-📌 *Reputação:* setrep @user [0-100], addrep @user [±valor]
-📌 *Temporada:* season (status), season reset, season config [dias] [true/false]
-📌 *Códigos:* codigo criar, codigo misterioso, codigo listar, codigo log, codigo desativar
-📌 *Treinos:* settreino @user [attr] [valor]
-📌 *Solo:* setsolo @user reset
-📌 *Reset:* resetall, clubes, x1reset`);
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+📌 *JOGADORES*
+• addcoins @user [valor] - Adicionar coins
+• remcoins @user [valor] - Remover coins
+• setovr @user [1-99] - Definir OVR
+• setenergy @user [0-200] - Definir energia
+• setdiv @user [bronze/prata/ouro...] - Definir divisão
+• resetplayer @user - Resetar jogador
+• addmvp @user [qtd] - Adicionar MVP
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+⭐ *XP & EVOLUÇÃO*
+• addxp @user [valor] - Adicionar XP
+• setlevel @user [1-100] - Definir nível
+• setevo @user [pontos] - Definir pontos evo
+• addevo @user [pontos] - Adicionar pontos evo
+• resetxp @user - Resetar XP
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 *ATRIBUTOS*
+• settreino @user [attr] [valor] - Definir atributo
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌟 *REPUTAÇÃO*
+• setrep @user [0-100] - Definir reputação
+• addrep @user [±valor] - Ajustar reputação
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏆 *TEMPORADA*
+• season - Ver status
+• season reset - Resetar temporada
+• season config [dias] [true/false] - Configurar
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎁 *CÓDIGOS PROMOCIONAIS*
+• codigo criar [COD] [COINS] [XP] [USOS] [HORAS]
+• codigo misterioso [minC] [maxC] [minX] [maxX] [USOS]
+• codigo listar - Ver todos
+• codigo log - Ver resgatados
+• codigo desativar [CODIGO] - Desativar
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏆 *TORNEIOS*
+• torneio criar [NOME]|[TIPO]|[MAX]|[ENT]|[PREMIO]|[TROFEU]
+• torneio iniciar [ID] - Iniciar inscrições
+• torneio jogar [ID] - Jogar partida
+• torneio ver [ID] - Ver detalhes
+• torneio cancelar [ID] - Cancelar
+• torneio listar - Listar todos
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 *FUT SOLO*
+• setsolo @user reset - Resetar solo
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+💥 *RESET GERAL*
+• resetall - Resetar tudo
+• clubes - Resetar clubes
+• x1reset - Limpar X1 pendentes`);
         }
       }
     }

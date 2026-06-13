@@ -44,71 +44,66 @@ Olá, ${playerName}!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 📋 *PERFIL*
-• !fut perfil
-• !fut stats
-• !fut saldo
-• !fut energia
+• !fut perfil - Ver perfil completo
+• !fut stats - Estatísticas detalhadas
+• !fut saldo - Ver FC Coins
+• !fut energia - Ver energia
 
-⚡ *ENERGIA*
-• !fut tre pac/sho/pas/dri/def/phy
-• !fut descansar
+⚡ *TREINO*
+• !fut tre pac/sho/pas/dri/def/phy [pts]
+• !fut descansar - Recuperar energia
 
 ⚔️ *PARTIDAS*
-• !fut x1 @usuario
-• !fut ax1 - aceitar
-• !fut rx1 - recusar
+• !fut x1 @usuario - Desafiar
+• !fut ax1 - Aceitar desafio
+• !fut rx1 - Recusar desafio
 • !fut solo [normal/dificil/extremo]
+• !fut rivalidade @user - Ver rivalidade
 
 🏆 *TORNEIOS*
-• !fut torneio - Ver abertos
-• !fut torneio entrar [ID]
+• !fut torneio - Ver torneios abertos
+• !fut torneio entrar [ID] - Inscrever-se
 
-🏆 *DIVISÕES*
-• !fut divisoes
-• !fut ranking
+📊 *RANKINGS*
+• !fut divisoes - Ver divisões
+• !fut ranking - Ranking da divisão
+• !fut topglobal - Top Global
+• !fut rankingclubes - Top Clubes
+• !fut soloscore - Ranking Solo
 
-⭐ *XP & EVOLUÇÃO*
-• !fut xp - ver nível e XP
-• !fut evoluir [attr] [pts]
-• !fut atributos
-
-💪 *HABILIDADES*
-• !fut hab
-• !fut comprar hab [id]
+⭐ *EVOLUÇÃO*
+• !fut xp - Ver nível e XP
+• !fut evoluir [attr] [pts] - Evoluir atributo
+• !fut atributos - Ver atributos
+• !fut hab - Ver/comprar habilidades
 
 ⚙️ *CLUBE*
-• !fut criar [nome]
-• !fut clube
-• !fut membros
-• !fut sair
+• !fut criar [nome] - Criar clube
+• !fut clube - Ver meu clube
+• !fut membros - Ver elenco
+• !fut sair - Sair do clube
+• !fut prop @user [salário] - Fazer proposta
 
 💼 *NEGOCIAÇÕES*
-• !fut prop @user [salário]
-• !fut negs - ver
-• !fut ace [id] - aceitar
-• !fut repro [id] - recusar
-• !fut cnt [id] [valor]
-
-🌟 *GLOBAL*
-• !fut topglobal
-• !fut rankingclubes
-• !fut soloscore
+• !fut negs - Ver propostas
+• !fut ace [id] - Aceitar
+• !fut repro [id] - Recusar
 
 🎁 *RECOMPENSAS*
-• !fut diaria - Caixa diária
-• !fut semanal - Missões
+• !fut diaria - Caixa diária (24h)
+• !fut semanal - Missões da semana
 • !fut codigo [CODIGO] - Resgatar código
 
-🏆 *EXTRAS*
-• !fut forma - Ver sua forma
-• !fut conquistas - Suas conquistas
-• !fut titulos - Títulos
-• !fut temporada - Ver temporada
-• !fut reputacao - Ver reputação
-• !fut rivalidades - Ver rivalidades
+🏅 *EXTRAS*
+• !fut forma - Ver forma atual
+• !fut conquistas - Minhas conquistas
+• !fut titulos - Ver/trocar títulos
+• !fut temporada - Status da temporada
+• !fut reputacao - Minha reputação
+• !fut rivalidades - Minhas rivalidades
 
-🔧 *ADMIN* (apenas admins do grupo)
-• !fut admin - ver comandos
+🔧 *ADMIN*
+• !fut admin - Ver comandos admin
 
 💡 Use *!fut entrar* para começar!`;
 }
