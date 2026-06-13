@@ -21164,6 +21164,40 @@ break;
           await reply(getMenuFut(pushname));
         }
         break;
+      case 'futadm':
+      case 'menufutadm':
+      case 'menufutadmin':
+        try {
+          const { getMenuAdminFut } = await import('./games/futebol/menu.js');
+          // Verifica se existe GIF específico para admin de futebol
+          const futAdmGifPath = __dirname + '/../midias/menufut.gif';
+          const futAdmImagePath = __dirname + '/../midias/menufut.jpg';
+          const futAdmVideoPath = __dirname + '/../midias/menufut.mp4';
+
+          const useVideoAdm = fs.existsSync(futAdmVideoPath);
+          const mediaPathAdm = useVideoAdm ? futAdmVideoPath : (fs.existsSync(futAdmGifPath) ? futAdmGifPath : (fs.existsSync(futAdmImagePath) ? futAdmImagePath : null));
+
+          if (mediaPathAdm && fs.existsSync(mediaPathAdm)) {
+            const mediaBufferAdm = fs.readFileSync(mediaPathAdm);
+            const menuTextAdm = getMenuAdminFut();
+            const lerMaisPrefix = getMenuLerMaisText ? getMenuLerMaisText() : '';
+
+            await nazu.sendMessage(from, {
+              [useVideoAdm ? 'video' : 'image']: mediaBufferAdm,
+              caption: lerMaisPrefix + menuTextAdm,
+              gifPlayback: useVideoAdm || mediaPathAdm.endsWith('.gif'),
+              mimetype: useVideoAdm ? 'video/mp4' : (mediaPathAdm.endsWith('.gif') ? 'image/gif' : 'image/jpeg')
+            }, {
+              quoted: info
+            });
+          } else {
+            await reply(getMenuAdminFut());
+          }
+        } catch (error) {
+          console.error('Erro ao enviar menu admin de futebol:', error);
+          await reply(getMenuAdminFut());
+        }
+        break;
       case 'menumembros':
       case 'menumemb':
       case 'menugeral':

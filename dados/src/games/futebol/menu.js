@@ -129,6 +129,7 @@ export function getMenuFut(playerName = 'Jogador') {
 🔧 *ADMIN*
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚙️ Comandos  → !fut admin
+⚙️ Menu ADM  → !futadm
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 Use *!fut entrar* para começar!`;
