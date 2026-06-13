@@ -604,7 +604,7 @@ class FootballDB {
     return { success: true, tournament: tournament };
   }
 
-  // Inscrever jogador no torneio
+  // Inscrição com verificação de economia
   joinTournament(tournamentId, userId) {
     const tournament = this.tournaments[tournamentId];
     const player = this.players[userId];
@@ -630,6 +630,7 @@ class FootballDB {
         return { success: false, error: `FC Coins insuficientes! Necessário: ${tournament.entryCost}` };
       }
       player.economy.fcCoins -= tournament.entryCost;
+      player.economy.totalSpent += tournament.entryCost;
     }
     
     tournament.participants.push({
