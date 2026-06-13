@@ -71,8 +71,15 @@ Olá, ${playerName}!
 • !fut criarclube [nome]
 • !fut clube
 • !fut membros
-• !fut proposta @usuario [salário]
 • !fut sairclube
+
+💼 *NEGOCIAÇÕES*
+• !fut proposta @user [salário]
+• !fut negociacoes
+• !fut aceitar neg [id]
+• !fut reprovar neg [id]
+• !fut contraprop [id] [valor]
+• !fut minhaspropostas
 
 🌟 *GLOBAL*
 • !fut topglobal

@@ -126,7 +126,7 @@ class FootballDB {
     this.tournaments = readJSON(FILES.TOURNAMENTS, []);
     this.globalRanking = readJSON(FILES.GLOBAL_RANKING, { players: [], clubs: [] });
     this.seasons = readJSON(FILES.SEASONS, { current: 1, history: [] });
-    this.market = readJSON(FILES.MARKET, { proposals: [] });
+    this.market = readJSON(FILES.MARKET, { proposals: [], negotiations: [] });
     this.config = readJSON(FILES.CONFIG, {
       fcCoinsName: 'FC Coins',
       currentSeason: 1,
@@ -794,6 +794,109 @@ class FootballDB {
     
     // Remover proposta
     this.market.proposals = this.market.proposals.filter(p => p.id !== proposalId);
+    this.save();
+    
+    return { success: true };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // NEGOCIAÇÕES
+  // ═══════════════════════════════════════════════════════════════
+
+  createNegotiation(clubId, playerId, salary, counterOffer = false) {
+    const negotiationId = `neg_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    
+    const negotiation = {
+      id: negotiationId,
+      clubId: clubId,
+      clubName: this.clubs[clubId]?.name || 'Clube',
+      playerId: playerId,
+      playerName: this.players[playerId]?.name || 'Jogador',
+      salary: salary,
+      counterOffer: counterOffer, // true se é contra-oferta do jogador
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000),
+      status: 'pending' // pending, accepted, rejected, expired
+    };
+    
+    this.market.negotiations.push(negotiation);
+    this.save();
+    
+    return negotiation;
+  }
+
+  getPlayerNegotiations(playerId) {
+    return this.market.negotiations.filter(n => 
+      n.playerId === playerId && n.status === 'pending'
+    );
+  }
+
+  getClubNegotiations(clubId) {
+    return this.market.negotiations.filter(n => 
+      n.clubId === clubId && n.status === 'pending'
+    );
+  }
+
+  getNegotiation(negotiationId) {
+    return this.market.negotiations.find(n => n.id === negotiationId);
+  }
+
+  acceptNegotiation(negotiationId, byPlayer = false) {
+    const neg = this.getNegotiation(negotiationId);
+    if (!neg) return { success: false, error: 'Negociação não encontrada' };
+    if (neg.status !== 'pending') return { success: false, error: 'Negociação já encerrada' };
+    
+    // Adicionar jogador ao clube
+    const player = this.players[neg.playerId];
+    if (!player) return { success: false, error: 'Jogador não encontrado' };
+    if (player.currentClub) return { success: false, error: 'Jogador já está em um clube' };
+    
+    const club = this.clubs[neg.clubId];
+    if (!club) return { success: false, error: 'Clube não encontrado' };
+    if (club.players.length >= 5) return { success: false, error: 'Clube cheio' };
+    
+    // Verificar se clube tem saldo
+    const weeklyCost = neg.salary * 5; // 5 semanas de salário como bônus de assinatura
+    if (club.economy.balance < weeklyCost) {
+      return { success: false, error: 'Clube não tem FC Coins suficientes' };
+    }
+    
+    // Contratar
+    player.currentClub = neg.clubId;
+    player.salary = neg.salary;
+    player.weeklySalary = neg.salary;
+    player.joinedClubAt = Date.now();
+    
+    // Gastar do clube
+    club.economy.balance -= weeklyCost;
+    club.players.push({
+      id: neg.playerId,
+      name: neg.playerName,
+      ovr: player.ovr,
+      salary: neg.salary,
+      joinedAt: Date.now()
+    });
+    
+    // Encerrar negociação
+    neg.status = 'accepted';
+    neg.respondedAt = Date.now();
+    
+    // Limpar outras negociações pendentes do jogador
+    this.market.negotiations = this.market.negotiations.filter(n => 
+      n.id !== negotiationId && n.playerId !== neg.playerId && n.status === 'pending'
+    );
+    
+    this.save();
+    
+    return { success: true, negotiation: neg };
+  }
+
+  rejectNegotiation(negotiationId) {
+    const neg = this.getNegotiation(negotiationId);
+    if (!neg) return { success: false, error: 'Negociação não encontrada' };
+    
+    neg.status = 'rejected';
+    neg.respondedAt = Date.now();
     this.save();
     
     return { success: true };

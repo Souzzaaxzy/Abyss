@@ -348,10 +348,9 @@ export async function handleFutCommand(args, messageInfo, reply) {
       return reply('✅ Você saiu do clube!');
     
     // ═══════════════════════════════════════════════════════════════
-    // CONTRATAÇÕES
+    // NEGOCIAÇÕES
     // ═══════════════════════════════════════════════════════════════
     case 'proposta':
-    case 'contratar':
       if (!player) {
         return reply('❌ Você não está registrado!');
       }
@@ -384,68 +383,166 @@ export async function handleFutCommand(args, messageInfo, reply) {
       }
       
       const salary = parseInt(args[2]) || 5000;
-      
-      const proposalResult = db.createProposal(player.currentClub, targetUser, salary, salary * 10);
-      if (!proposalResult.success) {
-        return reply(`❌ ${proposalResult.error}`);
+      if (salary < 100) {
+        return reply('❌ Salário mínimo: 100 FC Coins/semana');
       }
       
-      return reply(`✅ *PROPOSTA ENVIADA!* ✅\n\n📝 Para: @${targetUser.split('@')[0]}\n💰 Salário: ${salary.toLocaleString()}/sem\n🎁 Bônus: ${(salary * 10).toLocaleString()}\n\nO jogador foi notificado!`);
+      const negotiation = db.createNegotiation(player.currentClub, targetUser, salary, false);
+      
+      return reply(`⚽ *NOVA PROPOSTA!* ⚽\n\n📤 De: ${userClub.name}\n💰 Salário: ${salary.toLocaleString()}/sem\n\n📩 Enviada para @${targetUser.split('@')[0]}!\n\n⏳ Aguardando resposta...`);
     
-    case 'propostas':
-      if (!player) {
-        return reply('❌ Você não está registrado!');
-      }
-      
-      const proposals = db.getPlayerProposals(sender);
-      if (proposals.length === 0) {
-        return reply('📭 Você não tem propostas pendentes.');
-      }
-      
-      let proposalsText = `📝 *SUAS PROPOSTAS (${proposals.length})*\n\n`;
-      proposals.forEach(p => {
-        proposalsText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        proposalsText += `⚽ Clube: ${p.clubName}\n`;
-        proposalsText += `💰 Salário: ${p.salary.toLocaleString()}/sem\n`;
-        proposalsText += `🎁 Bônus: ${p.signingBonus.toLocaleString()}\n`;
-        proposalsText += `📌 ID: ${p.id}\n`;
-      });
-      
-      return reply(proposalsText);
-    
-    case 'aceitarproposta':
+    case 'negociacoes':
       if (!player) {
         return reply('❌ Você não está registrado!');
       }
       
       if (player.currentClub) {
-        return reply('❌ Você já está em um clube!');
+        // Ver negociações do clube (presidente)
+        const clubNegs = db.getClubNegotiations(player.currentClub);
+        const club = db.getClub(player.currentClub);
+        
+        if (club.president.id !== sender) {
+          return reply('❌ Apenas o presidente pode ver as negociações!');
+        }
+        
+        if (clubNegs.length === 0) {
+          return reply('📭 Nenhuma negociação pendente no seu clube.');
+        }
+        
+        let negsText = `📝 *NEGOCIAÇÕES DO CLUBE (${clubNegs.length})*\n\n`;
+        clubNegs.forEach((n, i) => {
+          negsText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          negsText += `${i + 1}. @${n.playerName}\n`;
+          negsText += `   Salário: ${n.salary.toLocaleString()}/sem\n`;
+          negsText += `   ${n.counterOffer ? '🔄 Contra-oferta' : '📤 Proposta'}\n`;
+          negsText += `   ID: ${n.id}\n`;
+        });
+        negsText += `\n📌 *AÇÕES:*\n`;
+        negsText += `• !fut aceitar neg [id] - Contratar\n`;
+        negsText += `• !fut reprovar neg [id] - Recusar\n`;
+        negsText += `• !fut contraprop [id] [valor] - Fazer contra-oferta`;
+        
+        return reply(negsText);
+      } else {
+        // Ver negociações do jogador
+        const playerNegs = db.getPlayerNegotiations(sender);
+        
+        if (playerNegs.length === 0) {
+          return reply('📭 Você não tem negociações pendentes.');
+        }
+        
+        let playerNegsText = `📝 *SUAS NEGOCIAÇÕES (${playerNegs.length})*\n\n`;
+        playerNegs.forEach((n, i) => {
+          playerNegsText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          playerNegsText += `${i + 1}. ${n.clubName}\n`;
+          playerNegsText += `   💰 Salário: ${n.salary.toLocaleString()}/sem\n`;
+          playerNegsText += `   ${n.counterOffer ? '🔄 Contra-oferta do clube' : '📤 Proposta inicial'}\n`;
+          playerNegsText += `   ID: ${n.id}\n`;
+        });
+        playerNegsText += `\n📌 *AÇÕES:*\n`;
+        playerNegsText += `• !fut aceitar neg [id] - Aceitar e entrar no clube\n`;
+        playerNegsText += `• !fut reprovar neg [id] - Recusar\n`;
+        playerNegsText += `• !fut contraprop [id] [valor] - Fazer contra-oferta`;
+        
+        return reply(playerNegsText);
+      }
+    
+    case 'aceitar':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
       }
       
-      const proposalId = args[1];
-      if (!proposalId) {
-        return reply('📌 Use: *!fut aceitarproposta [id]*');
+      const negId = args[1];
+      if (!negId) {
+        return reply('📌 Use: *!fut aceitar neg [id]*');
       }
       
-      const acceptResult = db.acceptProposal(proposalId, sender);
+      const acceptResult = db.acceptNegotiation(negId);
       if (!acceptResult.success) {
         return reply(`❌ ${acceptResult.error}`);
       }
       
-      const acceptedClub = db.getClub(player.currentClub);
-      return reply(`✅ *CONTRATO ACEITO!* ✅\n\n⚽ Você agora é jogador do ${acceptedClub?.name}!\n💰 Salário: ${player.salary.toLocaleString()}/sem\n🎁 Bônus de assinatura já creditado!`);
+      return reply(`✅ *CONTRATADO!* ✅\n\n⚽ Clube: ${acceptResult.negotiation.clubName}\n💰 Salário: ${acceptResult.negotiation.salary.toLocaleString()}/sem\n\nBem-vindo ao clube! 🏆`);
     
-    case 'recusarproposta':
-      // Simplificado - remove todas as propostas do jogador
-      const playerProposals = db.market.proposals.filter(p => p.playerId === sender);
-      if (playerProposals.length === 0) {
-        return reply('📭 Você não tem propostas para recusar.');
+    case 'reprovar':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
       }
       
-      db.market.proposals = db.market.proposals.filter(p => p.playerId !== sender);
-      db.save();
+      const rejectNegId = args[1];
+      if (!rejectNegId) {
+        return reply('📌 Use: *!fut reprovar neg [id]*');
+      }
       
-      return reply('✅ Propostas recusadas com sucesso!');
+      const rejectResult = db.rejectNegotiation(rejectNegId);
+      if (!rejectResult.success) {
+        return reply(`❌ ${rejectResult.error}`);
+      }
+      
+      return reply('❌ Negociação reprovada.');
+    
+    case 'contraprop':
+    case 'negociar':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const negToCounterId = args[1];
+      const counterSalary = parseInt(args[2]);
+      
+      if (!negToCounterId || !counterSalary) {
+        return reply('📌 Use: *!fut contraprop [id] [valor]*');
+      }
+      
+      const existingNeg = db.getNegotiation(negToCounterId);
+      if (!existingNeg) {
+        return reply('❌ Negociação não encontrada!');
+      }
+      if (existingNeg.status !== 'pending') {
+        return reply('❌ Esta negociação já foi encerrada!');
+      }
+      
+      if (player.currentClub) {
+        // Presidente fazendo contra-oferta
+        if (player.currentClub !== existingNeg.clubId) {
+          return reply('❌ Esta negociação não é do seu clube!');
+        }
+        
+        const counterNeg = db.createNegotiation(player.currentClub, existingNeg.playerId, counterSalary, true);
+        
+        return reply(`🔄 *CONTRA-OFERTA ENVIADA!* 🔄\n\n📤 Para: @${existingNeg.playerName}\n💰 Novo salário: ${counterSalary.toLocaleString()}/sem\n\nAguardando resposta do jogador...`);
+      } else {
+        // Jogador fazendo contra-oferta
+        if (existingNeg.playerId !== sender) {
+          return reply('❌ Esta negociação não é sua!');
+        }
+        
+        const counterNegFromPlayer = db.createNegotiation(existingNeg.clubId, sender, counterSalary, true);
+        
+        return reply(`🔄 *CONTRA-OFERTA ENVIADA!* 🔄\n\n📤 Para: ${existingNeg.clubName}\n💰 Salário proposto: ${counterSalary.toLocaleString()}/sem\n\nAguardando resposta do presidente...`);
+      }
+    
+    case 'minhaspropostas':
+    case 'verpropostas':
+      if (!player) {
+        return reply('❌ Você não está registrado!');
+      }
+      
+      const myNegs = db.getPlayerNegotiations(sender);
+      if (myNegs.length === 0) {
+        return reply('📭 Você não tem propostas pendentes.\n\nUse *!fut proposta @usuario [salário]* como presidente para enviar uma.');
+      }
+      
+      let myProposalsText = `📝 *SUAS PROPOSTAS*\n\n`;
+      myNegs.forEach((n, i) => {
+        myProposalsText += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        myProposalsText += `${i + 1}. ${n.clubName}\n`;
+        myProposalsText += `💰 ${n.salary.toLocaleString()}/sem\n`;
+        myProposalsText += `${n.counterOffer ? '🔄 Contra-oferta' : '📤 Nova'}\n`;
+        myProposalsText += `ID: ${n.id}\n`;
+      });
+      
+      return reply(myProposalsText);
     
     // ═══════════════════════════════════════════════════════════════
     // GLOBAL
