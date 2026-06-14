@@ -6134,13 +6134,21 @@ if (isCmd && command && !isOwnerOrSub) {
             return reply('🔒 *Modo Futebol desativado neste grupo.*\n\n📌 Administradores: use *!modofut* para ativar.');
           }
           
+          // Enviar GIF/menu do fut junto com a resposta
+          const futGifPath = __dirname + '/../midias/menufut_v2.mp4';
+          const futImagePath = __dirname + '/../midias/menufut.jpg';
+          const hasMedia = fs.existsSync(futGifPath) || fs.existsSync(futImagePath);
+          
           await handleFut(args, {
             sender,
             senderName: pushname,
             from,
             nazu,
             mentionedJid: info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [],
-            isGroupAdmin: isGroupAdmin
+            isGroupAdmin: isGroupAdmin,
+            hasMedia: hasMedia,
+            mediaPath: hasMedia ? (fs.existsSync(futGifPath) ? futGifPath : futImagePath) : null,
+            quotedMessage: info
           }, reply);
         } catch (e) {
           console.error('Erro no comando fut:', e);
