@@ -22,6 +22,10 @@ import {
   getX1ResultMessage,
   ATTR_NAMES
 } from './menu.js';
+import {
+  getAdminCategoryMenu,
+  getAccessDeniedMessage
+} from './admin-menu.js';
 
 // Armazena desafios pendentes
 const pendingX1 = new Map();
@@ -550,20 +554,24 @@ Ex: *!futtorneiocriar Copa Elite x1 16 500 5000*`);
         break;
       }
       
-      case 'futadmin':
-      case 'help':
-      case 'ajuda':
-      case undefined: {
+      case 'futadmin': {
         // Verificar se é admin
         const isAdmin = await checkAdmin();
         if (!isAdmin) {
-          return sendReply(`🚫 *ACESSO NEGADO*
-
-Este painel é exclusivo para administradores do Futebol Global.
-
-📌 Apenas administradores do grupo podem acessar.`);
+          return sendReply(getAccessDeniedMessage());
+        }
+        // Verificar se tem subcomando de categoria
+        const category = args[1]?.toLowerCase();
+        if (category) {
+          return sendReply(getAdminCategoryMenu(category, senderName));
         }
         return sendReply(getAdminMenuFut(senderName));
+      }
+
+      case 'help':
+      case 'ajuda':
+      case undefined: {
+        return sendReply(getMenuFut(senderName));
       }
       
       default:
