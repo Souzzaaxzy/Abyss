@@ -33386,7 +33386,8 @@ break;
           });
           if (!isGroup) return sendKaiserWarning("Este comando só pode ser usado em grupos.");
           if (!isModoBn) return reply('❌ O modo brincadeira não está ativo nesse grupo.');
-          if (!menc_os2) return reply('Marque um usuário.');
+          // Para punheta, usa o próprio sender se ninguém foi mencionado
+          const targetUser = menc_os2 || sender;
           let gamesData = fs.existsSync(__dirname + '/funcs/json/games.json') ? JSON.parse(fs.readFileSync(__dirname + '/funcs/json/games.json')) : {
             games2: {}
           };
@@ -33398,28 +33399,28 @@ break;
           let responseText;
           if (command === 'punheta' && Array.isArray(GamezinData[command])) {
             const randomMsg = GamezinData[command][Math.floor(Math.random() * GamezinData[command].length)];
-            responseText = randomMsg.replaceAll('@{nome}', `@${getUserName(menc_os2)}`);
+            responseText = randomMsg.replaceAll('@{nome}', `@${getUserName(targetUser)}`);
           } else {
-            responseText = GamezinData[command]?.replaceAll('#nome#', `@${getUserName(menc_os2)}`) || `Voce acabou de dar um(a) ${command} no(a) @${getUserName(menc_os2)}`;
+            responseText = GamezinData[command]?.replaceAll('#nome#', `@${getUserName(targetUser)}`) || `Voce acabou de dar um(a) ${command} no(a) @${getUserName(targetUser)}`;
           }
           let media = gamesData.games2[command];
           if (media?.image) {
             await nazu.sendMessage(from, {
               image: media.image,
               caption: responseText,
-              mentions: [menc_os2]
+              mentions: [targetUser]
             });
           } else if (media?.video) {
             await nazu.sendMessage(from, {
               video: media.video,
               caption: responseText,
-              mentions: [menc_os2],
+              mentions: [targetUser],
               gifPlayback: true
             });
           } else {
             await nazu.sendMessage(from, {
               text: responseText,
-              mentions: [menc_os2]
+              mentions: [targetUser]
             });
           }
         } catch (e) {
