@@ -644,34 +644,94 @@ export function getDivisionsMessage() {
 
 export function getSkillsMessage(player) {
   const slots = getSkillSlots(player.division.id);
-  const owned = player.skills.map(s => {
-    const info = db.SKILLS?.find(sk => sk.id === s.id);
-    return `${info?.name || s.id} (Nível ${s.level})`;
-  }).join('\n• ');
   
-  return `
-💪 *HABILIDADES*
+  // Dados reais das habilidades
+  const skillsData = [
+    { id: 'aprendizado_rapido', name: 'Aprendizado Rápido', emoji: '📚', 
+      desc: 'Treinos rendem +20% atributos', 
+      bonus: '+20%', effect: 'Atributos' },
+    { id: 'recuperacao_fisica', name: 'Recuperação Física', emoji: '💪', 
+      desc: 'Reduz custo de treino em 15%',
+      bonus: '-15%', effect: 'Energia' },
+    { id: 'competidor', name: 'Competidor', emoji: '🏅', 
+      desc: '+5% pontos em X1',
+      bonus: '+5%', effect: 'X1' },
+    { id: 'veterano', name: 'Veterano', emoji: '⭐', 
+      desc: '+10% XP Football',
+      bonus: '+10%', effect: 'XP' },
+    { id: 'líder', name: 'Líder', emoji: '👑', 
+      desc: 'Bônus para time no draft 5v5',
+      bonus: '+5%', effect: 'Draft' },
+    { id: 'finalizador', name: 'Finalizador', emoji: '⚽', 
+      desc: '+10% em finalizações',
+      bonus: '+10%', effect: 'SHO' },
+    { id: 'maestro', name: 'Maestro', emoji: '🎯', 
+      desc: '+10% em passes',
+      bonus: '+10%', effect: 'PAS' },
+    { id: 'muralha', name: 'Muralha', emoji: '🛡️', 
+      desc: '+10% em defesa',
+      bonus: '+10%', effect: 'DEF' },
+    { id: 'reflexo_felino', name: 'Reflexo Felino', emoji: '🐱', 
+      desc: '+10% físico',
+      bonus: '+10%', effect: 'PHY' },
+    { id: 'drible_mestra', name: 'Drible Mestre', emoji: '💫', 
+      desc: '+10% em drible',
+      bonus: '+10%', effect: 'DRI' }
+  ];
 
-📊 *Slots:* ${player.skills.length}/${slots}
+  const owned = player.skills.map(s => {
+    const info = skillsData.find(sk => sk.id === s.id);
+    return `${info?.emoji || '🔮'} ${info?.name || s.id} (Nv.${s.level})`;
+  }).join('\n');
 
-${player.skills.length > 0 ? `✅ *Equipadas:*\n• ${owned}` : '❌ Nenhuma habilidade equipada'}
+  // Habilidades não desbloqueadas
+  const ownedIds = player.skills.map(s => s.id);
+  const notOwned = skillsData
+    .filter(s => !ownedIds.includes(s.id))
+    .map(s => `${s.emoji} ${s.name}`);
 
-━━━━━━━━━━━━━━━━━━━━━━━━
+  let text = '';
+  text += '╔══════════════════════════════╗\n';
+  text += '║    ⚡ HABILIDADES ⚡        ║\n';
+  text += '╚══════════════════════════════╝\n\n';
+  text += `📊 *Slots:* [${player.skills.length}/${slots}]\n`;
+  text += `💰 *FC Coins:* ${player.economy.fcCoins.toLocaleString()}\n\n`;
+  text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  
+  if (player.skills.length > 0) {
+    text += '✅ *EQUIPADAS:*\n';
+    text += owned.split('\n').map(s => `• ${s}`).join('\n');
+    text += '\n\n';
+  } else {
+    text += '❌ *Nenhuma habilidade equipada*\n\n';
+  }
 
-💡 Use *!fut comprar hab [id]* para comprar
+  text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text += '📋 *DISPONÍVEIS:*\n\n';
 
-📋 *HABILIDADES DISPONÍVEIS:*
-• aprendizado_rapido - Treinos rendem mais
-• recuperacao_fisica - Menos custo em treino
-• competidor - +5% pontos em X1
-• veterano - +10% XP Football
-• líder - Bônus para time
-• finalizador - +10% finalização
-• maestro - +10% passe
-• muralha - +10% defesa
-• reflexo_felino - +10% físico
-• drible_mestra - +10% drible`;
+  skillsData.forEach((s, i) => {
+    const ownedSkill = player.skills.find(p => p.id === s.id);
+    const level = ownedSkill?.level || 0;
+    const status = level > 0 ? `🟢 Nv.${level}` : `⚪`;
+    
+    text += `${status} ${s.emoji} *${s.name}*\n`;
+    text += `    📝 ${s.desc}\n`;
+    text += `    💡 Efeito: ${s.bonus} ${s.effect}\n`;
+    
+    if (level < 3) {
+      const costs = ['50.000', '100.000', '200.000'];
+      text += `    💎 Próximo: ${costs[level] || 'MAX'}\n`;
+    }
+    text += '\n';
+  });
+
+  text += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  text += '💡 *COMPRAR:* !fut comprar hab [id]\n';
+  text += '📖 *VER LOJA:* !fut loja habilidades';
+
+  return text;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // LOJA DE HABILIDADES
