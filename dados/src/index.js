@@ -33415,21 +33415,35 @@ break;
 
           if (media?.image) {
             const imagePath = resolveMediaPath(typeof media.image === 'object' ? media.image.url : media.image);
-            const imageBuffer = fs.readFileSync(imagePath);
-            await nazu.sendMessage(from, {
-              image: imageBuffer,
-              caption: responseText,
-              mentions: [targetUser]
-            });
+            if (fs.existsSync(imagePath)) {
+              const imageBuffer = fs.readFileSync(imagePath);
+              await nazu.sendMessage(from, {
+                image: imageBuffer,
+                caption: responseText,
+                mentions: [targetUser]
+              });
+            } else {
+              await nazu.sendMessage(from, {
+                text: responseText,
+                mentions: [targetUser]
+              });
+            }
           } else if (media?.video) {
             const videoPath = resolveMediaPath(typeof media.video === 'object' ? media.video.url : media.video);
-            const videoBuffer = fs.readFileSync(videoPath);
-            await nazu.sendMessage(from, {
-              video: videoBuffer,
-              caption: responseText,
-              mentions: [targetUser],
-              gifPlayback: true
-            });
+            if (fs.existsSync(videoPath)) {
+              const videoBuffer = fs.readFileSync(videoPath);
+              await nazu.sendMessage(from, {
+                video: videoBuffer,
+                caption: responseText,
+                mentions: [targetUser],
+                gifPlayback: true
+              });
+            } else {
+              await nazu.sendMessage(from, {
+                text: responseText,
+                mentions: [targetUser]
+              });
+            }
           } else {
             await nazu.sendMessage(from, {
               text: responseText,
