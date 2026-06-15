@@ -33407,7 +33407,8 @@ break;
           // Resolver caminho absoluto para mídias locais
           const resolveMediaPath = (url) => {
             if (typeof url === 'string' && url.startsWith('./')) {
-              return path.join(__dirname, '../../', url.substring(2));
+              // './midias/...' -> '/data/.../dados/src/midias/...'
+              return path.join(__dirname, url.substring(2));
             }
             return url;
           };
