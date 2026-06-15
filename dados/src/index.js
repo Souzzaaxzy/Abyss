@@ -6126,7 +6126,6 @@ if (isCmd && command && !isOwnerOrSub) {
       }
 
       case 'fut':
-      case 'futadmin':
       case 'football':
       case 'futebol':
         try {
@@ -6140,7 +6139,7 @@ if (isCmd && command && !isOwnerOrSub) {
           const futImagePath = __dirname + '/../midias/menufut.jpg';
           const hasMedia = fs.existsSync(futGifPath) || fs.existsSync(futImagePath);
           
-          await handleFut(args, {
+          await handleFut(futArgs, {
             sender,
             senderName: pushname,
             from,
