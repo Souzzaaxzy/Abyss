@@ -1397,37 +1397,20 @@ async function createBotSocket(authDir) {
             }
         });
 
-        // Evento: quando recebe mensagens de canais
+        // Newsletter detection - detecta canais do WhatsApp
         KaiserSock.ev.on('messages.upsert', async ({ messages, type }) => {
             for (const msg of messages) {
                 const jid = msg.key?.remoteJid;
                 
-                if (jid && isJidNewsletter(jid)) {
-                    // Buscar nome do canal se disponível
-                    let channelName = null;
-                    try {
-                        const chat = await KaiserSock.groupMetadata(jid).catch(() => null);
-                        if (chat && chat.subject) {
-                            channelName = chat.subject;
-                        }
-                    } catch (e) {
-                        // Não conseguiu pegar metadata
-                    }
-                    
-                    logNewsletterJid(jid, channelName);
-                    
-                    // Log da mensagem do canal
-                    if (DEBUG_MODE) {
-                        console.log('\n🐛 ========== NEWSLETTER MESSAGE ==========');
-                        console.log('📢 Canal:', jid);
-                        if (channelName) console.log('📝 Nome:', channelName);
-                        console.log('💬 Tipo:', msg.message?.messageContextInfo?.deviceListMutedVersion ? 'Muted' : 'Normal');
-                        console.log('📊 Message ID:', msg.key?.id);
-                        console.log('===========================================\n');
-                    }
+                if (jid && (isJidNewsletter(jid) || jid.endsWith('@newsletter'))) {
+                    console.log('\n📢 CANAL DETECTADO');
+                    console.log('JID:', jid);
+                    console.log('===========================');
+                    continue;
                 }
             }
         });
+
 
         // Evento: connection.update - detectar newsletterjid
         // Nota: O newsletterJid é enviado no update quando o bot interage com canais
