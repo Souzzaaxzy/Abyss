@@ -1,0 +1,35 @@
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Banco de dados
+dados/database/*.json
+dados/database/grupos/*.json
+dados/database/dono/*.json
+!dados/database/.gitkeep
+!dados/database/grupos/.gitkeep
+!dados/database/dono/.gitkeep
+
+# Sessão do WhatsApp
+dados/src/auth_info_baileys/
+dados/src/.auth_info_baileys/
+
+# Arquivos temporários
+*.tmp
+*.temp
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Build
+dist/
+build/
