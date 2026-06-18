@@ -22103,12 +22103,25 @@ Precisa de ajuda? Entre em contato:
             useVideo = false;
             mediaBuffer = fs.readFileSync(mediaPath);
           } else {
-            // Usa a mídia padrão
+            // Usa o GIF padrão do Abyss
+            const menuGifPath = __dirname + '/../midias/menu_abyss.gif';
             const menuVideoPath = __dirname + '/../midias/menu.mp4';
             const menuImagePath = __dirname + '/../midias/menu.jpg';
-            useVideo = fs.existsSync(menuVideoPath);
-            mediaPath = useVideo ? menuVideoPath : menuImagePath;
-            mediaBuffer = fs.readFileSync(mediaPath);
+            
+            // Prioridade: GIF do Abyss > Vídeo > Imagem
+            if (fs.existsSync(menuGifPath)) {
+              mediaPath = menuGifPath;
+              useVideo = false;
+              mediaBuffer = fs.readFileSync(mediaPath);
+            } else if (fs.existsSync(menuVideoPath)) {
+              mediaPath = menuVideoPath;
+              useVideo = true;
+              mediaBuffer = fs.readFileSync(mediaPath);
+            } else {
+              mediaPath = menuImagePath;
+              useVideo = false;
+              mediaBuffer = fs.readFileSync(mediaPath);
+            }
           }
 
           // Obtém o design personalizado do menu
@@ -22123,11 +22136,14 @@ Precisa de ajuda? Entre em contato:
 
           const lerMaisPrefix = getMenuLerMaisText();
 
+          // Verifica se é GIF para usar gifPlayback
+          const isGif = mediaPath.endsWith('.gif');
+          
           await nazu.sendMessage(from, {
             [useVideo ? 'video' : 'image']: mediaBuffer,
             caption: lerMaisPrefix + menuText,
-            gifPlayback: useVideo,
-            mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
+            gifPlayback: isGif || useVideo,
+            mimetype: isGif ? 'image/gif' : (useVideo ? 'video/mp4' : 'image/jpeg')
           }, {
             quoted: info
           });
