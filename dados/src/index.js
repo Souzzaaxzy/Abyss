@@ -748,7 +748,7 @@ async function createGroupMessage(KaiserSock, groupMetadata, participants, setti
     let profilePicUrl = 'https://raw.githubusercontent.com/nazuninha/uploads/main/outros/1747053564257_bzswae.bin';
 
     if (participantIds.length === 1) {
-      profilePicUrl = await KaiserSock.profilePictureUrl(participantIds[0], 'image')
+      profilePicUrl = await AbyssSock.profilePictureUrl(participantIds[0], 'image')
         .catch(() => profilePicUrl);
     }
 
@@ -1118,7 +1118,7 @@ if (npcManager?.config?.jornalEnabled) {
     try {
       const news = await npcManager.generateDailyNews();
       if (news) {
-        console.log('[NPC] Kaiser News gerado com sucesso');
+        console.log('[NPC] Abyss News gerado com sucesso');
       }
     } catch (e) {
       console.error('[NPC] Erro ao gerar jornal:', e.message);
@@ -1131,7 +1131,7 @@ cron.schedule('0 20 * * *', async () => {
     try {
       const news = await npcManager.generateDailyNews();
       if (news) {
-        console.log('[NPC] Kaiser News diário enviado');
+        console.log('[NPC] Abyss News diário enviado');
       }
     } catch (e) {
       console.error('[NPC] Erro no jornal diário:', e.message);
@@ -2940,7 +2940,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     }
     async function sendKaiserWarning(text) {
       const warningMessage = `╭─────────────────────⭓\n` +
-        `│      ⚠️ 𝗞𝗔𝗜𝗦𝗘𝗥 𝗔𝗩𝗜𝗦𝗢 ⚠️\n` +
+        `│      ⚠️ 𝗔𝗕𝗬𝗦𝗦 𝗔𝗩𝗜𝗦𝗢 ⚠️\n` +
         `├─────────────────────⭓\n` +
         `│\n` +
         `│ ❌ ${text}\n` +
@@ -4808,7 +4808,7 @@ if (  isGroup &&  groupData.antistickerplus &&  !isGroupAdmin &&  !isOwner &&  !
         }
 
         // Obter a personalidade atual do grupo
-        const personality = groupData.assistentePersonality || 'kaiser';
+        const personality = groupData.assistentePersonality || 'abyss';
 
         ia.makeAssistentRequest({
           mensagens: [jSoNzIn]
@@ -6548,7 +6548,7 @@ if (isCmd && command && !isOwnerOrSub) {
 
           if (sub === 'perfilrpg') {
             // Perfil completo do RPG
-            // Sincroniza XP e Level (Garante que o bot original e o Kaiser leiam o mesmo campo)
+            // Sincroniza XP e Level (Garante que o bot original e o Abyss leiam o mesmo campo)
             me.exp = me.exp || me.xp || 0;
             me.xp = me.exp;
             me.level = me.level || 1;
@@ -6642,7 +6642,7 @@ if (isCmd && command && !isOwnerOrSub) {
               }
             }
 
-            // Força o recálculo dos bônus no padrão original do Kaiser antes de exibir
+            // Força o recálculo dos bônus no padrão original do Abyss antes de exibir
             recalcEquipmentBonuses(me, econ.shop);
             const combatStats = calculateCombatStats(me, econ);
             
@@ -10479,7 +10479,7 @@ if (isCmd && command && !isOwnerOrSub) {
               const u = getEcoUser(econ, m);
               u.wallet += Math.floor(dg.reward / myParty.members.length);
               
-              // Sincroniza xp e exp (Kaiser usa exp, Kaiser estava usando xp)
+              // Sincroniza xp e exp (Abyss usa exp)
               u.exp = (u.exp || 0) + Math.floor(dg.xp / myParty.members.length);
               u.xp = u.exp;
 
@@ -19325,7 +19325,7 @@ case 'addaluguel':
       case 'gerarnick':
       case 'nickgenerator':
         try {
-          if (!q) return reply(`🌌 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick kaiser`);
+          if (!q) return reply(`🌌 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick abyss`);
           var datzn;
           datzn = await styleText(q);
           await reply(datzn.join('\n'));
@@ -21098,7 +21098,7 @@ break;
 │ 🔄 *Atualizado:* ${updatedAt}
 │ 📤 *Último push:* ${pushedAt}
 │
-│ ⏱️ *Kaiser vem sendo ativamente*
+│ ⏱️ *Abyss vem sendo ativamente*
 │ *mantida há:* ${tempoAtivo}
 │
 │ 🔗 *Links:*
@@ -21508,7 +21508,7 @@ Exemplo: ${prefix}msgprefix Use #prefixo# antes do comando!
 
 🔹 *Nome do Bot*
 Use: ${prefix}nomebot <nome>
-Exemplo: ${prefix}nomebot Kaiser
+Exemplo: ${prefix}nomebot Abyss
 • Altera o nome exibido nos menus
 • Use nomes curtos e memoráveis
 
@@ -23213,7 +23213,7 @@ ${prefix}setgroq sua_chave_aqui
       case 'nome-bot':
         try {
           if (!isOwnerOrSub) return reply("Este comando é exclusivo para o meu dono!");
-          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Kaiser`);
+          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Abyss`);
           let config = JSON.parse(fs.readFileSync(CONFIG_FILE));
           config.nomebot = q;
           writeJsonFile(CONFIG_FILE, config);
@@ -24021,8 +24021,8 @@ ${prefix}addcmdvip <comando> | <descrição> | <categoria>
 • outros - Outros
 
 *Exemplo:*
-${prefix}addcmdvip premium_ia | IA avançada exclusiva | ia
-${prefix}addcmdvip premium_ia | IA avançada exclusiva | ia | premium_ia <pergunta>
+${prefix}addcmdvip premium_ia | IA do Abismo exclusiva | ia
+${prefix}addcmdvip premium_ia | IA do Abismo exclusiva | ia | premium_ia <pergunta>
 
 *Adicionar todos de um menu:*
 ${prefix}addcmdvip <nomeMenu> all
@@ -24524,7 +24524,7 @@ ${prefix}togglecmdvip premium_ia off`);
       case 'blackpink':
         try {
           const [texto1, texto2] = q.split('/').map(i => i.trim());
-          if (!texto1 || !texto2) return reply(`❌ Cadê os textos?\nExemplo: ${prefix + command} Kaiser/Bot`);
+          if (!texto1 || !texto2) return reply(`❌ Cadê os textos?\nExemplo: ${prefix + command} Abyss/Bot`);
 
           const modelo = command; // O próprio comando é o modelo
 
@@ -25002,7 +25002,7 @@ ${prefix}togglecmdvip premium_ia off`);
               }
             }
           }
-          blad += `╰━━━〔 ⭐ KAISER BOT ⭐ 〕━━━╯`;
+          blad += `╰━━━〔 ⭐ ABYSS ⭐ 〕━━━╯`;
           await nazu.sendMessage(from, {
             text: blad,
             mentions: menc
@@ -26076,7 +26076,7 @@ case 'sfundo':
         {
           sticker: buffer,
           author: `${pushname}\n${nomebot}\n${nomedono}`,
-          packname: 'Kaiser Bot - Stickers',
+          packname: 'Abyss - Stickers',
           type: 'image'
         },
         {
@@ -30422,7 +30422,7 @@ case 'assistent':
       if (!groupData.assistente) {
         delete groupData.assistentePersonality;
       } else {
-        groupData.assistentePersonality = groupData.assistentePersonality || 'kaiser';
+        groupData.assistentePersonality = groupData.assistentePersonality || 'abyss';
       }
 
       fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
@@ -30430,13 +30430,13 @@ case 'assistent':
       const statusMsg = groupData.assistente
         ? `✅ *Assistente ativada com sucesso!*\n\n` +
         `🤖 *Personalidade atual:* ${
-          groupData.assistentePersonality === 'kaiser' ? 'Kaiser (Padrão)' :
+          groupData.assistentePersonality === 'abyss' ? 'Abyss (Padrão)' :
           groupData.assistentePersonality === 'humana' ? 'Humana' :
           groupData.assistentePersonality === 'pro' ? 'Pro (Comandos)' :
           'IA Normal'
         }\n\n` +
         `💡 *Trocar personalidade:*\n` +
-        `• ${prefix}assistente kaiser\n` +
+        `• ${prefix}assistente abyss\n` +
         `• ${prefix}assistente humana\n` +
         `• ${prefix}assistente ia\n` +
         `• ${prefix}assistente pro\n\n` +
@@ -30448,10 +30448,10 @@ case 'assistent':
 
     const personality = q.toLowerCase().trim();
 
-    if (!['kaiser', 'humana', 'ia', 'pro'].includes(personality)) {
+    if (!['abyss', 'humana', 'ia', 'pro'].includes(personality)) {
       return reply(`❌ *Personalidade inválida!*\n\n` +
         `Escolha uma das opções:\n` +
-        `• ${prefix}assistente kaiser\n` +
+        `• ${prefix}assistente abyss\n` +
         `• ${prefix}assistente humana\n` +
         `• ${prefix}assistente ia\n` +
         `• ${prefix}assistente pro`);
@@ -30462,7 +30462,7 @@ case 'assistent':
     fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
 
     const personalityNames = {
-      'kaiser': '🌙 *Kaiser* - Vampira tsundere',
+      'abyss': '🌙 *Abyss* - Vampira tsundere',
       'humana': '👤 *Humana* - Age como pessoa real',
       'ia': '🤖 *IA Normal* - Direta e objetiva',
       'pro': '⚡ *Pro* - Executa comandos'
@@ -30638,7 +30638,7 @@ case 'assistent':
                 `• Sistema: ${st.ativo ? 'Ativado' : 'Desativado'}\n` +
                 `• Intervalo entre falas: ${st.cooldown}\n` +
                 `• Chance de resposta: ${st.chance}\n` +
-                `• Kaiser News: ${st.jornal}\n` +
+                `• Abyss News: ${st.jornal}\n` +
                 `• Total de eventos: ${st.eventosRegistrados}`);
 
             default:

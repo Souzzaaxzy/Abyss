@@ -1546,7 +1546,7 @@ async function startNazu() {
          era apagado a cada ciclo). O reset correto acontece no evento 'connection.update'
          quando connection === 'open', confirmando conexão real.
          */
-        console.log('🚀 Iniciando Kaiser...');
+        console.log('🚀 Iniciando Abyss...');
 
         await createBotSocket(AUTH_DIR);
         // isReconnecting = false é feito no finally abaixo

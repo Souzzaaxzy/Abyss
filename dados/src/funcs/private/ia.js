@@ -1792,7 +1792,7 @@ function clearConversationData(maxAge = 7 * 24 * 60 * 60 * 1000) {
   });
 }
 
-async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'kaiser') {
+async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'abyss') {
   try {
     const { mensagens } = data;
     if (!mensagens || !Array.isArray(mensagens)) {
