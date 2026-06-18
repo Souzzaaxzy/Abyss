@@ -1,0 +1,9 @@
+{
+  "header": "╭┈⊰  『 *{botName}* 』\n┊              ola, {userName}!\n╰─┈┈┈┈┈◜🔳◞┈┈┈┈┈─╯",
+  "menuTopBorder": "╭┈",
+  "bottomBorder": "╰─┈┈┈┈┈◜🔳◞┈┈┈┈┈─╯",
+  "menuTitleIcon": "🍧ฺꕸ▸",
+  "menuItemIcon": "📍",
+  "separatorIcon": "🔳",
+  "middleBorder": "|"
+}
