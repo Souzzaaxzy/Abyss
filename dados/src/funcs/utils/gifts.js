@@ -42,7 +42,7 @@ const GIFT_BOXES = {
         rewards: [
             { type: 'gold', min: 500, max: 2000, chance: 30 },
             { type: 'xp', min: 200, max: 500, chance: 30 },
-            { type: 'item', items: ['🌌', '🌟', '💫', '🔮'], chance: 35 },
+            { type: 'item', items: ['👑', '🌟', '💫', '🔮'], chance: 35 },
             { type: 'nothing', chance: 5 }
         ]
     }
@@ -55,7 +55,7 @@ const SENDABLE_GIFTS = {
     chocolate: { id: 'chocolate', emoji: '🍫', name: 'Chocolate', cost: 75, message: 'um delicioso chocolate' },
     urso: { id: 'urso', emoji: '🧸', name: 'Ursinho', cost: 200, message: 'um ursinho fofo' },
     diamante: { id: 'diamante', emoji: '💎', name: 'Diamante', cost: 500, message: 'um diamante precioso' },
-    coroa: { id: 'coroa', emoji: '🌌', name: 'Coroa', cost: 1000, message: 'uma coroa real' },
+    coroa: { id: 'coroa', emoji: '👑', name: 'Coroa', cost: 1000, message: 'uma coroa real' },
     estrela: { id: 'estrela', emoji: '⭐', name: 'Estrela', cost: 300, message: 'uma estrela brilhante' },
     bolo: { id: 'bolo', emoji: '🎂', name: 'Bolo', cost: 150, message: 'um bolo delicioso' },
     buque: { id: 'buque', emoji: '💐', name: 'Buquê', cost: 250, message: 'um lindo buquê de flores' },

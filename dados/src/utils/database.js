@@ -1983,7 +1983,7 @@ function ensureEconomyDefaults(econ) {
   "armadura_do_eclipse_eterno": { "name": "🌌 Armadura do Eclipse Eterno", "price": 2000000, "type": "armor", "rarity": "Mítico", "durability": -1, "effect": { "defense": 220, "attack": 50, "special": "Regenera 3% da vida máxima por turno" } },
   "armadura_do_abismo_infinito": { "name": "⚫ Armadura do Abismo Infinito", "price": 3000000, "type": "armor", "rarity": "Mítico", "durability": -1, "effect": { "defense": 300, "attack": 75, "special": "10% de chance de reduzir pela metade o dano recebido" } },
   "armadura_do_imperador_dragoico": { "name": "🐉 Armadura do Imperador Dragônico", "price": 4000000, "type": "armor", "rarity": "Mítico", "durability": -1, "effect": { "defense": 400, "attack": 110, "special": "Reflete 10% do dano sofrido. Imunidade a queimadura" } },
-  "armadura_do_soberano_absoluto": { "name": "🌌 Armadura do Soberano Absoluto", "price": 5000000, "type": "armor", "rarity": "Mítico", "durability": -1, "effect": { "defense": 490, "attack": 150, "special": "Reduz todo dano recebido em 15%. Revive uma vez por batalha com 25% da vida maxima" } },
+  "armadura_do_soberano_absoluto": { "name": "👑 Armadura do Soberano Absoluto", "price": 5000000, "type": "armor", "rarity": "Mítico", "durability": -1, "effect": { "defense": 490, "attack": 150, "special": "Reduz todo dano recebido em 15%. Revive uma vez por batalha com 25% da vida maxima" } },
   "elmo_de_couro": { "name": "Elmo de Couro", "price": 600, "type": "helmet", "rarity": "Comum", "durability": -1, "effect": { "defense": 4 } },
   "elmo_de_ferro": { "name": "Elmo de Ferro", "price": 1200, "type": "helmet", "rarity": "Incomum", "durability": -1, "effect": { "defense": 12 } },
   "elmo_do_berserker_carmesim": { "name": "Elmo do Berserker Carmesim", "price": 12000, "type": "helmet", "rarity": "Épico", "durability": -1, "effect": { "attack": 25, "defense": 15 } },
@@ -2021,7 +2021,7 @@ function ensureEconomyDefaults(econ) {
   "pocao_de_vida": { "name": "Poção de Vida", "price": 400, "type": "consumable", "rarity": "Comum", "durability": -1, "effect": { "special": "+50 HP" } }
 };
 
-  // Força a atualização de todos os itens da loja Abyss para garantir tipos e preços corretos
+  // Força a atualização de todos os itens da loja KaiserBot para garantir tipos e preços corretos
   for (const [k, v] of Object.entries(kaiserShop)) {
     if (!econ.shop[k] || JSON.stringify(econ.shop[k]) !== JSON.stringify(v)) {
       econ.shop[k] = v;

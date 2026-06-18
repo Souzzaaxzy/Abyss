@@ -151,7 +151,7 @@ const getRep = (userId) => {
     const total = user.positive - user.negative;
     
     let rank = '🆕 Novato';
-    if (total >= 100) rank = '🌌 Lendário';
+    if (total >= 100) rank = '👑 Lendário';
     else if (total >= 50) rank = '⭐ Estrela';
     else if (total >= 25) rank = '🌟 Popular';
     else if (total >= 10) rank = '💫 Conhecido';

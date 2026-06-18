@@ -1,38 +1,30 @@
-export default async function menu(prefix, botName = "Abyss", userName = "Viajante", {
-    header = `╔══════════════════════════════════════════════╗
-║          🌌 ${botName} - O Vazio Te Consome 🌌   ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║            Olá, ${userName}!                     ║
-║       Quando o Void te chama, não há retorno.    ║
-╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "═══════════════════════════════════════════════",
-    bottomBorder = "═══════════════════════════════════════════════",
-    menuTitleIcon = "◈",
-    menuItemIcon = "▸",
-    separatorIcon = "─",
-    middleBorder = ""
+export default async function menu(prefix, botName = "MeuBot", userName = "Usuário", {
+    header = `╔══════════════════════════════════════════════╗\n║              🤖 ${botName}              ║\n║              Olá, ${userName}!              ║\n╚══════════════════════════════════════════════╝`,
+    menuTopBorder = "╭──────────────────────────────────────────────╮",
+    bottomBorder = "╰──────────────────────────────────────────────╯",
+    menuTitleIcon = "🍧ฺꕸ▸",
+    menuItemIcon = "•.̇𖥨֗🍓⭟",
+    separatorIcon = "❁",
+    middleBorder = "│"
 } = {}) {
-    return `
+    return `${header}
 
 ${menuTopBorder}
-🌌 *MENU DO VOID*
-${menuTopBorder}
-▸ ${prefix}menuia     - 🤖 Inteligência Artificial
-▸ ${prefix}menudown   - 📥 Downloads
-▸ ${prefix}menulogos  - 🎨 Criar Logos
-▸ ${prefix}menuedits  - ✨ Editar Mídia
-▸ ${prefix}menuadm    - ⚙️ Administração
-▸ ${prefix}menubn     - 💜 Boas-vindas
-▸ ${prefix}menudono   - 👑 Dono
-▸ ${prefix}menumemb   - 👤 Membro
-▸ ${prefix}menufut    - ⚽ Jogos
-▸ ${prefix}ferramentas - 🔧 Ferramentas
-▸ ${prefix}menufig    - 🖼️ Figurinhas
-▸ ${prefix}alteradores - 🎭 Alteradores
-▸ ${prefix}menurpg    - ⚔️ Modo RPG
-▸ ${prefix}menuvip    - 💎 VIP
-${bottomBorder}
-
-◈ *O Void observa tudo* ◈
-_"Quando o Void te chama, não há retorno."_`;
+│ 🌟 MENU PRINCIPAL
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}menuia
+${middleBorder} ${menuItemIcon}${prefix}menudown
+${middleBorder} ${menuItemIcon}${prefix}menulogos
+${middleBorder} ${menuItemIcon}${prefix}menuedits
+${middleBorder} ${menuItemIcon}${prefix}menuadm
+${middleBorder} ${menuItemIcon}${prefix}menubn
+${middleBorder} ${menuItemIcon}${prefix}menudono
+${middleBorder} ${menuItemIcon}${prefix}menumemb
+${middleBorder} ${menuItemIcon}${prefix}menufut
+${middleBorder} ${menuItemIcon}${prefix}ferramentas
+${middleBorder} ${menuItemIcon}${prefix}menufig
+${middleBorder} ${menuItemIcon}${prefix}alteradores
+${middleBorder} ${menuItemIcon}${prefix}menurpg
+${middleBorder} ${menuItemIcon}${prefix}menuvip
+${bottomBorder}`;
 }

@@ -1,51 +1,71 @@
-export default async function menudown(prefix, botName = "Abyss", userName = "Viajante", {
-    header = `╔══════════════════════════════════════════════╗
-║        📥 ${botName} - DOWNLOADS DO VOID 📥      ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║            Olá, ${userName}!                     ║
-║        Baixe o abismo para seu dispositivo.      ║
-╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "═══════════════════════════════════════════════",
-    bottomBorder = "═══════════════════════════════════════════════",
-    menuTitleIcon = "◈",
-    menuItemIcon = "▸",
+export default async function menudown(prefix, botName = "MeuBot", userName = "Usuário", {
+    header = `╭──────────────────────────────────────────────╮⊰ 🌸 『 *${botName}* 』\n│Olá, #user#!\n╰──────────────────────────────────────────────╯`,
+    menuTopBorder = "╭──────────────────────────────────────────────╮",
+    bottomBorder = "╰──────────────────────────────────────────────╯",
+    menuTitleIcon = "🍧ฺꕸ▸",
+    menuItemIcon = "•.̇𖥨֗🍓⭟",
+    separatorIcon = "❁",
+    middleBorder = "│",
+    searchMenuTitle = "🔍 PESQUISAS & CONSULTAS",
+    audioMenuTitle = "🎵 MÚSICA & ÁUDIO", 
+    videoMenuTitle = "🎬 VÍDEOS & STREAMING",
+    downloadMenuTitle = "📥 DOWNLOADS",
+    mediaMenuTitle = "📱 MÍDIAS SOCIAIS",
+    gamesMenuTitle = "🎮 GAMING & APPS"
 } = {}) {
-    return `
+    const formattedHeader = header.replace(/#user#/g, userName);
+    return `${formattedHeader}
 
 ${menuTopBorder}
-📥 *MENU DE DOWNLOADS*
-${menuTopBorder}
-
-◈ 🎬 VÍDEO & ÁUDIO
-▸ ${prefix}play <nome>      - Baixar música (YT)
-▸ ${prefix}video <nome>     - Baixar vídeo (YT)
-▸ ${prefix}ytmp3 <link>     - YT para áudio
-▸ ${prefix}ytmp4 <link>     - YT para vídeo
-▸ ${prefix}spotify <link>   - Baixar do Spotify
-▸ ${prefix}soundcloud <link> - Baixar do SoundCloud
-
-◈ 📱 REDES SOCIAIS
-▸ ${prefix}tiktok <link>    - Baixar TikTok
-▸ ${prefix}ig <link>        - Baixar Instagram
-▸ ${prefix}fb <link>        - Baixar Facebook
-▸ ${prefix}tw <link>        - Baixar Twitter/X
-▸ ${prefix}kwai <link>      - Baixar Kwai
-▸ ${prefix}pinterest <link> - Baixar Pinterest
-
-◈ 📁 ARQUIVOS & OUTROS
-▸ ${prefix}mediafire <link> - Baixar do MediaFire
-▸ ${prefix}gdrive <link>    - Baixar do Google Drive
-
-◈ 🎵 LETRAS & MÚSICA
-▸ ${prefix}letra <música>   - Buscar letra
-▸ ${prefix}spotifysearch    - Buscar no Spotify
-
-◈ 📋 INFORMAÇÕES
-▸ ${prefix}playstore <app>  - Info da Play Store
-▸ ${prefix}mcplugins <nome> - Info de plugin MC
-
+│ ${searchMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}google
+${middleBorder}${menuItemIcon}${prefix}noticias
+${middleBorder}${menuItemIcon}${prefix}apps
+${middleBorder}${menuItemIcon}${prefix}dicionario
+${middleBorder}${menuItemIcon}${prefix}wikipedia
 ${bottomBorder}
 
-◈ *O Void fornece tudo que precisa* ◈
-_"Baixe as profundezas..."_`;
+${menuTopBorder}
+│ ${audioMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}letra
+${middleBorder}${menuItemIcon}${prefix}play
+${middleBorder}${menuItemIcon}${prefix}play2
+
+${middleBorder}${menuItemIcon}${prefix}spotify
+${middleBorder}${menuItemIcon}${prefix}soundcloud
+${bottomBorder}
+
+${menuTopBorder}
+│ ${videoMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}playvid
+${bottomBorder}
+
+${menuTopBorder}
+│ ${downloadMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}tiktok
+${middleBorder}${menuItemIcon}${prefix}instagram
+${middleBorder}${menuItemIcon}${prefix}kwai
+${middleBorder}${menuItemIcon}${prefix}igstory
+${middleBorder}${menuItemIcon}${prefix}facebook
+${middleBorder}${menuItemIcon}${prefix}gdrive
+${middleBorder}${menuItemIcon}${prefix}mediafire
+${middleBorder}${menuItemIcon}${prefix}twitter
+${bottomBorder}
+
+${menuTopBorder}
+│ ${mediaMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}pinterest
+${bottomBorder}
+
+${menuTopBorder}
+│ ${gamesMenuTitle}
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}mcplugin
+${bottomBorder}
+`;
 }

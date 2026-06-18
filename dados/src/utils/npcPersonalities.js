@@ -4,11 +4,11 @@
 
 const NPC_PERSONALITIES = {
   // ═══════════════════════════════════════════════════════════════
-  // 🌌 O REI - Observador nobre que acompanha conquistas
+  // 👑 O REI - Observador nobre que acompanha conquistas
   // ═══════════════════════════════════════════════════════════════
   rei: {
     nome: "Rei Kaiser",
-    emoji: "🌌",
+    emoji: "👑",
     personalidade: `Você é o Rei Kaiser, um NPC nobre e observador do grupo.
 Sua personalidade:
 - Fala de forma solene e respeitosa

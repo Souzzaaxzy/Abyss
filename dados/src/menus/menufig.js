@@ -1,36 +1,41 @@
-export default async function menufig(prefix, botName = "Abyss", userName = "Viajante", {
-    header = `╔══════════════════════════════════════════════╗
-║        🖼️ ${botName} - FIGURINHAS DO VOID 🖼️    ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║            Olá, ${userName}!                     ║
-║        Coleção de sombras para compartilhar...   ║
-╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "═══════════════════════════════════════════════",
-    bottomBorder = "═══════════════════════════════════════════════",
+async function menuSticker(prefix, botName = "MeuBot", userName = "Usuário", {
+    header = `╔══════════════════════════════════════════════╗\n║              🤖 ${botName}              ║\n║              Olá, ${userName}!              ║\n╚══════════════════════════════════════════════╝`,
+    menuTopBorder = "╭──────────────────────────────────────────────╮",
+    bottomBorder = "╰──────────────────────────────────────────────╯",
+    menuTitleIcon = "🍧ฺꕸ▸",
+    menuItemIcon = "•.̇𖥨֗🍓⭟",
+    separatorIcon = "❁",
+    middleBorder = "│",
+    createStickerMenuTitle = "🎨 CRIAÇÃO DE FIGURINHAS",
+    managementMenuTitle = "⚙️ GERENCIAMENTO DE FIGURINHAS"
 } = {}) {
-    return `
+    return `${header}
 
 ${menuTopBorder}
-🖼️ *FIGURINHAS*
-${menuTopBorder}
-
-◈ 📦 CRIAR
-▸ ${prefix}sticker          - Criar (marque img)
-▸ ${prefix}sgif             - Sticker animado
-▸ ${prefix}attp <texto>     - Texto em sticker
-▸ ${prefix}attp2 <texto>    - Estilo 2
-▸ ${prefix}attp3 <texto>    - Estilo 3
-▸ ${prefix}emojimix <😀😀>  - Misturar emojis
-
-◈ 🖼️ CONVERSÃO
-▸ ${prefix}toimg            - Sticker → Imagem
-▸ ${prefix}tomp3            - Vídeo → Áudio
-
-◈ 🔍 BUSCAR
-▸ ${prefix}stickersearch    - Buscar figurinhas
-
+│ ${createStickerMenuTitle}
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}emojimix
+${middleBorder} ${menuItemIcon}${prefix}ttp
+${middleBorder} ${menuItemIcon}${prefix}attp
+${middleBorder} ${menuItemIcon}${prefix}sticker
+${middleBorder} ${menuItemIcon}${prefix}sticker2
+${middleBorder} ${menuItemIcon}${prefix}sbg
+${middleBorder} ${menuItemIcon}${prefix}sfundo
+${middleBorder} ${menuItemIcon}${prefix}qc
 ${bottomBorder}
 
-◈ *Coleção do void* ◈
-_"Imortalize nas sombras..."_`;
+${menuTopBorder}
+│ ${managementMenuTitle}
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}figualeatoria
+${middleBorder} ${menuItemIcon}${prefix}figurinhas
+${middleBorder} ${menuItemIcon}${prefix}rename
+${middleBorder} ${menuItemIcon}${prefix}rgtake
+${middleBorder} ${menuItemIcon}${prefix}take
+${middleBorder} ${menuItemIcon}${prefix}toimg
+${middleBorder} ${menuItemIcon}${prefix}brat
+${middleBorder} ${menuItemIcon}${prefix}bratvid
+${bottomBorder}
+`;
 }
+export default menuSticker;

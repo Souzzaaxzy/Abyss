@@ -131,7 +131,7 @@ class ElectionManager {
     saveMandates(mandates);
 
     let text = `🏆 *RESULTADO DA ELEIÇÃO*\n\n`;
-    text += `🌌 Alpha eleito: @${winner.id.split('@')[0]} 🐺\n\n`;
+    text += `👑 Alpha eleito: @${winner.id.split('@')[0]} 🐺\n\n`;
     text += `🎉 Parabéns! Seu mandato dura ${config.mandato}.`;
 
     await this.nazu.sendMessage(groupId, { text, mentions: [winner.id] });

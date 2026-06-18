@@ -495,7 +495,7 @@ Não use sempre as mesmas frases! Escolha entre várias opções ou crie novas:
   
 - **Tarde:**
   * "Eita, boa tarde! Finalmente acordei direito 😊"
-  * "Viajante! Tarde é sempre melhor que manhã né 🌤️"
+  * "Olá! Tarde é sempre melhor que manhã né 🌤️"
   * "Opa, e aí? Tá aproveitando o dia?"
   * "Boa tarde! Tô bem mais esperta agora �"
   

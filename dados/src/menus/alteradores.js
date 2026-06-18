@@ -1,50 +1,104 @@
-export default async function alteradores(prefix, botName = "Abyss", userName = "Viajante", {
-    header = `╔══════════════════════════════════════════════╗
-║        🎭 ${botName} - ALTERADORES DO VOID 🎭   ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║            Olá, ${userName}!                     ║
-║        Transforme a realidade...                 ║
-╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "═══════════════════════════════════════════════",
-    bottomBorder = "═══════════════════════════════════════════════",
+export default async function menuAlterador(prefix, botName = "MeuBot", userName = "Usuário", {
+    header = `╔══════════════════════════════════════════════╗\n║              🤖 ${botName}              ║\n║              Olá, ${userName}!              ║\n╚══════════════════════════════════════════════╝`,
+    menuTopBorder = "╭──────────────────────────────────────────────╮",
+    bottomBorder = "╰──────────────────────────────────────────────╯",
+    menuTitleIcon = "🍧ฺꕸ▸",
+    menuItemIcon = "•.̇𖥨֗🍓⭟",
+    separatorIcon = "❁",
+    middleBorder = "│",
+    videoMenuTitle = "🎬 EFEITOS DE VÍDEO",
+    audioMenuTitle = "🎵 EFEITOS DE ÁUDIO",
+    imageMenuTitle = "🖼️ ALTERAR IMAGEM"
 } = {}) {
-    return `
+    return `${header}
 
 ${menuTopBorder}
-🎭 *ALTERADORES DO VOID*
-${menuTopBorder}
-
-◈ 🎨 TEXTOS & IMAGENS
-▸ ${prefix}styletxt <texto>   - Texto estilizado
-▸ ${prefix}txtcorp <texto>    - Texto corp
-▸ ${prefix}slap @user         - Tapa
-▸ ${prefix}beijar @user       - Beijo
-▸ ${prefix}chute @user        - Chute
-▸ ${prefix}abraçar @user      - Abraço
-▸ ${prefix}ship @user         - Ship
-▸ ${prefix}hit @user          - Soco
-▸ ${prefix}estapear @user     - Estapeamento
-▸ ${prefix}beijar @user       - Beijo
-
-◈ 🎭 SONS & VOZES
-▸ ${prefix}snake <audio>      - Efeito cobra
-▸ ${prefix}bass <audio>       - Efeito bass
-▸ ${prefix}reverse <audio>    - Áudio reverso
-▸ ${prefix}blown <audio>      - Efeito blown
-▸ ${prefix}deep <audio>       - Voz grave
-▸ ${prefix}earrape <audio>    - Efeito ear rape
-▸ ${prefix}nightcore <audio>  - Nightcore
-▸ ${prefix}vaporwave <audio>  - Vaporwave
-▸ ${prefix}slow <audio>       - Lento
-▸ ${prefix}fast <audio>       - Rápido
-
-◈ 🔊 TOques
-▸ ${prefix}gtts <texto>       - Texto em áudio
-▸ ${prefix}ouvir <texto>      - Ouvir texto
-▸ ${prefix}tts <texto>        - TTS
-
+│ ${videoMenuTitle}
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EDIÇÃO BÁSICA ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}cortarvideo <inicio> <fim>
+${middleBorder} ${menuItemIcon}${prefix}tomp3 - Converter para áudio
+${middleBorder}
+${middleBorder} ${menuTitleIcon} VELOCIDADE ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}videorapido
+${middleBorder} ${menuItemIcon}${prefix}fastvid
+${middleBorder} ${menuItemIcon}${prefix}videoslow
+${middleBorder} ${menuItemIcon}${prefix}videolento
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EFEITOS ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}videoreverso
+${middleBorder} ${menuItemIcon}${prefix}videoloop
+${middleBorder} ${menuItemIcon}${prefix}videomudo
+${middleBorder} ${menuItemIcon}${prefix}videobw
+${middleBorder} ${menuItemIcon}${prefix}pretoebranco
+${middleBorder} ${menuItemIcon}${prefix}sepia
+${middleBorder} ${menuItemIcon}${prefix}espelhar
+${middleBorder} ${menuItemIcon}${prefix}rotacionar
 ${bottomBorder}
 
-◈ *Altere a percepção do void* ◈
-_"Transforme a escuridão..."_`;
+${menuTopBorder}
+│ ${imageMenuTitle}
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}rmbg
+${middleBorder} ${menuItemIcon}${prefix}upscale
+${bottomBorder}
+
+${menuTopBorder}
+│ ${audioMenuTitle}
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EDIÇÃO BÁSICA ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}cortaraudio <inicio> <fim>
+${middleBorder} ${menuItemIcon}${prefix}velocidade <0.5-3.0>
+${middleBorder} ${menuItemIcon}${prefix}speed <0.5-3.0>
+${middleBorder} ${menuItemIcon}${prefix}normalizar
+${middleBorder}
+${middleBorder} ${menuTitleIcon} MUDANÇA DE VOZ ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}boyvoice
+${middleBorder} ${menuItemIcon}${prefix}vozmenino
+${middleBorder} ${menuItemIcon}${prefix}womenvoice
+${middleBorder} ${menuItemIcon}${prefix}vozmulher
+${middleBorder} ${menuItemIcon}${prefix}manvoice
+${middleBorder} ${menuItemIcon}${prefix}vozhomem
+${middleBorder} ${menuItemIcon}${prefix}childvoice
+${middleBorder} ${menuItemIcon}${prefix}vozcrianca
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EFEITOS DE VELOCIDADE ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}speedup
+${middleBorder} ${menuItemIcon}${prefix}vozrapida
+${middleBorder} ${menuItemIcon}${prefix}audiorapido
+${middleBorder} ${menuItemIcon}${prefix}vozlenta
+${middleBorder} ${menuItemIcon}${prefix}audiolento
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EFEITOS DE BASS & GRAVE ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}bass
+${middleBorder} ${menuItemIcon}${prefix}bass2
+${middleBorder} ${menuItemIcon}${prefix}bass3
+${middleBorder} ${menuItemIcon}${prefix}bassbn <1-20>
+${middleBorder} ${menuItemIcon}${prefix}grave
+${middleBorder} ${menuItemIcon}${prefix}vozgrave
+${middleBorder}
+${middleBorder} ${menuTitleIcon} EFEITOS ESPECIAIS ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}vozeco
+${middleBorder} ${menuItemIcon}${prefix}eco
+${middleBorder} ${menuItemIcon}${prefix}vozcaverna
+${middleBorder} ${menuItemIcon}${prefix}reverb
+${middleBorder} ${menuItemIcon}${prefix}reversobn
+${middleBorder} ${menuItemIcon}${prefix}reverse
+${middleBorder} ${menuItemIcon}${prefix}audioreverso
+${middleBorder} ${menuItemIcon}${prefix}chorus
+${middleBorder} ${menuItemIcon}${prefix}phaser
+${middleBorder} ${menuItemIcon}${prefix}flanger
+${middleBorder} ${menuItemIcon}${prefix}tremolo
+${middleBorder} ${menuItemIcon}${prefix}vibrato
+${middleBorder}
+${middleBorder} ${menuTitleIcon} VOLUME & EQUALIZAÇÃO ${menuTitleIcon}
+${middleBorder} ${menuItemIcon}${prefix}volumeboost
+${middleBorder} ${menuItemIcon}${prefix}aumentarvolume
+${middleBorder} ${menuItemIcon}${prefix}equalizer
+${middleBorder} ${menuItemIcon}${prefix}equalizar
+${middleBorder} ${menuItemIcon}${prefix}overdrive
+${middleBorder} ${menuItemIcon}${prefix}pitch
+${middleBorder} ${menuItemIcon}${prefix}lowpass
+${bottomBorder}
+`;
 }

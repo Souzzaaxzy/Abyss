@@ -180,7 +180,7 @@ class MessageQueue {
             try {
                 await this.errorHandler(item, error);
             } catch (handlerError) {
-                console.error('🌌 Error handler failed:', handlerError.message);
+                console.error('❌ Error handler failed:', handlerError.message);
             }
         }
 
@@ -275,7 +275,7 @@ try {
 
 
     if (!config.prefixo || !config.nomebot || !config.numerodono) {
-        throw new Error('◈ Configuração do Void inválida: campos obrigatórios ausentes (prefixo, nomebot, numerodono)');
+        throw new Error('Configuração inválida: campos obrigatórios ausentes (prefixo, nomebot, numerodono)');
     }
 
 
@@ -284,7 +284,7 @@ try {
         console.log('🐛 Modo DEBUG ativado - Logs detalhados habilitados');
     }
 } catch (err) {
-    console.error(`🌌 Erro ao carregar configuração: ${err.message}`);
+    console.error(`❌ Erro ao carregar configuração: ${err.message}`);
     process.exit(1);
 }
 
@@ -357,7 +357,7 @@ async function initializeOptimizedCaches(KaiserSock) {
         messagesCache = new Map();
 
     } catch (error) {
-        console.error('🌌 Erro ao inicializar sistema de otimização:', error.message);
+        console.error('❌ Erro ao inicializar sistema de otimização:', error.message);
 
         msgRetryCounterCache = new NodeCache({
             stdTTL: 5 * 60,
@@ -431,7 +431,7 @@ async function clearAuthDir(dirToRemove = AUTH_DIR) {
 
         console.log(`🗑️ Pasta de autenticação (${normalized}) excluída com sucesso.`);
     } catch (err) {
-        console.error(`🌌 Erro ao excluir pasta de autenticação (${dirToRemove}): ${err.message}`);
+        console.error(`❌ Erro ao excluir pasta de autenticação (${dirToRemove}): ${err.message}`);
     }
 }
 
@@ -447,7 +447,7 @@ async function loadGlobalBlacklist() {
         _globalBlacklistCacheTime = now;
         return _globalBlacklistCache;
     } catch (e) {
-        console.error(`🌌 Erro ao ler blacklist global: ${e.message}`);
+        console.error(`❌ Erro ao ler blacklist global: ${e.message}`);
         return _globalBlacklistCache ?? {};
     }
 }
@@ -458,7 +458,7 @@ async function loadGroupSettings(groupId) {
         const data = await fs.readFile(groupFilePath, 'utf-8');
         return JSON.parse(data);
     } catch (e) {
-        console.error(`🌌 Erro ao ler configurações do grupo ${groupId}: ${e.message}`);
+        console.error(`❌ Erro ao ler configurações do grupo ${groupId}: ${e.message}`);
         return {};
     }
 }
@@ -501,7 +501,7 @@ export async function saveGroupSettings(groupId, settings) {
             console.log(`📝 [Settings] Configurações de ${groupId} atualizadas.`);
         }
     } catch (error) {
-        console.error(`🌌 Erro ao salvar settings de ${groupId}:`, error);
+        console.error(`❌ Erro ao salvar settings de ${groupId}:`, error);
     }
 }
 async function handleGroupJoinRequest(KaiserSock, inf) {
@@ -577,7 +577,7 @@ async function handleGroupJoinRequest(KaiserSock, inf) {
             CaptchaIndex.add(typeIds, from, answer, expiresAt, nome);
 
             await KaiserSock.sendMessage(from, {
-                text: `🔐 *VERIFICAÇÃO DE SEGURANÇA*\n\n🌌 Viajante @${numero}!\n\nPara confirmar que não é uma sombra, resolva:\n❓ *${num1} + ${num2} = ?*\n\n⏱️ Você tem 5 minutos ou será removido.`,
+                text: `🔐 *VERIFICAÇÃO DE SEGURANÇA*\n\n👋 Olá @${numero}!\n\nPara garantir que você não é um bot, resolva:\n❓ *${num1} + ${num2} = ?*\n\n⏱️ Você tem 5 minutos ou será removido.`,
                 mentions: [participantJid]
             });
         }
@@ -894,7 +894,7 @@ async function updateOwnerLid(KaiserSock) {
             await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
         }
     } catch (err) {
-        console.error(`🌌 Erro ao atualizar LID do dono: ${err.message}`);
+        console.error(`❌ Erro ao atualizar LID do dono: ${err.message}`);
     }
 }
 
@@ -1074,7 +1074,7 @@ async function createBotSocket(authDir) {
                         await KaiserSock.sendMessage(groupId, {
                             text: mensagem
                         }).catch(err => {
-                            console.error(`🌌 Erro ao enviar X9: ${err.message}`);
+                            console.error(`❌ Erro ao enviar X9: ${err.message}`);
                         });
                     }
 
@@ -1227,7 +1227,7 @@ async function createBotSocket(authDir) {
                     await Promise.allSettled(messageProcessingPromises);
 
                 } catch (err) {
-                    console.error(`🌌 Error in message upsert handler: ${err.message}`);
+                    console.error(`❌ Error in message upsert handler: ${err.message}`);
 
                     if (err.message.includes('ENOSPC') || err.message.includes('ENOMEM')) {
                         console.error('🚨 Critical system error detected, triggering emergency cleanup...');
@@ -1323,13 +1323,13 @@ async function createBotSocket(authDir) {
                 qr
             } = update;
             if (qr && !KaiserSock.authState.creds.registered && !codeMode) {
-                console.log('🔗 🌌 QR do Void gerado para autenticação:');
+                console.log('🔗 QR Code gerado para autenticação:');
                 qrcode.generate(qr, {
                     small: true
                 }, (qrcodeText) => {
                     console.log(qrcodeText);
                 });
-                console.log('📱 ◈ Escaneie o QR nas sombras acima com o WhatsApp para autenticar o bot.');
+                console.log('📱 Escaneie o QR code acima com o WhatsApp para autenticar o bot.');
             }
             if (connection === 'open') {
                  /*
@@ -1393,14 +1393,14 @@ async function createBotSocket(authDir) {
                                     });
                                     console.log('✅ Mensagem de inicialização enviada para o dono');
                                 } catch (sendError) {
-                                    console.error('🌌 Erro ao enviar mensagem de inicialização:', sendError.message);
+                                    console.error('❌ Erro ao enviar mensagem de inicialização:', sendError.message);
                                 }
                             }, 3000);
                         } else {
                             console.log('ℹ️ Mensagem de inicialização desativada');
                         }
                     } catch (msgError) {
-                        console.error('🌌 Erro ao processar mensagem de inicialização:', msgError.message);
+                        console.error('❌ Erro ao processar mensagem de inicialização:', msgError.message);
                     }
 
                     // Inicializa sub-bots automaticamente
@@ -1415,7 +1415,7 @@ async function createBotSocket(authDir) {
                             await subBotManager.initializeAllSubBots();
                         }, 5000);
                     } catch (error) {
-                        console.error('🌌 Erro ao inicializar sub-bots:', error.message);
+                        console.error('❌ Erro ao inicializar sub-bots:', error.message);
                     }
 
                     console.log(`✅ Bot ${nomebot} iniciado com sucesso! Prefixo: ${prefixo} | Dono: ${nomedono}`);
@@ -1460,9 +1460,9 @@ async function createBotSocket(authDir) {
                     console.log(`⚠️ Erro 403 detectado. Tentativa ${forbidden403Attempts}/${MAX_403_ATTEMPTS}`);
 
                     if (forbidden403Attempts >= MAX_403_ATTEMPTS) {
-                        console.log('❌ ◈ Máximo de tentativas atingido. Apagando QR code e parando...');
+                        console.log('❌ Máximo de tentativas para erro 403 atingido. Apagando QR code e parando...');
                         await clearAuthDir(authDir);
-                        console.log('🗑️ ◈ Autenticação do void removida. Reinicie o bot para invocar um novo QR.');
+                        console.log('🗑️ Autenticação removida. Reinicie o bot para gerar um novo QR code.');
                         process.exit(1);
                     }
 
@@ -1517,7 +1517,7 @@ async function createBotSocket(authDir) {
         });
         return KaiserSock;
     } catch (err) {
-        console.error(`🌌 Erro ao criar socket do bot: ${err.message}`);
+        console.error(`❌ Erro ao criar socket do bot: ${err.message}`);
         throw err;
     }
 }
@@ -1552,7 +1552,7 @@ async function startNazu() {
         // isReconnecting = false é feito no finally abaixo
     } catch (err) {
         reconnectAttempts++;
-        console.error(`🌌 Erro ao iniciar o bot (tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}): ${err.message}`);
+        console.error(`❌ Erro ao iniciar o bot (tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}): ${err.message}`);
 
         // Se excedeu tentativas, para de tentar
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
@@ -1618,7 +1618,7 @@ async function gracefulShutdown(signal) {
             await subBotManager.disconnectAllSubBots();
             console.log('✅ Sub-bots desconectados');
         } catch (error) {
-            console.error('🌌 Erro ao desconectar sub-bots:', error.message);
+            console.error('❌ Erro ao desconectar sub-bots:', error.message);
         }
 
         // Limpa recursos

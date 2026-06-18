@@ -105,9 +105,9 @@ const ACHIEVEMENTS = {
     },
     wins_100: {
         id: 'wins_100',
-        name: '🌌 Rei dos Jogos',
+        name: '👑 Rei dos Jogos',
         description: 'Venceu 100 jogos',
-        icon: '🌌',
+        icon: '👑',
         xpReward: 1000,
         goldReward: 5000
     },

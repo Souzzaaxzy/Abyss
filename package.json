@@ -1,7 +1,7 @@
 {
-    "name": "Abyss-Void7",
+    "name": "AbyssBot",
     "version": "10.0.6",
-    "description": "🌌 Entidade do vazio - O bot que observa do abismo. The Void7",
+    "description": "Bot de whatsapp atualizada",
     "type": "module",
     "main": "dados/src/connect.js",
     "scripts": {

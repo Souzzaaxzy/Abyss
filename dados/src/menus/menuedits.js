@@ -1,42 +1,22 @@
-export default async function menuedits(prefix, botName = "Abyss", userName = "Viajante", {
-    header = `╔══════════════════════════════════════════════╗
-║        ✨ ${botName} - EDIÇÕES DO VOID ✨       ║
-║  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  ║
-║            Olá, ${userName}!                     ║
-║        Transforme mídia nas sombras...           ║
-╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "═══════════════════════════════════════════════",
-    bottomBorder = "═══════════════════════════════════════════════",
+export default async function menuedits(prefix, botName = "MeuBot", userName = "Usuário", {
+    header = `╭──────────────────────────────────────────────╮⊰ 🌸 『 *${botName}* 』\n│Olá, #user#!\n╰──────────────────────────────────────────────╯`,
+    menuTopBorder = "╭──────────────────────────────────────────────╮",
+    bottomBorder = "╰──────────────────────────────────────────────╯",
+    menuTitleIcon = "🍧ฺꕸ▸",
+    menuItemIcon = "•.̇𖥨֗🍓⭟",
+    separatorIcon = "❁",
+    middleBorder = "│"
 } = {}) {
-    return `
+    const formattedHeader = header.replace(/#user#/g, userName);
+    return `${formattedHeader}
 
 ${menuTopBorder}
-✨ *EDIÇÃO DE MÍDIA*
-${menuTopBorder}
-
-◈ 🎨 EFEITOS
-▸ ${prefix}blur <img>        - Efeito blur
-▸ ${prefix}brilho <img>      - Ajustar brilho
-▸ ${prefix}contraste <img>   - Ajustar contraste
-▸ ${prefix}inverter <img>    - Inverter cores
-▸ ${prefix}rotacionar <img>  - Rotacionar
-▸ ${prefix}espelhar <img>    - Espelhar
-▸ ${prefix}saturar <img>     - Saturação
-
-◈ 🎭 STICKERS
-▸ ${prefix}sticker          - Criar sticker
-▸ ${prefix}sticker <img>    - Da imagem
-▸ ${prefix}sgif             - Sticker animado
-▸ ${prefix}toimg            - Sticker → Imagem
-
-◈ 🔊 ÁUDIO
-▸ ${prefix}tts <texto>       - Texto para fala
-▸ ${prefix}ouvir <texto>     - Ouvir texto
-▸ ${prefix}volume <qtd>      - Ajustar volume
-▸ ${prefix}velocidade <vel>  - Mudar velocidade
-
-${bottomBorder}
-
-◈ *Transforme a escuridão em arte* ◈
-_"Cada edição revela o void..."_`;
+│ MENU EDITS
+${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}jornal
+${middleBorder}${menuItemIcon}${prefix}cinema
+${middleBorder}${menuItemIcon}${prefix}blackwhite
+${middleBorder}${menuItemIcon}${prefix}desfoque
+${middleBorder}${menuItemIcon}${prefix}wojakreaction
+${bottomBorder}`;
 }

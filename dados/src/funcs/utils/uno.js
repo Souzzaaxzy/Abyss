@@ -474,7 +474,7 @@ class UnoGame {
             let msg = `🃏 *UNO - AGUARDANDO JOGADORES*\n\n`;
             msg += `👥 Jogadores (${this.players.length}/${CONFIG.MAX_PLAYERS}):\n`;
             this.players.forEach((p, i) => {
-                msg += `${i + 1}. @${getUserName(p)}${p === this.host ? ' 🌌' : ''}\n`;
+                msg += `${i + 1}. @${getUserName(p)}${p === this.host ? ' 👑' : ''}\n`;
             });
             if (this.players.length < CONFIG.MIN_PLAYERS) {
                 msg += `\n⚠️ Faltam ${CONFIG.MIN_PLAYERS - this.players.length} jogador(es) para iniciar.`;
@@ -529,7 +529,7 @@ class UnoManager {
         this.activeGames.set(groupId, game);
         
         const message = `🃏 *UNO - JOGO CRIADO!*\n\n` +
-                        `🌌 Host: @${getUserName(hostId)}\n\n` +
+                        `👑 Host: @${getUserName(hostId)}\n\n` +
                         `📝 Comandos:\n` +
                         `• "entrar" - Entrar no jogo\n` +
                         `• "sair" - Sair do jogo\n` +

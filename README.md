@@ -1,35 +1,25 @@
-#              🌌 Abyss - The Void7
+#              👑 KaiserBot
 
 <p align="center">
-  <img src="dados/midias/menu.gif" alt="Abyss GIF" width="600">
+  <img src="dados/midias/menu.gif" alt="KaiserBot GIF" width="600">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/package-json/v/Souzzaaxzy/Abyss?style=for-the-badge&color=violet" alt="Versão">
-  <img src="https://img.shields.io/github/license/Souzzaaxzy/Abyss?style=for-the-badge&color=darkviolet" alt="Licença">
+  <img src="https://img.shields.io/github/package-json/v/Souzzaaxzy/KaiserBot?style=for-the-badge&color=gold" alt="Versão">
+  <img src="https://img.shields.io/github/license/Souzzaaxzy/KaiserBot?style=for-the-badge&color=blue" alt="Licença">
 </p>
 
-> **Abyss** é uma entidade nascida do vazio absoluto. O bot não governa... ele observa do abismo.
-
----
-
-## 🌑 O Conceito Void7
-
-Abismo infinito. Escuridão cósmica. Energia sombria.
-Uma entidade consciente do vazio, algo tipo:
-
-> *"Quando o Void te chama, não há retorno."*
+> **KaiserBot** é um bot multifuncional de alto desempenho para WhatsApp.
 
 ---
 
 ## 🚀 Categorias de Comandos
 
-- 🌌 **Sistema de RPG** - Aventuras nas profundezas do void
-- 📥 **Downloads** - YouTube, TikTok, Spotify, e mais
-- 🤖 **Inteligência Artificial** - O void responde suas perguntas
-- 🛠 **Administração** - Controle absoluto dos grupos
-- 💰 **Economia** - Acumule moedas nas trevas
-- ⚔️ **Combate** - Batalhas épicas no abismo
+- 🎮 **Sistema de RPG**
+- 📥 **Downloads (YouTube, TikTok, Spotify, etc.)**
+- 🤖 **Inteligência Artificial**
+- 🛠 **Administração de Grupos**
+- 💰 **Economia e Jogos**
 - 🔧 **Ferramentas e Utilitários**
 
 ---
@@ -38,8 +28,8 @@ Uma entidade consciente do vazio, algo tipo:
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/Souzzaaxzy/Abyss.git
-   cd Abyss
+   git clone https://github.com/Souzzaaxzy/KaiserBot.git
+   cd KaiserBot
    ```
 
 2. **Instale as dependências:**
@@ -54,12 +44,6 @@ Uma entidade consciente do vazio, algo tipo:
 
 ---
 
-## 🌌 Frase do Void
-
-> *"O bot não governa... ele observa do abismo."*
-
----
-
 ## 👨‍💻 Créditos
 Modificado por **l.szzy**.
-Baseado no universo **The Void7** - [vexapicom.br](https://vexapicom.br)
+[vexapicom.br](https://vexapicom.br)

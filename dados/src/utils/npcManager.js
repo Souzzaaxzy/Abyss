@@ -150,7 +150,7 @@ const ALL_EVENTS = {
       "Herói! {user} venceu {dungeon}! 🗡️",
       "{user} é lenda! Conquistou {dungeon}! 🏆",
       "Dungeon limpa! {user} {dungeon}! ✅",
-      "{user} no topo! Venceu {dungeon}! 🌌"
+      "{user} no topo! Venceu {dungeon}! 👑"
     ],
     keywords: ['dungeon', 'venceu', 'conquistou']
   },
@@ -258,20 +258,20 @@ const ALL_EVENTS = {
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // 🌌 SOCIAL
+  // 👑 SOCIAL
   // ═══════════════════════════════════════════════════════════════
   novo_alpha: {
     templates: [
       "{user} virou Alpha! 🏆",
-      "O novo Alpha é {user}! 🌌",
+      "O novo Alpha é {user}! 👑",
       "{user} está no topo! Alpha confirmado! ⭐",
-      "ALPHA NOVO! {user} é o rei! 🌌",
+      "ALPHA NOVO! {user} é o rei! 👑",
       "{user} tá no topo! Alpha! 🏆",
       "O BRABO! {user} Alpha! 💪",
-      "ALPHA! {user} chegou! 🌌",
+      "ALPHA! {user} chegou! 👑",
       "{user} é o líder agora! ⭐",
       "TOP DEMAIS! {user} Alpha! 🏆",
-      "{user} tá on top! Alpha! 🌌"
+      "{user} tá on top! Alpha! 👑"
     ],
     keywords: ['alpha', 'novo líder', 'promovido']
   },
@@ -281,13 +281,13 @@ const ALL_EVENTS = {
       "{user} entrou na corrida eleitoral! 🗳️",
       "Novo candidato! {user} quer ser líder! 📢",
       "{user} tá na eleição! Vote nele! 🗳️",
-      "CANDIDATO! {user} quer poder! 🌌",
+      "CANDIDATO! {user} quer poder! 👑",
       "{user} tá correndo! Eleição! 🗳️",
       "DEU NOVO! {user} candidato! 💪",
       "{user} quer ser o jefe! 🗳️",
       "ELEIÇÃO! {user} tá na corrida! 📢",
       "{user} tá candidate! Vote! 🗳️",
-      "NOVO CANDIDATO! {user}! 🌌"
+      "NOVO CANDIDATO! {user}! 👑"
     ],
     keywords: ['candidatura', 'candidato', 'eleição']
   },
