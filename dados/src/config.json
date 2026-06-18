@@ -1,0 +1,23 @@
+{
+  "nomedono": "LeuDuCapa",
+  "numerodono": "553285076326",
+  "nomebot": "KaiserBot",
+  "prefixo": "!",
+  "site_vex": "https://vexapi.com.br",
+  "apikey_vex": "",
+  "lidowner": "278696501993618@lid",
+  "github_ofc": "https://github.com/Souzzaaxzy/KaiserBot",
+  "autor": "LeoDucapa",
+  "repositorio": "KaiseBot",
+  "WA_WEB_VERSION": {
+    "aviso": "Não mexa aqui, pode afetar o funcionamento do BOT.",
+    "value": [
+      2,
+      3000,
+      1034740716
+    ]
+  },
+  "globalMode": true,
+  "smm_api_url": "https://revisionsmm.com/api/v2",
+  "smm_api_key": ""
+}
