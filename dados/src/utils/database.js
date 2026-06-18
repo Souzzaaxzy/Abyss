@@ -1872,14 +1872,14 @@ function applyShopBonuses(user, econ) {
  */
 function calculateCombatStats(user, econ) {
   const shop = econ.shop || {};
-  // Força o recálculo oficial do Kaiser (equipment.js)
+  // Força o recálculo oficial do 𝐀𝐛𝐲𝐬𝐬 (equipment.js)
   // Isso preenche user.attackBonus, user.defenseBonus, user.hpBonus e user.maxHp
   recalcEquipmentBonuses(user, shop);
 
   // Atributos base por nível
   const level = user.level || 1;
   
-  // No Kaiser, attackBonus e defenseBonus já contém a soma de todos os equipamentos.
+  // No 𝐀𝐛𝐲𝐬𝐬, attackBonus e defenseBonus já contém a soma de todos os equipamentos.
   // Vamos somar isso aos valores base.
   let totalAtk = 100 + (level * 10) + (user.attackBonus || 0);
   let totalDef = 50 + (level * 5) + (user.defenseBonus || 0);
@@ -1952,8 +1952,8 @@ function ensureEconomyDefaults(econ) {
     }
   });
 
-    // === NOVA LOJA (KAISERBOT) ===
-  const kaiserShop = {
+    // === NOVA LOJA (ABYSSBOT) ===
+  const abyssShop = {
   "arco_basico": { "name": "Arco Básico", "price": 600, "type": "weapon", "rarity": "Comum", "durability": -1, "effect": { "attack": 8 } },
   "espada_de_ferro": { "name": "Espada de Ferro", "price": 800, "type": "weapon", "rarity": "Comum", "durability": -1, "effect": { "attack": 10 } },
   "espada_rubra_do_guerreiro": { "name": "Espada Rubra do Guerreiro", "price": 10000, "type": "weapon", "rarity": "Raro", "durability": -1, "effect": { "attack": 18, "special": "Chance de queimadura" } },
@@ -2021,8 +2021,8 @@ function ensureEconomyDefaults(econ) {
   "pocao_de_vida": { "name": "Poção de Vida", "price": 400, "type": "consumable", "rarity": "Comum", "durability": -1, "effect": { "special": "+50 HP" } }
 };
 
-  // Força a atualização de todos os itens da loja KaiserBot para garantir tipos e preços corretos
-  for (const [k, v] of Object.entries(kaiserShop)) {
+  // Força a atualização de todos os itens da loja AbyssBot para garantir tipos e preços corretos
+  for (const [k, v] of Object.entries(abyssShop)) {
     if (!econ.shop[k] || JSON.stringify(econ.shop[k]) !== JSON.stringify(v)) {
       econ.shop[k] = v;
       changed = true;

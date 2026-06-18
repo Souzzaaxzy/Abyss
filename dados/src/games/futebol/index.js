@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// 🏆 HANDLER DE COMANDOS DE FUTEBOL - KAISERBOT
+// 🏆 HANDLER DE COMANDOS DE FUTEBOL - ABYSSBOT
 // ═══════════════════════════════════════════════════════════════
 
 import db from './database/index.js';

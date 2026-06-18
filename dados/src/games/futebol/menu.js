@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// 🏆 MENU DE FUTEBOL - KAISERBOT
+// 🏆 MENU DE FUTEBOL - ABYSSBOT
 // ═══════════════════════════════════════════════════════════════
 
 import db from './database/index.js';

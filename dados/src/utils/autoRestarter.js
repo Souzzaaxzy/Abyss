@@ -21,7 +21,7 @@ class AutoRestarter {
             'UnhandledPromiseRejectionWarning'
         ];
         this.logFile = path.join(__dirname, '../../../logs/auto-restart.log');
-        this.pidFile = path.join(__dirname, '../../../kaiser.pid');
+        this.pidFile = path.join(__dirname, '../../../abyss.pid');
         this.isShuttingDown = false;
         this.childProcess = null;
         
@@ -213,7 +213,7 @@ class AutoRestarter {
             }
 
             // Limpa arquivos temporários
-            const tempDirs = ['/tmp/kaiser-*', './temp/*'];
+            const tempDirs = ['/tmp/abyss-*', './temp/*'];
             
             for (const tempPattern of tempDirs) {
                 try {
@@ -311,8 +311,8 @@ class AutoRestarter {
                 stdio: ['ignore', 'inherit', 'inherit'],
                 env: {
                     ...process.env,
-                    KAISER_RESTARTED: 'true',
-                    KAISER_RESTART_COUNT: this.restartCount.toString()
+                    ABYSS_RESTARTED: 'true',
+                    ABYSS_RESTART_COUNT: this.restartCount.toString()
                 }
             });
 
@@ -419,9 +419,9 @@ class AutoRestarter {
             });
 
             // Verifica se foi reiniciado
-            if (process.env.KAISER_RESTARTED === 'true') {
+            if (process.env.ABYSS_RESTARTED === 'true') {
                 await this.logEvent('restart_success', {
-                    previousRestartCount: process.env.KAISER_RESTART_COUNT || 'unknown'
+                    previousRestartCount: process.env.ABYSS_RESTART_COUNT || 'unknown'
                 });
             }
         } catch (error) {

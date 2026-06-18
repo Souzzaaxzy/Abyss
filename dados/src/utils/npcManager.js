@@ -453,7 +453,7 @@ const DEFAULT_CONFIG = {
   jornalEnabled: false,
   jornalHour: 20,
   jornalMinute: 0,
-  activeNPCs: ['kaiser'],
+  activeNPCs: ['abyss'],
   autoRespond: true,
   responseChance: 0.5,
   useAI: true,
@@ -548,14 +548,14 @@ class NPCManager {
     return this.getConfig(groupId).autoRespond !== false; 
   }
 
-  canSpeak(npcId = 'kaiser', groupId) {
+  canSpeak(npcId = 'abyss', groupId) {
     const now = Date.now();
     const key = `${groupId || 'global'}_${npcId}`;
     const lastTime = this.cooldowns.get(key) || 0;
     return (now - lastTime) >= this.getConfig(groupId).cooldown;
   }
 
-  markSpoken(npcId = 'kaiser', groupId) {
+  markSpoken(npcId = 'abyss', groupId) {
     const key = `${groupId || 'global'}_${npcId}`;
     this.cooldowns.set(key, Date.now());
   }
@@ -582,7 +582,7 @@ class NPCManager {
     const config = this.getConfig(groupId);
     if (Math.random() > config.responseChance) return null;
     
-    const npcId = 'kaiser';
+    const npcId = 'abyss';
     if (!this.canSpeak(npcId, groupId)) return null;
 
     const replacements = {
@@ -769,7 +769,7 @@ class NPCManager {
       `${i+1}. ${type.replace(/_/g, ' ')} (${count}x)`
     ).join('\n');
     
-    return `📰 *KAISER NEWS - ${new Date().toLocaleDateString('pt-BR')}*
+    return `📰 *ABYSS NEWS - ${new Date().toLocaleDateString('pt-BR')}*
 
 Bom dia! Resumo dos eventos de HOJE:
 

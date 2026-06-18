@@ -15,7 +15,7 @@ class MediaCleaner {
         this.mediaDirs = [
             path.join(this.baseDir, 'dados/midias'),
             path.join(this.baseDir, 'temp'),
-            '/tmp/kaiser-media',
+            '/tmp/abyss-media',
             '/tmp/baileys_media_cache'
         ];
         this.tempPrefixes = ['tmp_', 'temp_', 'download_', 'media_', 'baileys_'];
@@ -202,8 +202,8 @@ class MediaCleaner {
      */
     async cleanOldDownloads() {
         const downloadPaths = [
-            path.join(process.env.HOME || '/tmp', 'Downloads/kaiser_*'),
-            '/tmp/kaiser_downloads',
+            path.join(process.env.HOME || '/tmp', 'Downloads/abyss_*'),
+            '/tmp/abyss_downloads',
             path.join(this.baseDir, 'downloads')
         ];
 

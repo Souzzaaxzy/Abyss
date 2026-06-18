@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// 🏆 SISTEMA DE FUTEBOL GLOBAL - KAISERBOT
+// 🏆 SISTEMA DE FUTEBOL GLOBAL - ABYSSBOT
 // Banco de dados principal
 // ═══════════════════════════════════════════════════════════════
 

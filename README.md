@@ -1,19 +1,19 @@
-#              👑 KaiserBot
+#              🌌 𝐀𝐛𝐲𝐬𝐬
 
 <p align="center">
-  <img src="dados/midias/menu.gif" alt="KaiserBot GIF" width="600">
+  <img src="dados/midias/menu.gif" alt="𝐀𝐛𝐲𝐬𝐬 GIF" width="600">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/package-json/v/Souzzaaxzy/KaiserBot?style=for-the-badge&color=gold" alt="Versão">
-  <img src="https://img.shields.io/github/license/Souzzaaxzy/KaiserBot?style=for-the-badge&color=blue" alt="Licença">
+  <img src="https://img.shields.io/github/package-json/v/Souzzaaxzy/Abyss?style=for-the-badge&color=1a1a2e" alt="Versão">
+  <img src="https://img.shields.io/github/license/Souzzaaxzy/Abyss?style=for-the-badge&color=16213e" alt="Licença">
 </p>
 
-> **KaiserBot** é um bot multifuncional de alto desempenho para WhatsApp.
+> **𝐀𝐛𝐲𝐬𝐬** é a entidade do vazio, nascida para servir The Void7. 🌑
 
 ---
 
-## 🚀 Categorias de Comandos
+## 🌌 Categorias de Comandos
 
 - 🎮 **Sistema de RPG**
 - 📥 **Downloads (YouTube, TikTok, Spotify, etc.)**
@@ -28,8 +28,8 @@
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/Souzzaaxzy/KaiserBot.git
-   cd KaiserBot
+   git clone https://github.com/Souzzaaxzy/Abyss.git
+   cd Abyss
    ```
 
 2. **Instale as dependências:**
@@ -45,5 +45,4 @@
 ---
 
 ## 👨‍💻 Créditos
-Modificado por **l.szzy**.
-[vexapicom.br](https://vexapicom.br)
+Modificado por **l.szzy** - The Void7 ⚫
