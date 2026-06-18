@@ -22105,18 +22105,16 @@ Precisa de ajuda? Entre em contato:
             isGif = false;
             mediaBuffer = fs.readFileSync(mediaPath);
           } else {
-            // Usa o GIF oficial do Abyss
-            const menuGifPath = __dirname + '/../midias/menu.gif';
-            if (fs.existsSync(menuGifPath)) {
-              mediaPath = menuGifPath;
-              isGif = true;
+            // Usa o vídeo oficial do Abyss (menu.mp4)
+            const menuVideoPath = __dirname + '/../midias/menu.mp4';
+            const menuImagePath = __dirname + '/../midias/menu.jpg';
+            if (fs.existsSync(menuVideoPath)) {
+              mediaPath = menuVideoPath;
+              useVideo = true;
               mediaBuffer = fs.readFileSync(mediaPath);
-            } else {
-              // Fallback para mp4 ou jpg
-              const menuVideoPath = __dirname + '/../midias/menu.mp4';
-              const menuImagePath = __dirname + '/../midias/menu.jpg';
-              useVideo = fs.existsSync(menuVideoPath);
-              mediaPath = useVideo ? menuVideoPath : menuImagePath;
+            } else if (fs.existsSync(menuImagePath)) {
+              mediaPath = menuImagePath;
+              useVideo = false;
               mediaBuffer = fs.readFileSync(mediaPath);
             }
           }
@@ -22134,10 +22132,9 @@ Precisa de ajuda? Entre em contato:
           const lerMaisPrefix = getMenuLerMaisText();
 
           await nazu.sendMessage(from, {
-            [isGif || useVideo ? 'video' : 'image']: mediaBuffer,
+            [useVideo ? 'video' : 'image']: mediaBuffer,
             caption: lerMaisPrefix + menuText,
-            gifPlayback: isGif || useVideo,
-            mimetype: isGif ? 'video/mp4' : (useVideo ? 'video/mp4' : 'image/jpeg')
+            gifPlayback: useVideo
           }, {
             quoted: info
           });
