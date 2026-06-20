@@ -33137,12 +33137,12 @@ break;
             ABC += `@${menb.split("@")[0]}\n`;
             mencts.push(menb);
           }
+          const surubaoVideoPath = path.join(__dirname, '../midias/surubao.mp4');
           await nazu.sendMessage(from, {
-            video: {
-              url: path.join(__dirname, './midias/surubao.mp4')
-            },
+            video: fs.readFileSync(surubaoVideoPath),
             caption: ABC,
-            mentions: mencts
+            mentions: mencts,
+            gifPlayback: true
           });
         } catch (e) {
           console.error(e);
@@ -33705,7 +33705,7 @@ break;
           const resolveMediaPath = (url) => {
             if (typeof url === 'string' && url.startsWith('./')) {
               // './midias/...' -> '/data/.../dados/src/midias/...'
-              return path.join(__dirname, url.substring(2));
+              return path.join(__dirname, '../' + url.substring(2));
             }
             return url;
           };
