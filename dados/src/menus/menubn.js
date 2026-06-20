@@ -130,8 +130,12 @@ ${middleBorder}
 ${middleBorder}${menuItemIcon}${prefix}ficante
 ${middleBorder}${menuItemIcon}${prefix}namoro
 ${middleBorder}${menuItemIcon}${prefix}casamento
+${middleBorder}${menuItemIcon}${prefix}trisal
+${middleBorder}${menuItemIcon}${prefix}quadrisal
 ${middleBorder}${menuItemIcon}${prefix}relacionamento
 ${middleBorder}${menuItemIcon}${prefix}terminar
+${middleBorder}${menuItemIcon}${prefix}terminartrisal
+${middleBorder}${menuItemIcon}${prefix}terminarquadrisal
 ${middleBorder}${menuItemIcon}${prefix}trair
 ${middleBorder}${menuItemIcon}${prefix}historicotraicao
 ${bottomBorder}

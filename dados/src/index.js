@@ -6626,8 +6626,15 @@ if (isCmd && command && !isOwnerOrSub) {
 
             const activePair = relationshipManager.getActivePairForUser(sender);
             if (activePair && activePair.partnerId) {
-              familySpouse = `@${activePair.partnerId.split('@')[0]}`;
-              mentions.push(activePair.partnerId);
+              // Verificar se é relacionamento múltiplo
+              if (activePair.allPartners && Array.isArray(activePair.allPartners)) {
+                const partnerNames = activePair.allPartners.map(p => `@${p.split('@')[0]}`).join(', ');
+                familySpouse = partnerNames;
+                mentions.push(...activePair.allPartners);
+              } else {
+                familySpouse = `@${activePair.partnerId.split('@')[0]}`;
+                mentions.push(activePair.partnerId);
+              }
 
               // Determinar tipo de relacionamento
               if (activePair.pair?.status === 'casamento') {
@@ -6639,6 +6646,12 @@ if (isCmd && command && !isOwnerOrSub) {
               } else if (activePair.pair?.status === 'ficante') {
                 relationshipType = 'Ficante';
                 relationshipEmoji = '🎈';
+              } else if (activePair.pair?.status === 'trisal') {
+                relationshipType = 'Em Trisal';
+                relationshipEmoji = '💞';
+              } else if (activePair.pair?.status === 'quadrisal') {
+                relationshipType = 'Em Quadrisal';
+                relationshipEmoji = '💞';
               }
             }
 
@@ -11107,6 +11120,12 @@ if (isCmd && command && !isOwnerOrSub) {
           } else if (activePair.pair?.status === 'ficante') {
             relationshipEmoji = '🎈';
             relationshipType = 'Parceiro(a)';
+          } else if (activePair.pair?.status === 'trisal') {
+            relationshipEmoji = '💞';
+            relationshipType = 'Trisal';
+          } else if (activePair.pair?.status === 'quadrisal') {
+            relationshipEmoji = '💞';
+            relationshipType = 'Quadrisal';
           }
 
           const relationshipSince = activePair.pair?.stages?.[activePair.pair.status]?.since;
@@ -11114,7 +11133,15 @@ if (isCmd && command && !isOwnerOrSub) {
 
           text += `${relationshipEmoji} *${relationshipType}:*\n`;
           text += `┌─────────────────\n`;
-          text += `│ @${activePair.partnerId.split('@')[0]}\n`;
+          
+          // Verificar se é relacionamento múltiplo
+          if (activePair.allPartners && Array.isArray(activePair.allPartners)) {
+            activePair.allPartners.forEach(partner => {
+              text += `│ @${partner.split('@')[0]}\n`;
+            });
+          } else {
+            text += `│ @${activePair.partnerId.split('@')[0]}\n`;
+          }
           text += `│ ❤️ Desde: ${sinceDate}\n`;
           text += `└─────────────────\n\n`;
         } else {
@@ -11162,7 +11189,11 @@ if (isCmd && command && !isOwnerOrSub) {
         // Adiciona o parceiro do sistema de relacionamentos nas menções
         const activePairForMentions = relationshipManager.getActivePairForUser(sender);
         if (activePairForMentions && activePairForMentions.partnerId) {
-          mentions.push(activePairForMentions.partnerId);
+          if (activePairForMentions.allPartners && Array.isArray(activePairForMentions.allPartners)) {
+            mentions.push(...activePairForMentions.allPartners);
+          } else {
+            mentions.push(activePairForMentions.partnerId);
+          }
         }
 
         saveEconomy(econ);
@@ -32047,6 +32078,141 @@ ${tempo.includes('nunca') ? '😂 Brincadeira! Nunca desista dos seus sonhos!' :
         });
         break;
       }
+
+      case 'trisal': {
+        if (!isGroup) {
+          await reply('⚠️ Esse comando só pode ser usado em grupos.');
+          break;
+        }
+        if (!isModoBn) {
+          await reply('❌ O modo brincadeira está desligado neste grupo.');
+          break;
+        }
+        const mentionedList = Array.isArray(menc_jid2) ? menc_jid2 : [];
+        if (mentionedList.length < 2) {
+          await reply('❌ Mencione 2 pessoas para formar um trisal: !trisal @user1 @user2');
+          break;
+        }
+        if (mentionedList.length > 2) {
+          await reply('❌ Um trisal precisa de exatamente 2 pessoas além de você (3 no total). Use !quadrisal para 4 pessoas.');
+          break;
+        }
+        const [target1, target2] = mentionedList;
+        if (target1 === sender || target2 === sender) {
+          await reply('❌ Você não pode incluir a si mesmo no trisal.');
+          break;
+        }
+        if (target1 === target2) {
+          await reply('❌ Mencione pessoas diferentes.');
+          break;
+        }
+        const requestResult = relationshipManager.createGroupRequest('trisal', from, sender, [target1, target2]);
+        if (!requestResult.success) {
+          if (requestResult.mentions && requestResult.mentions.length > 0) {
+            await nazu.sendMessage(from, {
+              text: requestResult.message,
+              mentions: requestResult.mentions
+            }, { quoted: info });
+          } else {
+            await reply(requestResult.message);
+          }
+          break;
+        }
+        await nazu.sendMessage(from, {
+          text: requestResult.message,
+          mentions: requestResult.mentions
+        });
+        break;
+      }
+
+      case 'quadrisal': {
+        if (!isGroup) {
+          await reply('⚠️ Esse comando só pode ser usado em grupos.');
+          break;
+        }
+        if (!isModoBn) {
+          await reply('❌ O modo brincadeira está desligado neste grupo.');
+          break;
+        }
+        const mentionedList = Array.isArray(menc_jid2) ? menc_jid2 : [];
+        if (mentionedList.length < 3) {
+          await reply('❌ Mencione 3 pessoas para formar um quadrisal: !quadrisal @user1 @user2 @user3');
+          break;
+        }
+        if (mentionedList.length > 3) {
+          await reply('❌ Um quadrisal precisa de exatamente 3 pessoas além de você (4 no total).');
+          break;
+        }
+        const [target1, target2, target3] = mentionedList;
+        if ([target1, target2, target3].includes(sender)) {
+          await reply('❌ Você não pode incluir a si mesmo no quadrisal.');
+          break;
+        }
+        if (new Set([target1, target2, target3]).size !== 3) {
+          await reply('❌ Mencione pessoas diferentes.');
+          break;
+        }
+        const requestResult = relationshipManager.createGroupRequest('quadrisal', from, sender, [target1, target2, target3]);
+        if (!requestResult.success) {
+          if (requestResult.mentions && requestResult.mentions.length > 0) {
+            await nazu.sendMessage(from, {
+              text: requestResult.message,
+              mentions: requestResult.mentions
+            }, { quoted: info });
+          } else {
+            await reply(requestResult.message);
+          }
+          break;
+        }
+        await nazu.sendMessage(from, {
+          text: requestResult.message,
+          mentions: requestResult.mentions
+        });
+        break;
+      }
+
+      case 'terminartrisal': {
+        if (!isGroup) {
+          await reply('⚠️ Esse comando só pode ser usado em grupos.');
+          break;
+        }
+        if (!isModoBn) {
+          await reply('❌ O modo brincadeira está desligado neste grupo.');
+          break;
+        }
+        const result = relationshipManager.disbandGroupRelationship(sender, sender);
+        if (!result.success) {
+          await reply(result.message);
+          break;
+        }
+        await nazu.sendMessage(from, {
+          text: result.message,
+          mentions: result.mentions
+        }, { quoted: info });
+        break;
+      }
+
+      case 'terminarquadrisal': {
+        if (!isGroup) {
+          await reply('⚠️ Esse comando só pode ser usado em grupos.');
+          break;
+        }
+        if (!isModoBn) {
+          await reply('❌ O modo brincadeira está desligado neste grupo.');
+          break;
+        }
+        const result = relationshipManager.disbandGroupRelationship(sender, sender);
+        if (!result.success) {
+          await reply(result.message);
+          break;
+        }
+        await nazu.sendMessage(from, {
+          text: result.message,
+          mentions: result.mentions
+        }, { quoted: info });
+        break;
+      }
+
       case 'relacionamento': {
         const mentionedList = Array.isArray(menc_jid2) ? menc_jid2 : [];
         let userOne = null;
@@ -32652,6 +32818,10 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
                 relacao = '💞 Namorando';
               } else if (activePair.pair.status === 'ficante') {
                 relacao = '🎈 Ficante';
+              } else if (activePair.pair.status === 'trisal') {
+                relacao = '💞 Em Trisal';
+              } else if (activePair.pair.status === 'quadrisal') {
+                relacao = '💞 Em Quadrisal';
               }
             }
           } catch (error) {

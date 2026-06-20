@@ -7,12 +7,14 @@ const MARRIAGE_REQUIRED_MS = 48 * 60 * 60 * 1000;
 const STATUS_ORDER = {
   ficante: 1,
   namoro: 2,
-  casamento: 3
+  trisal: 3,
+  quadrisal: 4,
+  casamento: 5
 };
 
 const TYPE_CONFIG = {
   ficante: {
-    label: 'Brincadeira',
+    label: 'Ficante',
     emoji: '🎈',
     inviteLabel: 'uma ficante',
     successHeadline: '🎈 Pedido aceito!',
@@ -31,12 +33,31 @@ const TYPE_CONFIG = {
     inviteLabel: 'um casamento',
     successHeadline: '💍 Pedido aceito!',
     successText: 'agora estão oficialmente casados!'
+  },
+  trisal: {
+    label: 'Trisal',
+    emoji: '💞',
+    inviteLabel: 'um trisal',
+    successHeadline: '💞 Pedido aceito!',
+    successText: 'formaram um trisal!',
+    multipleParticipants: true,
+    minParticipants: 3
+  },
+  quadrisal: {
+    label: 'Quadrisal',
+    emoji: '💞',
+    inviteLabel: 'um quadrisal',
+    successHeadline: '💞 Pedido aceito!',
+    successText: 'formaram um quadrisal!',
+    multipleParticipants: true,
+    minParticipants: 4
   }
 };
 
 class RelationshipManager {
   constructor() {
     this.pendingRequests = new Map();
+    this.pendingGroupRequests = new Map(); // Para pedidos de trisal/quadrisal
     this.pendingBetrayals = new Map(); // Nova estrutura para pedidos de traição
     const timer = setInterval(() => this._cleanup(), 60 * 1000);
     if (typeof timer.unref === 'function') {
@@ -50,7 +71,7 @@ class RelationshipManager {
 
   _normalizeType(type) {
     const normalized = normalizar(type || '');
-    return ['ficante', 'namoro', 'casamento'].includes(normalized) ? normalized : null;
+    return ['ficante', 'namoro', 'casamento', 'trisal', 'quadrisal'].includes(normalized) ? normalized : null;
   }
 
   _getPairKey(a, b) {
@@ -679,11 +700,368 @@ class RelationshipManager {
     };
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // SISTEMA DE RELACIONAMENTOS MÚLTIPLOS (TRISAL E QUADRISAL)
+  // ═══════════════════════════════════════════════════════════════
+
+  // Verifica se há pedido de grupo pendente
+  hasPendingGroupRequest(groupId) {
+    return this.pendingGroupRequests.has(groupId);
+  }
+
+  // Cria pedido de trisal ou quadrisal
+  createGroupRequest(type, groupId, requesterId, targetIds) {
+    const normalizedType = this._normalizeType(type);
+    if (!normalizedType || !TYPE_CONFIG[normalizedType]?.multipleParticipants) {
+      return { success: false, message: 'Tipo de relacionamento inválido para múltiplos participantes.' };
+    }
+
+    const requester = this._normalizeId(requesterId);
+    if (!requester) {
+      return { success: false, message: 'Solicitante inválido.' };
+    }
+
+    const targets = targetIds.map(t => this._normalizeId(t)).filter(Boolean);
+    if (targets.length === 0) {
+      return { success: false, message: 'Nenhum participante válido.' };
+    }
+
+    const requiredParticipants = TYPE_CONFIG[normalizedType].minParticipants;
+    const expectedTargets = requiredParticipants - 1; // -1 porque o requester já conta
+
+    if (targets.length !== expectedTargets) {
+      return { 
+        success: false, 
+        message: `❌ ${TYPE_CONFIG[normalizedType].label} precisa de ${requiredParticipants} participantes (você + ${expectedTargets} pessoas).` 
+      };
+    }
+
+    // Verifica se algum dos participantes é o próprio solicitante
+    if (targets.includes(requester)) {
+      return { success: false, message: '❌ Você não pode incluir a si mesmo no pedido.' };
+    }
+
+    // Verifica duplicatas
+    const uniqueTargets = [...new Set(targets)];
+    if (uniqueTargets.length !== targets.length) {
+      return { success: false, message: '❌ Não pode mencionar o mesmo usuário mais de uma vez.' };
+    }
+
+    if (this.pendingGroupRequests.has(groupId)) {
+      return { success: false, message: '❌ Já existe um pedido de grupo pendente neste grupo.' };
+    }
+
+    // Verifica se o solicitante já está em outro relacionamento
+    const requesterActivePair = this.getActivePairForUser(requesterId);
+    if (requesterActivePair) {
+      const partnerName = getUserName(requesterActivePair.partnerId);
+      const currentConfig = TYPE_CONFIG[requesterActivePair.pair.status];
+      return {
+        success: false,
+        message: `❌ Você já está em ${currentConfig.inviteLabel} com @${partnerName}. Termine esse relacionamento primeiro!`,
+        mentions: [requesterActivePair.partnerId]
+      };
+    }
+
+    // Verifica se algum dos alvos já está em relacionamento
+    for (const targetId of targetIds) {
+      const targetActivePair = this.getActivePairForUser(targetId);
+      if (targetActivePair) {
+        const partnerName = getUserName(targetActivePair.partnerId);
+        const targetName = getUserName(targetId);
+        const currentConfig = TYPE_CONFIG[targetActivePair.pair.status];
+        return {
+          success: false,
+          message: `❌ @${targetName} já está em ${currentConfig.inviteLabel} com @${partnerName}!`,
+          mentions: [targetId, targetActivePair.partnerId]
+        };
+      }
+    }
+
+    const now = Date.now();
+    const allParticipants = [requesterId, ...targetIds];
+    
+    const request = {
+      id: `${groupId}:${now}`,
+      type: normalizedType,
+      groupId,
+      requester: requester,
+      requesterRaw: requesterId,
+      targets: targetIds.map(t => ({ id: this._normalizeId(t), raw: t })),
+      acceptedTargets: [], // IDs normalizados que já aceitaram
+      createdAt: now,
+      expiresAt: now + REQUEST_TIMEOUT_MS
+    };
+
+    this.pendingGroupRequests.set(groupId, request);
+
+    // Construir mensagem
+    const config = TYPE_CONFIG[normalizedType];
+    const requesterName = getUserName(requesterId);
+    const targetNames = targetIds.map(t => `@${getUserName(t)}`).join(', ');
+
+    return {
+      success: true,
+      message: `${config.emoji} *PEDIDO DE ${config.label.toUpperCase()}*\n\n${targetNames}, vocês receberam um pedido de ${config.label.toLowerCase()} de @${requesterName}.\n\n📌 Usem os comandos:\n• *sim* - Aceitar\n• *não* - Recusar\n\n⏳ Expira em ${this._formatDuration(REQUEST_TIMEOUT_MS)}.`,
+      mentions: allParticipants,
+      request
+    };
+  }
+
+  // Processa resposta de participante para pedido de grupo
+  processGroupResponse(groupId, responderId, rawResponse) {
+    const pending = this.pendingGroupRequests.get(groupId);
+    if (!pending) return null;
+
+    const normalizedResponder = this._normalizeId(responderId);
+    
+    // Verifica se é o requester original (não pode responder ao próprio pedido)
+    if (normalizedResponder === pending.requester) {
+      return { success: false, message: '❌ Você não pode responder ao seu próprio pedido.' };
+    }
+
+    // Verifica se o respondente está na lista de alvos
+    const targetIndex = pending.targets.findIndex(t => t.id === normalizedResponder);
+    if (targetIndex === -1) {
+      return { success: false, message: '❌ Você não foi convidado para este pedido.' };
+    }
+
+    // Verifica se já respondeu
+    if (pending.acceptedTargets.includes(normalizedResponder)) {
+      return { success: false, message: '❌ Você já aceitou este pedido.' };
+    }
+
+    const decision = this._normalizeDecision(rawResponse);
+    if (!decision) {
+      return {
+        success: false,
+        message: '❌ Resposta inválida. Use "sim" para aceitar ou "não" para recusar.'
+      };
+    }
+
+    const config = TYPE_CONFIG[pending.type];
+    const requesterName = getUserName(pending.requesterRaw);
+
+    if (decision === 'reject') {
+      // Recusa - cancela o pedido inteiro
+      this.pendingGroupRequests.delete(groupId);
+      
+      const rejecterName = getUserName(responderId);
+      return {
+        success: true,
+        cancelled: true,
+        message: `${config.emoji} *${config.label.toUpperCase()} CANCELADO*\n\n@${rejecterName} recusou o pedido de ${config.label.toLowerCase()} de @${requesterName}.\n\n💔 O ${config.label.toLowerCase()} não foi formado.`,
+        mentions: [pending.requesterRaw, responderId]
+      };
+    }
+
+    // Aceitar - adiciona aos aceitos
+    pending.acceptedTargets.push(normalizedResponder);
+
+    // Verifica se todos aceitaram
+    const allTargets = pending.targets.map(t => t.id);
+    const allAccepted = allTargets.every(t => pending.acceptedTargets.includes(t));
+
+    if (allAccepted) {
+      // Todos aceitaram - formar o relacionamento
+      const result = this._createGroupRelationship(pending);
+      this.pendingGroupRequests.delete(groupId);
+      return result;
+    }
+
+    // Ainda faltam aceitar
+    const remaining = allTargets.filter(t => !pending.acceptedTargets.includes(t));
+    const remainingNames = remaining.map(t => `@${getUserName(t)}`).join(', ');
+    
+    return {
+      success: true,
+      message: `${config.emoji} @${getUserName(responderId)} aceitou o pedido de ${config.label.toLowerCase()}!\n\n⏳ Aguardando: ${remainingNames}`,
+      mentions: [responderId, pending.requesterRaw, ...remaining]
+    };
+  }
+
+  // Cria o relacionamento de grupo (trisal ou quadrisal)
+  _createGroupRelationship(pending) {
+    const data = this._loadData();
+    const config = TYPE_CONFIG[pending.type];
+    const now = Date.now();
+
+    // Todos os participantes
+    const allUsers = [pending.requesterRaw, ...pending.targets.map(t => t.raw)];
+    const normalizedUsers = allUsers.map(u => this._normalizeId(u));
+
+    // Criar chave única para o grupo (ordenada alfabeticamente)
+    const groupKey = normalizedUsers.sort().join('::');
+
+    const pair = {
+      users: allUsers, // Mantém a ordem original com JIDs
+      status: pending.type,
+      type: pending.type, // trisal ou quadrisal
+      stages: {
+        [pending.type]: {
+          since: new Date(now).toISOString(),
+          requestedBy: pending.requesterRaw,
+          targets: pending.targets.map(t => t.raw),
+          groupId: pending.groupId,
+          createdAt: new Date(pending.createdAt).toISOString()
+        }
+      },
+      history: [{
+        type: pending.type,
+        requestedBy: pending.requesterRaw,
+        targets: pending.targets.map(t => t.raw),
+        createdAt: new Date(pending.createdAt).toISOString(),
+        acceptedAt: new Date(now).toISOString()
+      }],
+      createdAt: new Date(now).toISOString(),
+      updatedAt: new Date(now).toISOString()
+    };
+
+    data.pairs[groupKey] = pair;
+    this._saveData(data);
+
+    // Construir mensagem de sucesso
+    const participantNames = allUsers.map(u => `@${getUserName(u)}`).join(', ');
+
+    return {
+      success: true,
+      created: true,
+      message: `${config.emoji} *${config.label.toUpperCase()} FORMADO!*\n\n💞 ${participantNames}\n\n${config.successText} 🎉`,
+      mentions: allUsers,
+      pair
+    };
+  }
+
+  // Encontra o relacionamento ativo de um usuário (função melhorada para múltiplos)
+  getActivePairForUser(userId) {
+    const normalized = this._normalizeId(userId);
+    if (!normalized) return null;
+
+    const data = this._loadData();
+    
+    for (const [key, pair] of Object.entries(data.pairs)) {
+      if (!pair || !Array.isArray(pair.users) || !pair.status || !TYPE_CONFIG[pair.status]) continue;
+      
+      // Verifica se é um tipo de relacionamento múltiplo
+      if (TYPE_CONFIG[pair.status]?.multipleParticipants) {
+        // Para trisal/quadrisal, verifica se o usuário está em users
+        const usersNormalized = pair.users.map(u => this._normalizeId(u));
+        const index = usersNormalized.indexOf(normalized);
+        if (index !== -1) {
+          // Retorna todos os outros participantes
+          const otherUsers = pair.users.filter((u, i) => i !== index);
+          return {
+            key,
+            pair,
+            partnerId: otherUsers.join(','), // Retorna todos os parceiros separados por vírgula
+            allPartners: otherUsers,
+            userId: pair.users[index]
+          };
+        }
+      } else {
+        // Para relacionamentos 1-1 (ficante, namoro, casamento)
+        const usersNormalized = pair.users.map(u => this._normalizeId(u));
+        const index = usersNormalized.indexOf(normalized);
+        if (index !== -1) {
+          const partnerIndex = index === 0 ? 1 : 0;
+          const partnerId = pair.users[partnerIndex];
+          if (!partnerId) continue;
+          return {
+            key,
+            pair,
+            partnerId,
+            userId: pair.users[index]
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  // Termina relacionamento de grupo (trisal ou quadrisal)
+  disbandGroupRelationship(userId, triggeredBy) {
+    const userActivePair = this.getActivePairForUser(userId);
+    if (!userActivePair) {
+      return { success: false, message: '❌ Você não está em nenhum relacionamento múltiplo (trisal ou quadrisal).' };
+    }
+
+    const pair = userActivePair.pair;
+    if (!TYPE_CONFIG[pair.status]?.multipleParticipants) {
+      return { success: false, message: '❌ Use o comando de término específico para este tipo de relacionamento.' };
+    }
+
+    const config = TYPE_CONFIG[pair.status];
+    const allUsers = pair.users;
+    const key = userActivePair.key;
+
+    // Verificar timeout para casamento
+    if (pair.status === 'casamento') {
+      const since = pair.stages?.casamento?.since;
+      if (since) {
+        const msSinceCreation = Date.now() - new Date(since).getTime();
+        if (msSinceCreation < MARRIAGE_REQUIRED_MS) {
+          const remaining = MARRIAGE_REQUIRED_MS - msSinceCreation;
+          return {
+            success: false,
+            message: `❌ O casamento só pode ser desfeito após ${this._formatDuration(MARRIAGE_REQUIRED_MS)} juntos.\n\n⏳ Falta: ${this._formatDuration(remaining)}`
+          };
+        }
+      }
+    }
+
+    const stageInfo = pair.stages?.[pair.status];
+    const since = stageInfo?.since ? Date.parse(stageInfo.since) : null;
+    const duration = since && !Number.isNaN(since) ? this._formatDuration(Date.now() - since) : null;
+
+    const endedAt = new Date().toISOString();
+    
+    // Arquivar
+    if (!Array.isArray(pair.history)) {
+      pair.history = [];
+    }
+    pair.history.push({
+      type: 'termino',
+      previousStatus: pair.status,
+      triggeredBy,
+      endedAt
+    });
+
+    const archivedPair = JSON.parse(JSON.stringify(pair));
+    archivedPair.terminatedAt = endedAt;
+    archivedPair.terminatedBy = triggeredBy;
+    archivedPair.finalStatus = pair.status;
+    archivedPair.status = 'terminado';
+
+    const data = this._loadData();
+    if (!Array.isArray(data.archived)) {
+      data.archived = [];
+    }
+    data.archived.push(archivedPair);
+    delete data.pairs[key];
+
+    this._saveData(data);
+
+    const participantNames = allUsers.map(u => `@${getUserName(u)}`).join(', ');
+
+    return {
+      success: true,
+      message: `💔 *${config.label.toUpperCase()} ENCERRADO*\n\n${participantNames}\n\nO ${config.label.toLowerCase()} foi encerrado por @${getUserName(triggeredBy)}.${duration ? `\n\n⏱️ Duração: ${duration}` : ''}`,
+      mentions: allUsers
+    };
+  }
+
   _cleanup() {
     const now = Date.now();
     for (const [groupId, request] of this.pendingRequests.entries()) {
       if (request.expiresAt && request.expiresAt <= now) {
         this.pendingRequests.delete(groupId);
+      }
+    }
+    // Limpa pedidos de grupo expirados (trisal/quadrisal)
+    for (const [groupId, request] of this.pendingGroupRequests.entries()) {
+      if (request.expiresAt && request.expiresAt <= now) {
+        this.pendingGroupRequests.delete(groupId);
       }
     }
     // Limpa pedidos de traição expirados
