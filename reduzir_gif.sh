@@ -2,7 +2,7 @@
 # Script para reduzir GIF do menufut para o WhatsApp
 # Limite do WhatsApp: ~1MB
 
-GIF_PATH="/data/data/com.termux/files/home/KaiserBot/dados/midias/menufut.gif"
+GIF_PATH="/data/data/com.termux/files/home/Abyss/dados/midias/menufut.gif"
 
 echo "🎬 Reduzindo GIF para WhatsApp..."
 echo "📁 Original: $GIF_PATH"
