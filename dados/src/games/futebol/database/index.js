@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Diretório do banco de dados - caminho correto
-const DB_DIR = path.join(__dirname, '../../../database/futebol');
+const DB_DIR = path.join(__dirname, '../../../../database/futebol');
 const ensureDir = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
