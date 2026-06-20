@@ -127,7 +127,7 @@ ${middleBorder}${menuItemIcon}${prefix}vesgo
 ${menuTopBorder}
 │ ${relationshipMenuTitle}
 ${middleBorder}
-${middleBorder}${menuItemIcon}${prefix}brincadeira
+${middleBorder}${menuItemIcon}${prefix}ficante
 ${middleBorder}${menuItemIcon}${prefix}namoro
 ${middleBorder}${menuItemIcon}${prefix}casamento
 ${middleBorder}${menuItemIcon}${prefix}relacionamento

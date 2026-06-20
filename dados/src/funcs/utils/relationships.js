@@ -5,18 +5,18 @@ const REQUEST_TIMEOUT_MS = 5 * 60 * 1000;
 const MARRIAGE_REQUIRED_MS = 48 * 60 * 60 * 1000;
 
 const STATUS_ORDER = {
-  brincadeira: 1,
+  ficante: 1,
   namoro: 2,
   casamento: 3
 };
 
 const TYPE_CONFIG = {
-  brincadeira: {
+  ficante: {
     label: 'Brincadeira',
     emoji: '🎈',
-    inviteLabel: 'uma brincadeira',
+    inviteLabel: 'uma ficante',
     successHeadline: '🎈 Pedido aceito!',
-    successText: 'agora estão em uma brincadeira!'
+    successText: 'agora estão em uma ficante!'
   },
   namoro: {
     label: 'Namoro',
@@ -50,7 +50,7 @@ class RelationshipManager {
 
   _normalizeType(type) {
     const normalized = normalizar(type || '');
-    return ['brincadeira', 'namoro', 'casamento'].includes(normalized) ? normalized : null;
+    return ['ficante', 'namoro', 'casamento'].includes(normalized) ? normalized : null;
   }
 
   _getPairKey(a, b) {
@@ -201,13 +201,13 @@ class RelationshipManager {
 
     const currentStatus = pair.status;
 
-    if (type === 'brincadeira') {
-      if (currentStatus === 'brincadeira') {
-        const since = pair.stages?.brincadeira?.since;
+    if (type === 'ficante') {
+      if (currentStatus === 'ficante') {
+        const since = pair.stages?.ficante?.since;
         const dateText = since ? this._formatDate(since) : 'recentemente';
         return {
           allowed: false,
-          message: `Vocês já estão em brincadeira desde ${dateText}.`
+          message: `Vocês já estão em ficante desde ${dateText}.`
         };
       }
       if (currentStatus === 'namoro') {
@@ -240,7 +240,7 @@ class RelationshipManager {
           message: 'Vocês já são casados!'
         };
       }
-      // Permite evoluir de brincadeira para namoro
+      // Permite evoluir de ficante para namoro
       return { allowed: true };
     }
 
@@ -405,11 +405,11 @@ class RelationshipManager {
     });
 
     // Lógica de atualização de status
-    if (request.type === 'brincadeira') {
-      pair.status = 'brincadeira';
-      // Só cria brincadeira se não existir
-      if (!pair.stages.brincadeira) {
-        pair.stages.brincadeira = stageEntry;
+    if (request.type === 'ficante') {
+      pair.status = 'ficante';
+      // Só cria ficante se não existir
+      if (!pair.stages.ficante) {
+        pair.stages.ficante = stageEntry;
       }
       if (!pair.createdAt) {
         pair.createdAt = stageEntry.since;
@@ -418,20 +418,20 @@ class RelationshipManager {
       pair.status = 'namoro';
       // Sempre atualiza o namoro com a nova data
       pair.stages.namoro = stageEntry;
-      // Preserva brincadeira anterior se existir, senão cria
-      if (!pair.stages.brincadeira) {
-        pair.stages.brincadeira = { ...stageEntry };
+      // Preserva ficante anterior se existir, senão cria
+      if (!pair.stages.ficante) {
+        pair.stages.ficante = { ...stageEntry };
       }
     } else if (request.type === 'casamento') {
       pair.status = 'casamento';
       // Sempre atualiza o casamento com a nova data
       pair.stages.casamento = stageEntry;
-      // Preserva namoro e brincadeira anteriores
+      // Preserva namoro e ficante anteriores
       if (!pair.stages.namoro) {
         pair.stages.namoro = { ...stageEntry };
       }
-      if (!pair.stages.brincadeira) {
-        pair.stages.brincadeira = { ...stageEntry };
+      if (!pair.stages.ficante) {
+        pair.stages.ficante = { ...stageEntry };
       }
       // ═══════════════════════════════════════════════════════════════
       // 🤖 EVENTO NPC - CASAMENTO
@@ -487,13 +487,13 @@ class RelationshipManager {
       }
     }
 
-    // Para namoro, mostra quanto tempo de brincadeira (se houver)
-    if (request.type === 'namoro' && pair.stages?.brincadeira?.since) {
-      const brincadeiraSince = Date.parse(pair.stages.brincadeira.since);
+    // Para namoro, mostra quanto tempo de ficante (se houver)
+    if (request.type === 'namoro' && pair.stages?.ficante?.since) {
+      const ficanteSince = Date.parse(pair.stages.ficante.since);
       const namoroSince = Date.parse(stageInfo.since);
-      if (!Number.isNaN(brincadeiraSince) && !Number.isNaN(namoroSince) && brincadeiraSince !== namoroSince) {
-        const brincadeiraDuration = namoroSince - brincadeiraSince;
-        lines.push(`🎈 Tempo de brincadeira antes do namoro: ${this._formatDuration(brincadeiraDuration)}`);
+      if (!Number.isNaN(ficanteSince) && !Number.isNaN(namoroSince) && ficanteSince !== namoroSince) {
+        const ficanteDuration = namoroSince - ficanteSince;
+        lines.push(`🎈 Tempo de ficante antes do namoro: ${this._formatDuration(ficanteDuration)}`);
       }
     }
 
@@ -542,7 +542,7 @@ class RelationshipManager {
     }
 
     // Mostra histórico de estágios
-    const historicalStages = ['brincadeira', 'namoro', 'casamento']
+    const historicalStages = ['ficante', 'namoro', 'casamento']
       .filter(stage => pair.stages?.[stage]?.since)
       .map(stage => {
         const config = TYPE_CONFIG[stage];

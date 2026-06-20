@@ -6636,8 +6636,8 @@ if (isCmd && command && !isOwnerOrSub) {
               } else if (activePair.pair?.status === 'namoro') {
                 relationshipType = 'Namorando';
                 relationshipEmoji = '💞';
-              } else if (activePair.pair?.status === 'brincadeira') {
-                relationshipType = 'Brincadeira';
+              } else if (activePair.pair?.status === 'ficante') {
+                relationshipType = 'Ficante';
                 relationshipEmoji = '🎈';
               }
             }
@@ -11104,7 +11104,7 @@ if (isCmd && command && !isOwnerOrSub) {
           } else if (activePair.pair?.status === 'namoro') {
             relationshipEmoji = '💞';
             relationshipType = 'Namorado(a)';
-          } else if (activePair.pair?.status === 'brincadeira') {
+          } else if (activePair.pair?.status === 'ficante') {
             relationshipEmoji = '🎈';
             relationshipType = 'Parceiro(a)';
           }
@@ -31940,7 +31940,7 @@ ${tempo.includes('nunca') ? '😂 Brincadeira! Nunca desista dos seus sonhos!' :
           await reply("🔮 Minha máquina do tempo pifou! Tenta de novo! ⏰ ");
         }
         break;
-      case 'brincadeira': {
+      case 'ficante': {
         if (!isGroup) {
           await reply('⚠️ Esse pedido só pode ser feito em grupos.');
           break;
@@ -31957,7 +31957,7 @@ ${tempo.includes('nunca') ? '😂 Brincadeira! Nunca desista dos seus sonhos!' :
           await reply('❌ Você não pode enviar um pedido para você mesmo.');
           break;
         }
-        const requestResult = relationshipManager.createRequest('brincadeira', from, sender, menc_os2);
+        const requestResult = relationshipManager.createRequest('ficante', from, sender, menc_os2);
         if (!requestResult.success) {
           if (requestResult.mentions && requestResult.mentions.length > 0) {
             await nazu.sendMessage(from, {
@@ -32650,8 +32650,8 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
                 relacao = '💍 Casado(a)';
               } else if (activePair.pair.status === 'namoro') {
                 relacao = '💞 Namorando';
-              } else if (activePair.pair.status === 'brincadeira') {
-                relacao = '🎈 Brincadeira';
+              } else if (activePair.pair.status === 'ficante') {
+                relacao = '🎈 Ficante';
               }
             }
           } catch (error) {
