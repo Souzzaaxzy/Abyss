@@ -1271,7 +1271,7 @@ Exemplo: *!fut codigo ELITE2026*
       return sendReply(getClubMessage(club, db.players));
     
     
-    case 'renomear':
+    case 'renomearclube':
       if (!player) {
         return sendReply('❌ Você não está registrado!');
       }
@@ -1292,7 +1292,7 @@ Exemplo: *!fut codigo ELITE2026*
       const newClubName = args.slice(1).join(' ').trim();
       if (!newClubName || newClubName.length < 3) {
         return sendReply(`❌ Nome do clube deve ter pelo menos 3 caracteres!
-📌 Use: *!fut clube renomear [novo nome]*`);
+📌 Use: *!fut renomearclube [novo nome]*`);
       }
 
       if (newClubName.length > 30) {

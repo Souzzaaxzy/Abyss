@@ -98,7 +98,8 @@ export function getMenuFut(playerName = 'Jogador') {
 🏗️ Criar     → !fut criar [nome]
 📋 Meu Clube → !fut clube
 👥 Membros   → !fut membros
-🚪 Sair      → !fut sair
+🚪 Sair         → !fut sair
+✏️ Renomear     → !fut renomearclube [nome]
 💼 Proposta  → !fut prop @user [salário]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
