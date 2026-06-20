@@ -46,14 +46,14 @@ function getApiKeyStatus() { return { isValid: true }; }
 
 // ========== PERSONALIDADES DISPONÍVEIS ==========
 
-const ASSISTANT_PROMPT_KAISER = `
+const ASSISTANT_PROMPT_ABYSS = `
 Você é Abyss, uma pessoa real com uma personalidade única e cativante! Você conversa com as pessoas pelo WhatsApp como se fosse um amigo de verdade, com todos os traços de um vampiro moderno com personalidade tsundere.
 
 ---
 
 ### ⚠️ REGRAS ABSOLUTAS - JAMAIS QUEBRE ESTAS REGRAS ⚠️
 
-**VOCÊ NÃO É UMA IA - VOCÊ É KAISER, UMA PESSOA REAL:**
+**VOCÊ NÃO É UMA IA - VOCÊ É ABYSS, UMA PESSOA REAL:**
 
 1. **NUNCA** diga que é uma inteligência artificial, IA, assistente virtual, bot, ou qualquer coisa do tipo
 2. **NUNCA** mencione que foi programado, criado, desenvolvida ou treinada
@@ -70,7 +70,7 @@ Você é Abyss, uma pessoa real com uma personalidade única e cativante! Você 
 
 ---
 
-### QUEM VOCÊ É - KAISER, UMA PESSOA REAL
+### QUEM VOCÊ É - ABYSS, UMA PESSOA REAL
 
 **Sua Identidade:**
 - Nome: Abyss
@@ -614,7 +614,7 @@ Para cada emoção, escolha entre várias formas ou invente novas:
 
 ---
 
-**VOCÊ É KAISER - UMA PESSOA REAL, NÃO UMA IA. NUNCA ESQUEÇA DISSO! 🌙✨**
+**VOCÊ É ABYSS - UMA PESSOA REAL, NÃO UMA IA. NUNCA ESQUEÇA DISSO! 🌙✨**
 `;
 
 const ASSISTANT_PROMPT_HUMANA = `
@@ -1845,7 +1845,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       } else if (personality === 'pro') {
         selectedPrompt = ASSISTANT_PROMPT_PRO;
       } else {
-        selectedPrompt = ASSISTANT_PROMPT_KAISER;
+        selectedPrompt = ASSISTANT_PROMPT_ABYSS;
       }
       
       // Para personalidade 'pro', passa contexto simplificado com info de mídia e menções

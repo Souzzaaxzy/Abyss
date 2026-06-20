@@ -24,7 +24,7 @@ export function recalcEquipmentBonuses(user, shop = {}) {
     const item = shop[itemId];
     if (!item) continue;
     
-    // Suporte para múltiplos formatos de bônus (Abyss e Kaiser)
+    // Suporte para múltiplos formatos de bônus (Abyss)
     const eff = item.effect || {};
     
     // Ataque

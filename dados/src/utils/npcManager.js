@@ -769,7 +769,7 @@ class NPCManager {
       `${i+1}. ${type.replace(/_/g, ' ')} (${count}x)`
     ).join('\n');
     
-    return `📰 *KAISER NEWS - ${new Date().toLocaleDateString('pt-BR')}*
+    return `📰 *ABYSS NEWS - ${new Date().toLocaleDateString('pt-BR')}*
 
 Bom dia! Resumo dos eventos de HOJE:
 
