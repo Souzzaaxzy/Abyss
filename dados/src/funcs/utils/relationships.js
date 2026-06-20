@@ -16,7 +16,7 @@ const TYPE_CONFIG = {
     emoji: '🎈',
     inviteLabel: 'uma ficante',
     successHeadline: '🎈 Pedido aceito!',
-    successText: 'agora estão em uma ficante!'
+    successText: 'agora estão ficando!'
   },
   namoro: {
     label: 'Namoro',
