@@ -1468,7 +1468,20 @@ Exemplo: *!fut codigo ELITE2026*
         return sendReply('📌 Use: *!fut ace [id]*\n💡 Dica: use o ID do clube #XXXXXX');
       }
       
-      const acceptResult = db.acceptNegotiation(negId);
+      // Buscar negociação por shortId do clube (6 dígitos) ou ID completo
+      let negotiation;
+      if (/^\d{6}$/.test(negId)) {
+        negotiation = db.getNegotiationByClubShortId(negId, sender);
+        if (!negotiation) {
+          return sendReply(`❌ Nenhuma proposta do clube #${negId} encontrada para você!`);
+        }
+      } else {
+        negotiation = db.getNegotiation(negId);
+      }
+      if (!negotiation) {
+        return sendReply("❌ Proposta não encontrada!");
+      }
+      const acceptResult = db.acceptNegotiation(negotiation.id);
       if (!acceptResult.success) {
         return sendReply(`❌ ${acceptResult.error}`);
       }
