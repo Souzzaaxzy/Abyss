@@ -16,7 +16,7 @@ const TYPE_CONFIG = {
   ficante: {
     label: 'Ficante',
     emoji: '🎈',
-    inviteLabel: 'uma ficante',
+    inviteLabel: 'uma ficada',
     successHeadline: '🎈 Pedido aceito!',
     successText: 'agora estão ficando!'
   },
@@ -228,7 +228,7 @@ class RelationshipManager {
         const dateText = since ? this._formatDate(since) : 'recentemente';
         return {
           allowed: false,
-          message: `Vocês já estão em ficante desde ${dateText}.`
+          message: `Vocês já estão ficando desde ${dateText}.`
         };
       }
       if (currentStatus === 'namoro') {
@@ -396,7 +396,8 @@ class RelationshipManager {
         status: null,
         stages: {},
         history: [],
-        createdAt: new Date(now).toISOString()
+        createdAt: new Date(now).toISOString(),
+        groupId: request.groupId
       };
     }
 
@@ -944,7 +945,8 @@ class RelationshipManager {
       if (!pair || !Array.isArray(pair.users) || !pair.status || !TYPE_CONFIG[pair.status]) continue;
       
       // Se groupId foi fornecido, verifica se o relacionamento é desse grupo
-      if (groupId && !key.startsWith(`${groupId}::`)) {
+      // Usa pair.groupId (salvo no stageEntry) em vez de verificar a chave
+      if (groupId && pair.groupId && pair.groupId !== groupId) {
         continue;
       }
       
