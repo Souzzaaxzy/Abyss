@@ -818,26 +818,27 @@ class RelationshipManager {
     
     // Verifica se é o requester original (não pode responder ao próprio pedido)
     if (normalizedResponder === pending.requester) {
-      return { success: false, message: '❌ Você não pode responder ao seu próprio pedido.' };
+      // Ignora completamente - o criador não deve responder ao próprio pedido
+      return null;
     }
 
     // Verifica se o respondente está na lista de alvos
     const targetIndex = pending.targets.findIndex(t => t.id === normalizedResponder);
     if (targetIndex === -1) {
-      return { success: false, message: '❌ Você não foi convidado para este pedido.' };
+      // Ignora completamente - pessoa que não foi convidada
+      return null;
     }
 
     // Verifica se já respondeu
     if (pending.acceptedTargets.includes(normalizedResponder)) {
-      return { success: false, message: '❌ Você já aceitou este pedido.' };
+      // Ignora completamente - já confirmou
+      return null;
     }
 
     const decision = this._normalizeDecision(rawResponse);
     if (!decision) {
-      return {
-        success: false,
-        message: '❌ Resposta inválida. Use "sim" para aceitar ou "não" para recusar.'
-      };
+      // Se não é uma resposta válida, ignora silenciosamente
+      return null;
     }
 
     const config = TYPE_CONFIG[pending.type];

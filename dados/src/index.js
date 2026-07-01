@@ -4522,18 +4522,11 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
             if (relationshipManager.hasPendingGroupRequest && relationshipManager.processGroupResponse) {
               if (relationshipManager.hasPendingGroupRequest(from) && body) {
                 const groupResponse = await relationshipManager.processGroupResponse(from, sender, body);
-                if (groupResponse) {
-                  if (groupResponse.success && groupResponse.message) {
-                    await nazu.sendMessage(from, {
-                      text: groupResponse.message,
-                      mentions: groupResponse.mentions || []
-                    });
-                  } else if (!groupResponse.success && groupResponse.message) {
-                    await nazu.sendMessage(from, {
-                      text: groupResponse.message,
-                      mentions: groupResponse.mentions || []
-                    });
-                  }
+                if (groupResponse?.success && groupResponse?.message) {
+                  await nazu.sendMessage(from, {
+                    text: groupResponse.message,
+                    mentions: groupResponse.mentions || []
+                  });
                 }
               }
             }
