@@ -5706,6 +5706,39 @@ if (isCmd && command && !isOwnerOrSub) {
 }
 
 
+    // ═══════════════════════════════════════════════════════════════
+    // FUNÇÕES AUXILIARES PARA FIXAR/DESFIXAR MENSAGENS
+    // ═══════════════════════════════════════════════════════════════
+    function getPinnedMessage(gid) {
+      const pinned = groupData?.pinnedMessage;
+      if (!pinned || !pinned.messageId) return null;
+      return pinned;
+    }
+    
+    function savePinnedMessage(gid, pinnedData) {
+      if (!groupData) return false;
+      groupData.pinnedMessage = pinnedData;
+      writeJsonFile(buildGroupFilePath(gid), groupData);
+      return true;
+    }
+    
+    function removePinnedMessage(gid) {
+      if (!groupData) return false;
+      delete groupData.pinnedMessage;
+      writeJsonFile(buildGroupFilePath(gid), groupData);
+      return true;
+    }
+    
+    async function pinMessageChat(nazuConn, jid, pin = true) {
+      try {
+        await nazuConn.chatModify({ pin }, jid);
+        return true;
+      } catch (e) {
+        console.error('Erro ao modificar chat (pin):', e.message);
+        return false;
+      }
+    }
+
     switch (command) {
 
       case 'roles':
@@ -31264,34 +31297,6 @@ ${prefix}nota buscar <termo> - Busca nas notas`);
         break;
 
       // ═══════════════════════════════════════════════════════════════
-      // FIXAR MENSAGEM - Funções auxiliares
-      const getPinnedMessage = (gid) => {
-        const pinned = groupData?.pinnedMessage;
-        if (!pinned || !pinned.messageId) return null;
-        return pinned;
-      };
-      const savePinnedMessage = (gid, pinnedData) => {
-        if (!groupData) return false;
-        groupData.pinnedMessage = pinnedData;
-        writeJsonFile(buildGroupFilePath(gid), groupData);
-        return true;
-      };
-      const removePinnedMessage = (gid) => {
-        if (!groupData) return false;
-        delete groupData.pinnedMessage;
-        writeJsonFile(buildGroupFilePath(gid), groupData);
-        return true;
-      };
-      const pinMessageChat = async (nazuConn, jid, pin = true) => {
-        try {
-          await nazuConn.chatModify({ pin }, jid);
-          return true;
-        } catch (e) {
-          console.error('Erro ao modificar chat (pin):', e.message);
-          return false;
-        }
-      };
-      
       // FIXAR MENSAGEM - Comandos para fixar e desfixar
       // ═══════════════════════════════════════════════════════════════
       case 'fixar':
