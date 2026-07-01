@@ -31266,13 +31266,6 @@ ${prefix}nota buscar <termo> - Busca nas notas`);
             const resultNoteDel = notes.deleteNote(sender, id);
             return reply(resultNoteDel.message);
           }
-          case 'fixar':
-          case 'pin': {
-            const id = parseInt(args[1]);
-            if (isNaN(id)) return reply("❌ Informe o ID da nota!");
-            const resultNotePin = notes.togglePin(sender, id);
-            return reply(resultNotePin.message);
-          }
           case 'buscar':
           case 'search': {
             const termo = args.slice(1).join(' ');
