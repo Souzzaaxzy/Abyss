@@ -31356,16 +31356,24 @@ ${prefix}nota buscar <termo> - Busca nas notas`);
       case 'desfixarmsg':
         if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
         if (!isGroupAdmin) return reply("◈ Apenas administradores podem desfixar mensagens.");
-        
+
         try {
-          // Desfixar a mensagem (enviar key vazio ou null para desfixar a mensagem fixada atual)
-          const result = await nazu.pinMessage(from, { remoteJid: from }, false).catch(() => null);
-          
-          // Tentar método alternativo se o primeiro não funcionar
-          if (!result) {
-            await nazu.sendMessage(from, { text: "🔓 Desfixando mensagem..." }, { quoted: info });
+          const quotedMsg = info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+          const quotedKey = info.message?.extendedTextMessage?.contextInfo?.quotedMessage?.quotedMessageKey;
+
+          if (!quotedMsg || !quotedKey) {
+            return reply(`❌ Você precisa responder à mensagem fixada que deseja desfixar.\n\n*Uso:*\n${prefix}desfixar (responder mensagem fixada)`);
           }
-          
+
+          const messageKey = {
+            remoteJid: from,
+            id: quotedKey?.id || info.message?.extendedTextMessage?.contextInfo?.stanzaId,
+            fromMe: quotedKey?.fromMe || false,
+            participant: quotedKey?.participant || sender
+          };
+
+          await nazu.pinMessage(from, messageKey, false).catch(() => {});
+
           return reply("✅ *Mensagem desfixada com sucesso!*");
         } catch (e) {
           console.error('Erro ao desfixar mensagem:', e);
