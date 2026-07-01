@@ -2586,7 +2586,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     const isNewsletter = !!(info.message?.newsletterAnnouncementMessage || info.message?.newsletterAdminInviteMessage || type === 'newsletterAnnouncementMessage');
     
     if (isGroup && isAntiStts && (isStatusV2 || isNewsletter)) {
-      if (!isOwnerOrSub && !isUserWhitelisted(sender, 'antistts')) {
+      if (!isOwnerOrSub && !isUserWhitelisted(sender, 'antistts') && !isGroupAdmin) {
         try {
           if (isBotAdmin) {
             await nazu.sendMessage(from, { delete: info.key }).catch(() => {});
@@ -4411,8 +4411,12 @@ packname: `${nomebot}`,            type: isVideo ? 'video' : 'image',
 
 
 
-if (  isGroup &&  groupData.antistickerplus &&  !isGroupAdmin &&  !isOwner &&  !isParceiro &&  info?.message) {
+if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParceiro && info?.message) {
   try {
+    // Verificar whitelist
+    if (isUserWhitelisted(sender, 'antistickerplus')) {
+      return;
+    }
 
     const msg = info.message;
 
@@ -4663,7 +4667,7 @@ if (  isGroup &&  groupData.antistickerplus &&  !isGroupAdmin &&  !isOwner &&  !
         if (isGroup && antipalavra && body && !isCmd) {
           try {
             if (!antipalavra.isActive(from)) {
-            } else if (!isGroupAdmin) {
+            } else if (!isGroupAdmin && !isUserWhitelisted(sender, 'antipalavra')) {
               const detectionResult = antipalavra.checkMessage(from, body);
 
               if (detectionResult && detectionResult.detected) {
@@ -34247,7 +34251,7 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
             return reply('⚠️ Nenhum anti válido foi especificado. Use o formato: antilink,antistatus,antiporn');
           }
 
-          const validAntis = ['antilink', 'antilinkgp', 'antilinkhard', 'antilinksoft', 'antiporn', 'antistatus', 'antistts', 'antipagamento', 'antibtn', 'antidoc', 'antiloc', 'antifig', 'antilinkcanal'];
+          const validAntis = ['antilink', 'antilinkgp', 'antilinkhard', 'antilinksoft', 'antiporn', 'antistatus', 'antistts', 'antipagamento', 'antibtn', 'antidoc', 'antiloc', 'antifig', 'antilinkcanal', 'antistickerplus', 'antipalavra'];
           const invalidAntis = antis.filter(a => !validAntis.includes(a));
 
           if (invalidAntis.length > 0) {
