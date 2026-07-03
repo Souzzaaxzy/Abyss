@@ -79,8 +79,8 @@ ${middleBorder} ${menuItemIcon}${prefix}descgrupo
 ${middleBorder} ${menuItemIcon}${prefix}fotogrupo
 ${middleBorder} ${menuItemIcon}${prefix}addregra
 ${middleBorder} ${menuItemIcon}${prefix}delregra
-${middleBorder} ${menuItemIcon}${prefix}fixar
-${middleBorder} ${menuItemIcon}${prefix}desfixar
+${middleBorder} ${menuItemIcon}${prefix}lixeira
+${middleBorder} ${menuItemIcon}${prefix}restaurar <número>
 ${middleBorder} ${menuItemIcon}${prefix}role.criar
 ${middleBorder} ${menuItemIcon}${prefix}role.alterar
 ${middleBorder} ${menuItemIcon}${prefix}role.excluir
@@ -170,6 +170,8 @@ ${menuTopBorder}
 ${middleBorder}
 ${middleBorder} ${menuItemIcon}${prefix}legendasaiu
 ${middleBorder} ${menuItemIcon}${prefix}legendabv
+${middleBorder} ${menuItemIcon}${prefix}legendaentrada
+${middleBorder} ${menuItemIcon}${prefix}legendasimples
 ${middleBorder} ${menuItemIcon}${prefix}fotobv
 ${middleBorder} ${menuItemIcon}${prefix}set-fotobv
 ${middleBorder} ${menuItemIcon}${prefix}set-bannerbv
