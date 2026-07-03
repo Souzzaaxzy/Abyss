@@ -27339,6 +27339,101 @@ break;
         }
         break;
 
+      case 'bann':
+      case 'banmulti':
+      case 'banirvarios':
+        try {
+          if (!isGroup) return sendAbyssWarning("◈ Este comando é só para grupos.");
+          if (!isGroupAdmin) return reply("Comando restrito a Administradores ou Moderadores com permissão. 💔");
+          if (!isBotAdmin) return sendAbyssWarning("Eu preciso ser administrador para realizar esta ação.");
+
+          // Extrair todos os usuários mencionados
+          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          
+          if (mentionedUsers.length === 0) {
+            return reply("◈ Marque pelo menos um usuário para banir.\n\nExemplo: " + prefix + "bann @user1 @user2 @user3");
+          }
+
+          // Filtrar usuários válidos
+          let usersToBan = [...mentionedUsers];
+          
+          // Remover dono do bot da lista
+          if (usersToBan.includes(nmrdn)) {
+            usersToBan = usersToBan.filter(u => u !== nmrdn);
+            await reply("⚠️ O dono do bot não pode ser banido.");
+          }
+          
+          // Remover o bot da lista
+          if (usersToBan.includes(botNumber)) {
+            usersToBan = usersToBan.filter(u => u !== botNumber);
+            await reply("⚠️ Eu não posso me banir! 😅");
+          }
+          
+          // Remover administradores do grupo
+          const adminsToSkip = [];
+          for (const user of usersToBan) {
+            if (groupAdmins.includes(user)) {
+              adminsToSkip.push(user);
+            }
+          }
+          usersToBan = usersToBan.filter(u => !groupAdmins.includes(u));
+          
+          if (adminsToSkip.length > 0) {
+            await reply("⚠️ Não posso banir administradores do grupo: " + adminsToSkip.map(u => '@' + u.split('@')[0]).join(', '), { mentions: adminsToSkip });
+          }
+
+          if (usersToBan.length === 0) {
+            return reply("❌ Nenhum usuário válido para banir.");
+          }
+
+          // Banir todos os usuários
+          const result = await nazu.groupParticipantsUpdate(from, usersToBan, 'remove');
+          
+          // Preparar relatório
+          let successCount = 0;
+          let failCount = 0;
+          const failedUsers = [];
+          
+          for (let i = 0; i < result.length; i++) {
+            if (result[i].status === "200" || result[i].status === 200) {
+              successCount++;
+            } else {
+              failCount++;
+              failedUsers.push(usersToBan[i]);
+            }
+          }
+
+          // Montar mensagem de resposta
+          let responseMsg = `🚪 *BANIMENTO EM MASSA*\n\n`;
+          responseMsg += `✅ Banidos: ${successCount}\n`;
+          
+          if (failCount > 0) {
+            responseMsg += `❌ Falhas: ${failCount}\n`;
+          }
+          
+          if (q && q.length > 0) {
+            responseMsg += `\n📝 Motivo: ${q}`;
+          }
+          
+          responseMsg += `\n\n📋 Removidos: ${usersToBan.map(u => '@' + u.split('@')[0]).join(', ')}`;
+          
+          // Notificação X9 se ativo
+          if (groupData.x9 && successCount > 0) {
+            const x9Msg = `🚪 *X9 Report:* Os seguintes usuários foram removidos por @${sender.split('@')[0]}: ${usersToBan.map(u => '@' + u.split('@')[0]).join(', ')}${q && q.length > 0 ? '\n📝 Motivo: ' + q : ''}`;
+            await nazu.sendMessage(from, {
+              text: x9Msg,
+              mentions: [sender, ...usersToBan]
+            }).catch(err => console.error('Erro ao enviar X9:', err.message));
+          }
+
+          reply(responseMsg, { mentions: usersToBan });
+
+        } catch (e) {
+          console.error(e);
+          reply("Ocorreu um erro 💔");
+        }
+        break;
+
       case 'bam':
       case 'banfake':
         if (!isGroup) return sendAbyssWarning("◈ Este comando é só para grupos.");
