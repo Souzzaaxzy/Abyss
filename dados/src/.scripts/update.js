@@ -569,8 +569,11 @@ async function main() {
     await installDependencies(dependencyCheckResult);
     await cleanup();
     printMessage('🔄 Buscando informações do último commit...');
-    const repoName = config.repositorio || 'Abyss';
-    const response = await fetch(`https://api.github.com/repos/${config.autor}/${repoName}/commits?per_page=1`, {
+    // Extrair owner e repo da URL github_ofc
+    const ghUrlMatch = config.github_ofc?.match(/github\.com\/([^/]+)\/([^/.]+)/);
+    const ghOwner = ghUrlMatch ? ghUrlMatch[1] : (config.autor || 'Souzzaaxzy');
+    const ghRepo = ghUrlMatch ? ghUrlMatch[2] : (config.repositorio || 'Abyss');
+    const response = await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/commits?per_page=1`, {
       headers: { Accept: 'application/vnd.github+json' },
     });
     if (!response.ok) {
