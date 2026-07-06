@@ -15,6 +15,7 @@ class UpdateCommand {
   constructor() {
     this.isUpdating = false;
     this.processing = false;
+    this.testFlag = '🧪 Update v2 funcionando!';
   }
 
   /**

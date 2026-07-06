@@ -17574,7 +17574,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ◈`);
             
             if (result.needsRestart) {
               // Envia mensagem de sucesso e reinicia
-              await reply(result.message);
+              await reply(result.message + '\n\n' + updateCmd.testFlag);
               setTimeout(() => {
                 console.log('[UPDATE] Reiniciando bot após atualização...');
                 process.exit(0);
