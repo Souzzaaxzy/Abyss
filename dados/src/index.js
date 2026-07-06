@@ -138,6 +138,7 @@ import cron from 'node-cron';import { fileURLToPath } from 'url';
 import RentalExpirationManager from './utils/rentalExpirationManager.js';
 import { PerformanceOptimizer, getPerformanceOptimizer } from './utils/performanceOptimizer.js';
 import { recalcEquipmentBonuses } from './utils/equipment.js';
+import UpdateCommand from './utils/updateCommand.js';
 import * as ia from './funcs/private/ia.js';
 import * as vipCommandsManager from './utils/vipCommandsManager.js';
 import { getInfo as gdriveGetInfo } from './funcs/utils/gdrive.js';
@@ -17522,6 +17523,45 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ◈`);
         }).catch((e) => {
           console.error("Erro no comando reiniciar:", e);
           reply(`❌ Erro ao tentar reiniciar: ${e.message}`);
+        });
+        break;
+
+      case 'update':
+      case 'atualizar':
+      case 'upgrade':
+        if (!isOwner) return reply(OWNER_ONLY_MESSAGE);
+        
+        // Instância singleton doUpdateCommand
+        if (!global.updateCommandInstance) {
+          global.updateCommandInstance = new UpdateCommand();
+        }
+        
+        const updateCmd = global.updateCommandInstance;
+        
+        // Envia mensagem inicial
+        reply('🔄 *Verificando atualizações...*').then(async () => {
+          try {
+            const result = await updateCmd.execute();
+            
+            if (!result.success) {
+              await reply(result.message);
+              return;
+            }
+            
+            if (result.needsRestart) {
+              // Envia mensagem de sucesso e reinicia
+              await reply(result.message);
+              setTimeout(() => {
+                console.log('[UPDATE] Reiniciando bot após atualização...');
+                process.exit(0);
+              }, 3000);
+            } else {
+              await reply(result.message);
+            }
+          } catch (error) {
+            console.error('Erro no comando update:', error);
+            await reply(`❌ *Erro inesperado*\n\n${error.message}`);
+          }
         });
         break;
 
