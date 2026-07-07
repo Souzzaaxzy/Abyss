@@ -35,6 +35,7 @@ ${middleBorder}${menuItemIcon}${prefix}corrigir
 ${middleBorder}${menuItemIcon}${prefix}resumirurl
 ${middleBorder}${menuItemIcon}${prefix}resumirchat <qtd>
 ${middleBorder}${menuItemIcon}${prefix}recomendar <tipo> <gênero>
+${middleBorder}${menuItemIcon}${prefix}ocr
 ${bottomBorder}
 
 ${menuTopBorder}
