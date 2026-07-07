@@ -1250,13 +1250,12 @@ async function createBotSocket(authDir) {
                             
                             if (!groupId || !groupId.endsWith('@g.us')) continue;
                             
-                            const { normalizeGroupId, buildGroupFilePath, writeJsonFile } = await import('./utils/paths.js');
                             const fs = await import('fs');
                             
-                            const normId = normalizeGroupId(groupId);
+                            const normId = groupId.replace(/@g.us$/, '@g.us');
                             if (!normId) continue;
                             
-                            const filePath = buildGroupFilePath(normId);
+                            const filePath = `./database/grupos/${normId}.json`;
                             if (!fs.existsSync(filePath)) continue;
                             
                             let groupData = {};
@@ -1274,7 +1273,7 @@ async function createBotSocket(authDir) {
                                 groupData.contador.push({ id: senderId, msg: 0, cmd: 0, figu: 0, apagadas: 1, pushname: 'Usuário', firstSeen: new Date().toISOString(), lastActivity: new Date().toISOString() });
                             }
                             
-                            writeJsonFile(filePath, groupData);
+                            fs.writeFileSync(filePath, JSON.stringify(groupData, null, 2));
                             console.log(`[DELETED] Msg apagada por ${senderId}`);
                         } catch (e) {
                             console.error('[DELETED] Erro:', e);
@@ -1367,10 +1366,10 @@ async function createBotSocket(authDir) {
                         } = await import('./utils/paths.js');
                         const fs = await import('fs');
                         
-                        const normId = normalizeGroupId(groupId);
+                        const normId = groupId.replace(/@g.us$/, '@g.us');
                         if (!normId) continue;
                         
-                        const filePath = buildGroupFilePath(normId);
+                        const filePath = `./database/grupos/${normId}.json`;
                         
                         // Criar arquivo se não existir
                         if (!fs.existsSync(filePath)) {
@@ -1409,7 +1408,7 @@ async function createBotSocket(authDir) {
                             });
                         }
                         
-                        writeJsonFile(filePath, groupData);
+                        fs.writeFileSync(filePath, JSON.stringify(groupData, null, 2));
                         console.log(`[DELETED] Mensagem apagada por ${senderId} em ${groupId}`);
                     }
                 } catch (e) {
