@@ -16859,9 +16859,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const bank = econUser.bank || 0;
           const totalCoins = balance + bank;
 
-          // Advertências REAIS
-          const userWarnData = groupData.warnings?.[targetUser] || {};
-          const userAdvs = userWarnData.count || 0;
+          // Advertências REAIS (array com motivos)
+          const userAdvs = (groupData.warnings?.[targetUser]?.length) || 0;
           const advBar = '🟥'.repeat(userAdvs) + '⬜'.repeat(3 - userAdvs);
 
           // Cargo no grupo
