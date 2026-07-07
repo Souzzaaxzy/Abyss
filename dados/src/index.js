@@ -16782,13 +16782,18 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const targetId = getUserName(targetUser);
           const targetName = `@${targetId}`;
 
+          // Dados do contador do grupo (igual ao !checkativo)
+          const userContador = (groupData.contador || []).find(u => u.id === targetUser);
+          const totalMessages = userContador?.msg || 0;
+          const totalCommands = userContador?.cmd || 0;
+          const totalStickers = userContador?.figu || 0;
+          const lastActivity = userContador?.lastActivity ? new Date(userContador.lastActivity) : null;
+
+          // Dados de leveling
           const levelingData = loadLevelingSafe();
           const levelUser = getLevelingUser(levelingData, targetUser);
           const userLevel = levelUser.level || 0;
           const userXp = levelUser.xp || 0;
-          const totalMessages = levelUser.messages || 0;
-          const totalCommands = levelUser.commands || 0;
-          const lastMessageTime = levelUser.lastMessage ? new Date(levelUser.lastMessage) : null;
 
           const xpForNext = userLevel * 500 + 500;
           const xpProgress = userXp > 0 ? Math.min(100, Math.floor((userXp / xpForNext) * 100)) : 0;
@@ -16802,6 +16807,7 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
             }
           }
 
+          // Dados de economia
           const econ = loadEconomy();
           const econUser = getEcoUser(econ, targetUser);
           const balance = econUser.wallet || 0;
@@ -16855,8 +16861,9 @@ Patente: ${patent}
 *ATIVIDADE*
 Mensagens: ${totalMessages}
 Comandos: ${totalCommands}
+Figurinhas: ${totalStickers}
 Apagadas: ${msgsApagadas}
-Ultima: ${formatDate(lastMessageTime)}
+Ultima msg: ${formatDate(lastActivity)}
 
 *NIVEL*
 Level: ${userLevel}
