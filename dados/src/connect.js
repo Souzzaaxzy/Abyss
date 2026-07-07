@@ -1252,7 +1252,8 @@ async function createBotSocket(authDir) {
                             
                             const fs = await import('fs');
                             
-                            const normId = groupId.replace(/@g.us$/, '@g.us');
+                            // Normalize group ID (same as in index.js)
+                            const normId = groupId.replace(/@g.us$/, '').replace(/[^0-9-]/g, '_') + '@g.us';
                             if (!normId) continue;
                             
                             const filePath = `./database/grupos/${normId}.json`;
@@ -1371,7 +1372,8 @@ async function createBotSocket(authDir) {
                         } = await import('./utils/paths.js');
                         const fs = await import('fs');
                         
-                        const normId = groupId.replace(/@g.us$/, '@g.us');
+                        // Normalize group ID (same as in index.js)
+                            const normId = groupId.replace(/@g.us$/, '').replace(/[^0-9-]/g, '_') + '@g.us';
                         if (!normId) continue;
                         
                         const filePath = `./database/grupos/${normId}.json`;
