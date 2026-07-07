@@ -5,11 +5,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Função para normalizar texto (remover acentos)
+function normalizar(texto) {
+    if (!texto || typeof texto !== 'string') return '';
+    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 // Arquivo de persistência
 const blockPvFile = path.join(process.cwd(), 'dados', 'database', 'blockPv.json');
 
 // Dados em memória
-let blockPvData = {
+export let blockPvData = {
     menus: [],      // Menus bloqueados no PV (array de menuKey)
     commands: []    // Comandos bloqueados no PV (array de command names)
 };
@@ -20,7 +26,9 @@ export function loadBlockPvData() {
         if (fs.existsSync(blockPvFile)) {
             const content = fs.readFileSync(blockPvFile, 'utf-8') || '';
             if (content && content.trim() && content.trim().startsWith('{')) {
-                blockPvData = JSON.parse(content);
+                const loadedData = JSON.parse(content);
+                blockPvData.menus = loadedData.menus || [];
+                blockPvData.commands = loadedData.commands || [];
             }
         }
     } catch (e) {
@@ -32,6 +40,10 @@ export function loadBlockPvData() {
 // Salvar dados no arquivo
 export function saveBlockPvData() {
     try {
+        const dir = path.dirname(blockPvFile);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         fs.writeFileSync(blockPvFile, JSON.stringify(blockPvData, null, 2), 'utf-8');
     } catch (e) {
         console.error('[BlockPV] Erro ao salvar dados:', e.message);
@@ -45,6 +57,10 @@ export function isPrivateChat(isGroup) {
 
 // Verificar se comando está bloqueado no PV
 export function isCommandBlockedInPV(command) {
+    if (!command || typeof command !== 'string') {
+        return { blocked: false };
+    }
+    
     const cmd = command.toLowerCase();
     
     // Verificar bloqueio individual de comando
@@ -121,11 +137,120 @@ export function menuExists(menuKey) {
     return menuCommandsMap.hasOwnProperty(menuKey);
 }
 
+// Encontrar menu pela chave ou pelo nome
+export function findMenuByKeyOrName(input) {
+    if (!input || typeof input !== 'string') {
+        return null;
+    }
+    
+    const normalizedInput = normalizar(input).toLowerCase();
+    
+    // Primeiro, tenta encontrar pela chave exata
+    if (menuCommandsMap[normalizedInput]) {
+        return normalizedInput;
+    }
+    
+    // Depois, tenta encontrar pelo nome do menu
+    for (const [key, data] of Object.entries(menuCommandsMap)) {
+        const normalizedMenuName = normalizar(data.menuName).toLowerCase();
+        if (normalizedMenuName === normalizedInput) {
+            return key;
+        }
+    }
+    
+    return null;
+}
+
 // Verificar se comando existe
 export function commandExists(command) {
+    if (!command || typeof command !== 'string') {
+        return false;
+    }
     const cmd = command.toLowerCase();
     return getCommandMenu(cmd) !== null;
 }
+
+// Verificar se um menu está bloqueado no PV
+export function isMenuBlocked(menuKey) {
+    if (!menuKey || typeof menuKey !== 'string') {
+        return false;
+    }
+    return blockPvData.menus.includes(menuKey);
+}
+
+// Verificar se um comando de menu está bloqueado no PV (retorna mensagem de erro ou null)
+export function checkMenuBlockedInPV(menuKey, menuName) {
+    if (isMenuBlocked(menuKey)) {
+        return `❌ O menu "${menuName}" está desativado para conversas privadas.\n\nUse este comando em um grupo.`;
+    }
+    return null;
+}
+
+// Mapear comandos de menu para suas chaves
+export const menuCommandMap = {
+    // Diversão
+    'menubn': { key: 'menubn', name: 'Diversão' },
+    'menubrincadeira': { key: 'menubn', name: 'Diversão' },
+    'menubrincadeiras': { key: 'menubn', name: 'Diversão' },
+    'gamemenu': { key: 'menubn', name: 'Diversão' },
+    // Downloads
+    'menudown': { key: 'menudown', name: 'Downloads' },
+    'menudownload': { key: 'menudown', name: 'Downloads' },
+    'menudownloads': { key: 'menudown', name: 'Downloads' },
+    'downmenu': { key: 'menudown', name: 'Downloads' },
+    'downloadmenu': { key: 'menudown', name: 'Downloads' },
+    // IA
+    'menuia': { key: 'menuia', name: 'IA' },
+    'menuias': { key: 'menuia', name: 'IA' },
+    'menuinteligencia': { key: 'menuia', name: 'IA' },
+    // Ferramentas
+    'menuferramentas': { key: 'menuferramentas', name: 'Ferramentas' },
+    'menuferramenta': { key: 'menuferramentas', name: 'Ferramentas' },
+    'ferramentas': { key: 'menuferramentas', name: 'Ferramentas' },
+    'toolsmenu': { key: 'menuferramentas', name: 'Ferramentas' },
+    'tools': { key: 'menuferramentas', name: 'Ferramentas' },
+    // Admin
+    'menuadms': { key: 'menuadm', name: 'Admin' },
+    'menuadmin': { key: 'menuadm', name: 'Admin' },
+    'menustaff': { key: 'menuadm', name: 'Admin' },
+    'menuadm': { key: 'menuadm', name: 'Admin' },
+    'adminmenu': { key: 'menuadm', name: 'Admin' },
+    // Dono
+    'menudono': { key: 'menudono', name: 'Dono' },
+    'donomenu': { key: 'menudono', name: 'Dono' },
+    'donomenu': { key: 'menudono', name: 'Dono' },
+    // Figurinhas
+    'menufig': { key: 'menufig', name: 'Figurinhas' },
+    'menusticker': { key: 'menufig', name: 'Figurinhas' },
+    'figurinhasmenu': { key: 'menufig', name: 'Figurinhas' },
+    'stickermenu': { key: 'menufig', name: 'Figurinhas' },
+    // Logos
+    'menulogos': { key: 'menulogos', name: 'Logos' },
+    'logomenu': { key: 'menulogos', name: 'Logos' },
+    'logosmenu': { key: 'menulogos', name: 'Logos' },
+    // Edits
+    'menuedits': { key: 'menuedits', name: 'Edições' },
+    'editmenu': { key: 'menuedits', name: 'Edições' },
+    'editsmenu': { key: 'menuedits', name: 'Edições' },
+    // Membresia
+    'menumemb': { key: 'menumemb', name: 'Membresia' },
+    'menumembro': { key: 'menumemb', name: 'Membresia' },
+    'membmenu': { key: 'menumemb', name: 'Membresia' },
+    // RPG
+    'menurpg': { key: 'menurpg', name: 'RPG' },
+    'rpgmenu': { key: 'menurpg', name: 'RPG' },
+    // VIP
+    'menuvip': { key: 'menuvip', name: 'VIP' },
+    'vipmenu': { key: 'menuvip', name: 'VIP' },
+    // Futebol
+    'menufut': { key: 'menufut', name: 'Futebol' },
+    'futmenu': { key: 'menufut', name: 'Futebol' },
+    'futebolmenu': { key: 'menufut', name: 'Futebol' },
+    // Áudios
+    'menuaudio': { key: 'menuaudio', name: 'Áudios' },
+    'menuáudio': { key: 'menuaudio', name: 'Áudios' },
+    'audiosmenu': { key: 'menuaudio', name: 'Áudios' },
+};
 
 // Mapeamento de menus para comandos
 // Cada menu pode ter múltiplos comandos (aliases)
@@ -207,6 +332,10 @@ export function getAllCommands() {
 
 // Função para obter o menu de um comando
 export function getCommandMenu(command) {
+    if (!command || typeof command !== 'string') {
+        return null;
+    }
+    
     const cmd = command.toLowerCase();
     for (const [menuKey, menuData] of Object.entries(menuCommandsMap)) {
         if (menuData.commands.includes(cmd)) {

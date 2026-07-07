@@ -5969,6 +5969,16 @@ if (isCmd && command && !isOwnerOrSub) {
       }
     }
 
+    // Verificar bloqueio de menu no PV (comandos !menuxxx)
+    console.log('[MENU-PV] command="' + command + '", isGroup=' + isGroup + ', menuCommandMap[command]=' + JSON.stringify(blockPv.menuCommandMap[command]));
+    if (!isGroup && blockPv.menuCommandMap && blockPv.menuCommandMap[command]) {
+      const menuInfo = blockPv.menuCommandMap[command];
+      console.log('[MENU-PV] menuInfo=' + JSON.stringify(menuInfo) + ', isMenuBlocked=' + blockPv.isMenuBlocked(menuInfo.key));
+      if (blockPv.isMenuBlocked(menuInfo.key)) {
+        return reply("❌ O menu \"" + menuInfo.name + "\" está desativado para conversas privadas.\n\nUse este comando em um grupo.");
+      }
+    }
+
     switch (command) {
 
       case 'roles':
