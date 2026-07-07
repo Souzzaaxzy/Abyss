@@ -26801,7 +26801,7 @@ ${prefix}togglecmdvip premium_ia off`);
           
           // Contadores de comandos
           const commandStats = loadJsonFile('./dados/database/commandStats.json', {});
-          const totalCommands = commandStats.totalExecutions || 0;
+          const totalCommands = Object.values(commandStats.commands || {}).reduce((sum, cmd) => sum + (cmd.count || 0), 0);
 
           // ==================== ESTATÍSTICAS DE USUÁRIOS ====================
           let totalUsers = 0;
