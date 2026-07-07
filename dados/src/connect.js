@@ -1242,37 +1242,68 @@ async function createBotSocket(authDir) {
 
             AbyssSock.ev.on('messages.update', async (updates) => {
                 for (const update of updates) {
-                    console.log('[DEBUG MSG UPDATE] Update:', JSON.stringify(update));
+                    // Mensagens deletadas (messageStubType: 1)
+                    if (update.update.message === null && update.update.messageStubType === 1) {
+                        try {
+                            const groupId = update.key.remoteJid;
+                            const senderId = update.key.participant || groupId;
+                            
+                            if (!groupId || !groupId.endsWith('@g.us')) continue;
+                            
+                            const { normalizeGroupId, buildGroupFilePath, writeJsonFile } = await import('./utils/paths.js');
+                            const fs = await import('fs');
+                            
+                            const normId = normalizeGroupId(groupId);
+                            if (!normId) continue;
+                            
+                            const filePath = buildGroupFilePath(normId);
+                            if (!fs.existsSync(filePath)) continue;
+                            
+                            let groupData = {};
+                            try {
+                                const content = fs.readFileSync(filePath, 'utf-8');
+                                groupData = JSON.parse(content);
+                            } catch (e) { continue; }
+                            
+                            groupData.contador = groupData.contador || [];
+                            const userIndex = groupData.contador.findIndex(u => u.id === senderId);
+                            
+                            if (userIndex !== -1) {
+                                groupData.contador[userIndex].apagadas = (groupData.contador[userIndex].apagadas || 0) + 1;
+                            } else {
+                                groupData.contador.push({ id: senderId, msg: 0, cmd: 0, figu: 0, apagadas: 1, pushname: 'Usuário', firstSeen: new Date().toISOString(), lastActivity: new Date().toISOString() });
+                            }
+                            
+                            writeJsonFile(filePath, groupData);
+                            console.log(`[DELETED] Msg apagada por ${senderId}`);
+                        } catch (e) {
+                            console.error('[DELETED] Erro:', e);
+                        }
+                        continue;
+                    }
+                    
                     if (update.update.pollUpdates) {
                         const pollUpdate = update.update.pollUpdates[0];
                         const pollMsgId = update.key.id;
                         const groupId = update.key.remoteJid;
-                        
+
                         try {
-                            // Lógica para o comando !tester: armazenar votos de enquetes gerais
                             if (!global.pollVotes) global.pollVotes = {};
-                            
-                            // Lógica compatível: Armazena votos por usuário
                             if (!global.pollVotes[pollMsgId]) global.pollVotes[pollMsgId] = {};
-                            
+
                             const voter = pollUpdate.pollUpdateMessageKey.participant || pollUpdate.pollUpdateMessageKey.remoteJid;
-                            
-                            // Extrai os nomes das opções selecionadas (Baileys v6.x+)
-                            // Se selectedOptions não estiver disponível, tenta extrair dos hashes de opções se necessário
-                            // Mas normalmente o Baileys já fornece o nome ou o índice.
                             const voteNames = pollUpdate.vote?.selectedOptions?.map(opt => opt.name || opt) || [];
-                            
+
                             if (voteNames.length > 0) {
                                 global.pollVotes[pollMsgId][voter] = voteNames;
                             } else {
                                 delete global.pollVotes[pollMsgId][voter];
                             }
 
-                            // Manter a lógica existente de eleições
                             const { loadElections, saveElections } = await import('./utils/database.js');
                             const elections = loadElections();
                             const election = elections.find(e => e.groupId === groupId && e.pollMsgId === pollMsgId);
-                            
+
                             if (election && election.status === 'votacao') {
                                 election.voters[voter] = true;
                                 saveElections(elections);
