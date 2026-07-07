@@ -16786,11 +16786,29 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const targetName = `@${targetId}`;
           
           // Carregar dados
-          const levelingData = loadLevelingSafe();
-          const econ = loadEconomy();
-          const cmdStats = JSON.parse(fs.readFileSync(pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json'), 'utf-8'));
-          const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
-          const userCtx = JSON.parse(fs.readFileSync(userCtxPath, 'utf-8'));
+          // Ler commandStats com tratamento de erro
+          let cmdStats = { commands: {} };
+          try {
+            const cmdStatsPath = pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json');
+            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8');
+            if (cmdStatsContent && cmdStatsContent.trim()) {
+              cmdStats = JSON.parse(cmdStatsContent);
+            }
+          } catch (e) {
+            console.warn('Erro ao ler commandStats:', e.message);
+          }
+          
+          // Ler userContext com tratamento de erro
+          let userCtx = {};
+          try {
+            const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
+            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8');
+            if (userCtxContent && userCtxContent.trim()) {
+              userCtx = JSON.parse(userCtxContent);
+            }
+          } catch (e) {
+            console.warn('Erro ao ler userContext:', e.message);
+          }
           
           // Dados de level
           const levelUser = levelingData.users?.[targetUser] || {};
@@ -25908,12 +25926,29 @@ ${prefix}togglecmdvip premium_ia off`);
         try {
           const targetUser = sender;
           
-          // Carregar dados
-          const levelingData = loadLevelingSafe();
-          const econ = loadEconomy();
-          const cmdStats = JSON.parse(fs.readFileSync(pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json'), 'utf-8'));
-          const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
-          const userCtx = JSON.parse(fs.readFileSync(userCtxPath, 'utf-8'));
+          // Ler commandStats com tratamento de erro
+          let cmdStats = { commands: {} };
+          try {
+            const cmdStatsPath = pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json');
+            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8');
+            if (cmdStatsContent && cmdStatsContent.trim()) {
+              cmdStats = JSON.parse(cmdStatsContent);
+            }
+          } catch (e) {
+            console.warn('Erro ao ler commandStats:', e.message);
+          }
+          
+          // Ler userContext com tratamento de erro
+          let userCtx = {};
+          try {
+            const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
+            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8');
+            if (userCtxContent && userCtxContent.trim()) {
+              userCtx = JSON.parse(userCtxContent);
+            }
+          } catch (e) {
+            console.warn('Erro ao ler userContext:', e.message);
+          }
           
           // Dados de level
           const levelUser = levelingData.users?.[targetUser] || {};
