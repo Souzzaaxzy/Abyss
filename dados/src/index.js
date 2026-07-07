@@ -16790,8 +16790,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           let cmdStats = { commands: {} };
           try {
             const cmdStatsPath = pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json');
-            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8');
-            if (cmdStatsContent && cmdStatsContent.trim()) {
+            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8') || '';
+            if (cmdStatsContent && cmdStatsContent.trim() && cmdStatsContent.trim().startsWith('{')) {
               cmdStats = JSON.parse(cmdStatsContent);
             }
           } catch (e) {
@@ -16802,8 +16802,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           let userCtx = {};
           try {
             const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
-            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8');
-            if (userCtxContent && userCtxContent.trim()) {
+            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8') || '';
+            if (userCtxContent && userCtxContent.trim() && userCtxContent.trim().startsWith('{')) {
               userCtx = JSON.parse(userCtxContent);
             }
           } catch (e) {
@@ -25930,8 +25930,8 @@ ${prefix}togglecmdvip premium_ia off`);
           let cmdStats = { commands: {} };
           try {
             const cmdStatsPath = pathz.join(process.cwd(), 'dados', 'database', 'commandStats.json');
-            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8');
-            if (cmdStatsContent && cmdStatsContent.trim()) {
+            const cmdStatsContent = fs.readFileSync(cmdStatsPath, 'utf-8') || '';
+            if (cmdStatsContent && cmdStatsContent.trim() && cmdStatsContent.trim().startsWith('{')) {
               cmdStats = JSON.parse(cmdStatsContent);
             }
           } catch (e) {
@@ -25942,8 +25942,8 @@ ${prefix}togglecmdvip premium_ia off`);
           let userCtx = {};
           try {
             const userCtxPath = pathz.join(process.cwd(), 'dados', 'database', 'userContext.json');
-            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8');
-            if (userCtxContent && userCtxContent.trim()) {
+            const userCtxContent = fs.readFileSync(userCtxPath, 'utf-8') || '';
+            if (userCtxContent && userCtxContent.trim() && userCtxContent.trim().startsWith('{')) {
               userCtx = JSON.parse(userCtxContent);
             }
           } catch (e) {
