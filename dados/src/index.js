@@ -16699,10 +16699,10 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
             return reply("❌ Não foi possível baixar a imagem. Tente novamente.");
           }
 
-          // Verificar tamanho (limite ~20MB)
+          // Verificar tamanho (limite ~5MB para API)
           const sizeMB = imageBuffer.length / (1024 * 1024);
-          if (sizeMB > 20) {
-            return reply(`❌ Imagem muito grande (${sizeMB.toFixed(1)}MB). Máximo: 20MB.\nTente enviar uma imagem menor.`);
+          if (sizeMB > 5) {
+            return reply(`❌ Imagem muito grande (${sizeMB.toFixed(1)}MB). Máximo: 5MB.\nTente enviar uma imagem menor ou comprimida.`);
           }
 
           // Converter para base64
@@ -16714,11 +16714,11 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const isPng = imageBuffer[0] === 0x89 && imageBuffer[1] === 0x50;
           const mimeType = isPng ? 'image/png' : 'image/jpeg';
 
-          // Enviar para Groq Vision API
+          // Enviar para Groq Vision API - modelo correto
           const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
-              model: 'llama-3.2-11b-vision-preview',
+              model: 'llama-3.2-90b-vision-preview',
               messages: [
                 {
                   role: 'user',
@@ -16743,7 +16743,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
               headers: {
                 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
                 'Content-Type': 'application/json'
-              }
+              },
+              timeout: 60000
             }
           );
 
