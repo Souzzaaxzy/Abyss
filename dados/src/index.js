@@ -16773,6 +16773,7 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
         break;
       case 'historico':
       case 'history':
+      case 'me':
         try {
           // Determinar usuário alvo
           let targetUser = sender;
