@@ -16699,13 +16699,20 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
             return reply("❌ Não foi possível baixar a imagem. Tente novamente.");
           }
 
+          // Verificar tamanho (limite ~20MB)
+          const sizeMB = imageBuffer.length / (1024 * 1024);
+          if (sizeMB > 20) {
+            return reply(`❌ Imagem muito grande (${sizeMB.toFixed(1)}MB). Máximo: 20MB.\nTente enviar uma imagem menor.`);
+          }
+
           // Converter para base64
           const base64Image = Buffer.isBuffer(imageBuffer) 
             ? imageBuffer.toString('base64')
             : (await fs.readFile(imageBuffer)).toString('base64');
 
-          // Determinar mime type
-          const mimeType = 'image/jpeg';
+          // Verificar se é PNG ou JPEG
+          const isPng = imageBuffer[0] === 0x89 && imageBuffer[1] === 0x50;
+          const mimeType = isPng ? 'image/png' : 'image/jpeg';
 
           // Enviar para Groq Vision API
           const response = await axios.post(
@@ -16729,7 +16736,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
                   ]
                 }
               ],
-              temperature: 0.1
+              temperature: 0.1,
+              max_tokens: 4096
             },
             {
               headers: {
@@ -16749,10 +16757,14 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
 
         } catch (e) {
           console.error('Erro no OCR:', e);
+          console.error('Response:', e.response?.data);
           if (e.response?.status === 401) {
             reply("❌ API Key inválida. Use !setgroq para configurar uma nova chave.");
           } else if (e.response?.status === 429) {
             reply("⏳ Limite de requisições atingido. Tente novamente em alguns minutos.");
+          } else if (e.response?.status === 400) {
+            const errorMsg = e.response?.data?.error?.message || 'Formato de imagem inválido ou muito grande';
+            reply(`❌ Erro na API: ${errorMsg}\n\nTente com uma imagem menor ou diferente.`);
           } else {
             reply(`❌ Erro ao processar OCR: ${e.message}`);
           }
