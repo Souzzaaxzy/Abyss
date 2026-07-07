@@ -1256,6 +1256,9 @@ async function createBotSocket(authDir) {
                             if (!normId) continue;
                             
                             const filePath = `./database/grupos/${normId}.json`;
+                            if (!fs.existsSync('./database/grupos')) {
+                                fs.mkdirSync('./database/grupos', { recursive: true });
+                            }
                             if (!fs.existsSync(filePath)) {
                                 fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
                             }
@@ -1372,6 +1375,9 @@ async function createBotSocket(authDir) {
                         if (!normId) continue;
                         
                         const filePath = `./database/grupos/${normId}.json`;
+                            if (!fs.existsSync('./database/grupos')) {
+                                fs.mkdirSync('./database/grupos', { recursive: true });
+                            }
                         
                         // Criar arquivo se não existir
                         if (!fs.existsSync(filePath)) {
