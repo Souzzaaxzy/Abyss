@@ -21956,7 +21956,32 @@ break;
           }
 
           const customDesign = getMenuDesignWithDefaults(customBotName, pushname);
-          const menuText = await menu(prefix, customBotName, pushname, customDesign);
+          
+          // Determinar cargo do usuário
+          let userCargo = "Membro";
+          if (isOwner) {
+            userCargo = "Dono";
+          } else if (isPremium) {
+            userCargo = "Premium";
+          } else if (isGroupAdmin) {
+            userCargo = "Admin";
+          } else if (isGroup && groupData?.moderators?.includes(sender)) {
+            userCargo = "Moderador";
+          }
+          
+          // Verificar status VIP
+          const userVip = premiumListaZinha[sender] || premiumListaZinha[from] || false;
+          
+          // Calcular ping
+          const timestamp = Date.now();
+          const pingMs = Math.round((timestamp - info.messageTimestamp * 1000));
+          
+          const menuText = await menu(prefix, customBotName, pushname, {
+            ...customDesign,
+            userCargo,
+            userVip,
+            ping: pingMs
+          });
           const lerMaisPrefix = getMenuLerMaisText();
 
           // Envia o áudio primeiro se configurado
@@ -22006,7 +22031,29 @@ break;
         } catch (error) {
           console.error('Erro ao enviar menu:', error);
           const customDesign = getMenuDesignWithDefaults(nomebot, pushname);
-          const menuText = await menu(prefix, nomebot, pushname, customDesign);
+          
+          // Determinar cargo do usuário (mesma lógica)
+          let userCargo = "Membro";
+          if (isOwner) {
+            userCargo = "Dono";
+          } else if (isPremium) {
+            userCargo = "Premium";
+          } else if (isGroupAdmin) {
+            userCargo = "Admin";
+          } else if (isGroup && groupData?.moderators?.includes(sender)) {
+            userCargo = "Moderador";
+          }
+          
+          const userVip = premiumListaZinha[sender] || premiumListaZinha[from] || false;
+          const timestamp = Date.now();
+          const pingMs = Math.round((timestamp - info.messageTimestamp * 1000));
+          
+          const menuText = await menu(prefix, nomebot, pushname, {
+            ...customDesign,
+            userCargo,
+            userVip,
+            ping: pingMs
+          });
           await reply(`${menuText}\n\n⚠️ *Nota*: Ocorreu um erro ao carregar a mídia do menu.`);
         }
         break;
