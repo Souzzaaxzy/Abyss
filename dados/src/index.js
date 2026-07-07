@@ -3134,6 +3134,10 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
             userData.cmd = (userData.cmd || 0) + 1;
           } else if (type === "stickerMessage") {
             userData.figu = (userData.figu || 0) + 1;
+          } else if (type === "audioMessage") {
+            userData.audios = (userData.audios || 0) + 1;
+          } else if (type === "imageMessage" || type === "videoMessage") {
+            userData.midias = (userData.midias || 0) + 1;
           } else {
             userData.msg = (userData.msg || 0) + 1;
           }
@@ -3147,6 +3151,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
             msg: isCmd ? 0 : 1,
             cmd: isCmd ? 1 : 0,
             figu: type === "stickerMessage" ? 1 : 0,
+            audios: type === "audioMessage" ? 1 : 0,
+            midias: ["imageMessage", "videoMessage"].includes(type) ? 1 : 0,
             apagadas: 0,
             pushname: pushname || 'Usuário Desconhecido',
             firstSeen: new Date().toISOString(),
@@ -16818,7 +16824,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const totalMessages = userContador?.msg || 0;
           const totalCommands = userContador?.cmd || 0;
           const totalFigus = userContador?.figu || 0;
-          const msgsApagadas = userContador?.apagadas || 0;
+          const totalAudios = userContador?.audios || 0;
+          const totalMidias = userContador?.midias || 0;
           const firstSeen = userContador?.firstSeen ? new Date(userContador.firstSeen) : null;
           const lastActivity = userContador?.lastActivity ? new Date(userContador.lastActivity) : null;
 
@@ -16897,7 +16904,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
 │ 💬 Msgs: \`${totalMessages}\`
 │ ⚒️ Cmds: \`${totalCommands}\`
 │ 🖼️ Figus: \`${totalFigus}\`
-│ 🗑️ Apagadas: \`${msgsApagadas}\`
+│ 🎵 Áudios: \`${totalAudios}\`
+│ 🖼️ Mídias: \`${totalMidias}\`
 │ 📅 Entrada: \`${dataEntrada}\`
 │ 🔥 Frequência: ${frequencia}
 │
