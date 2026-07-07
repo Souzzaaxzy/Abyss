@@ -16714,11 +16714,11 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const isPng = imageBuffer[0] === 0x89 && imageBuffer[1] === 0x50;
           const mimeType = isPng ? 'image/png' : 'image/jpeg';
 
-          // Enviar para Groq Vision API - modelo correto
+          // Enviar para Groq Vision API
           const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
-              model: 'llama-3.2-90b-vision-preview',
+              model: 'llama-3.2-11b-vision-preview',
               messages: [
                 {
                   role: 'user',
