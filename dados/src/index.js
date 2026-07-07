@@ -26795,87 +26795,28 @@ ${prefix}togglecmdvip premium_ia off`);
           const secs = Math.floor(uptimeSec % 60);
           const uptimeStr = days > 0 ? `${days}d ${hours}h ${mins}m` : `${hours}h ${mins}m ${secs}s`;
           
-          // Commands count
+          // Commands from commandStats
           const cmdStats = loadJsonFile('./dados/database/commandStats.json', {});
           const totalCmds = Object.values(cmdStats.commands || {}).reduce((s, c) => s + (c.count || 0), 0);
           const cmdCount = Object.keys(cmdStats.commands || {}).length;
 
-          // ==================== USERS ====================
-          let users = new Set();
-          let activeToday = 0;
-          let activeWeek = 0;
-          let totalMsgs = 0;
-          let totalCmdsUser = 0;
-          
-          try {
-            const groupFiles = fs.readdirSync('./dados/database/grupos/').filter(f => f.endsWith('.json'));
-            const now = Date.now();
-            const dayAgo = now - 86400000;
-            const weekAgo = now - 604800000;
-            
-            for (const file of groupFiles) {
-              try {
-                const gd = JSON.parse(fs.readFileSync(`./dados/database/grupos/${file}`, 'utf-8'));
-                for (const u of (gd.contador || [])) {
-                  users.add(u.id);
-                  totalMsgs += (u.msg || 0);
-                  totalCmdsUser += (u.cmd || 0);
-                  if (u.lastActivity) {
-                    const t = new Date(u.lastActivity).getTime();
-                    if (t >= dayAgo) activeToday++;
-                    if (t >= weekAgo) activeWeek++;
-                  }
-                }
-              } catch (e) {}
+          // ==================== USERS FROM COMMANDSTATS ====================
+          const allUsers = new Set();
+          const userCmdCount = {};
+          for (const [cmdName, cmdData] of Object.entries(cmdStats.commands || {})) {
+            for (const [userId, count] of Object.entries(cmdData.users || {})) {
+              allUsers.add(userId);
+              userCmdCount[userId] = (userCmdCount[userId] || 0) + count;
             }
-          } catch (e) {}
-
-          // Economy users
-          const econData = loadJsonFile('./dados/database/economy.json', {});
-          const econUsers = Object.keys(econData.users || {}).length;
+          }
+          const totalUsers = allUsers.size;
 
           // ==================== GROUPS ====================
           let groups = 0;
-          let members = 0;
-          let groupNames = [];
-          
           try {
             const groupFiles = fs.readdirSync('./dados/database/grupos/').filter(f => f.endsWith('.json'));
             groups = groupFiles.length;
-            
-            for (const file of groupFiles) {
-              try {
-                const gd = JSON.parse(fs.readFileSync(`./dados/database/grupos/${file}`, 'utf-8'));
-                if (gd.subject) groupNames.push(gd.subject);
-                members += (gd.participants || []).length;
-              } catch (e) {}
-            }
           } catch (e) {}
-
-          // ==================== SYSTEM ====================
-          const totalMem = os.totalmem();
-          const freeMem = os.freemem();
-          const usedMem = totalMem - freeMem;
-          const memPercent = Math.round((usedMem / totalMem) * 100);
-          const memGB = (bytes) => (bytes / 1024 / 1024 / 1024).toFixed(1);
-          
-          const cpus = os.cpus();
-          let cpuUse = 0;
-          for (const c of cpus) {
-            const t = Object.values(c.times).reduce((a, b) => a + b, 0);
-            cpuUse += ((t - c.times.idle) / t) * 100;
-          }
-          cpuUse = Math.round(cpuUse / cpus.length);
-
-          // CPU Load
-          const load = os.loadavg();
-          
-          const platform = os.platform();
-          const arch = os.arch();
-          const nodeV = process.version.replace('v', '');
-          const pid = process.pid;
-          
-          let osName = platform === 'linux' ? '🐧 Linux' : platform === 'darwin' ? '🍎 macOS' : '🪟 Windows';
 
           // ==================== DATABASE ====================
           let dbSize = 0;
@@ -26904,24 +26845,6 @@ ${prefix}togglecmdvip premium_ia off`);
           } catch (e) {}
           
           const dbSizeStr = dbSize > 1048576 ? `${(dbSize / 1048576).toFixed(1)} MB` : `${(dbSize / 1024).toFixed(1)} KB`;
-
-          // ==================== CONNECTIVITY ====================
-          let waStatus = '⚪ Desconhecido';
-          try {
-            if (AbyssSock?.ws?.readyState === 1) waStatus = '🟢 Conectado';
-            else if (AbyssSock?.ws?.readyState === 0) waStatus = '🟡 Conectando';
-            else waStatus = '🔴 Offline';
-          } catch (e) {}
-
-          // Latency
-          const startPing = Date.now();
-          let latency = '~';
-          try {
-            if (AbyssSock?.ws) {
-              await new Promise(r => setTimeout(r, 10));
-              latency = `${Date.now() - startPing}ms`;
-            }
-          } catch (e) {}
 
           // ==================== AI / SPECIAL ====================
           let aiCount = 0;
@@ -26952,32 +26875,21 @@ ${prefix}togglecmdvip premium_ia off`);
 └─────────────────────────────────────┘
 
 ┌─ 👥 *USUÁRIOS* ─────────────────────┐
-│ ✦ Registrados: ${users.size}
-│ ✦ Economia: ${econUsers} usuários
-│ ✦ Ativos hoje: ${activeToday}
-│ ✦ Ativos semana: ${activeWeek}
-│ ✦ Total mensagens: ${totalMsgs}
-│ ✦ Total comandos: ${totalCmdsUser}
+│ ✦ Usuários únicos: ${totalUsers}
+│ ✦ Comandos totais: ${totalCmds}
+│ ✦ Comandos/usuários: ${totalUsers > 0 ? Math.round(totalCmds/totalUsers) : 0}
 └─────────────────────────────────────┘
 
 ┌─ 🏘️ *GRUPOS* ──────────────────────┐
 │ ✦ Total de grupos: ${groups}
-│ ✦ Membros somados: ${members}
-│ ✦ Mídia/grupo: ${groups > 0 ? Math.round(members/groups) : 0}
+│ ✦ Usuários/grupo: ${groups > 0 ? Math.round(totalUsers/groups) : 0}
 └─────────────────────────────────────┘
 
 ┌─ 💾 *SISTEMA* ─────────────────────┐
-│ ✦ RAM: ${memGB(usedMem)}/${memGB(totalMem)} GB (${memPercent}%)
-│ ✦ CPU: ${cpuUse}% | Load: ${load[0].toFixed(1)}
-│ ✦ SO: ${osName} (${arch})
-│ ✦ Node.js: ${nodeV}
-│ ✦ PID: ${pid}
-└─────────────────────────────────────┘
-
-┌─ 🌐 *CONEXÃO* ──────────────────────┐
-│ ✦ WhatsApp: ${waStatus}
-│ ✦ Latência: ${latency}
-│ ✦ Tempo: ${new Date().toLocaleTimeString('pt-BR')}
+│ ✦ Uptime: ${uptimeStr}
+│ ✦ PID: ${process.pid}
+│ ✦ Node.js: ${process.version.replace('v', '')}
+│ ✦ Plataforma: ${os.platform()}
 └─────────────────────────────────────┘
 
 ┌─ 🗄️ *BANCO DE DADOS* ───────────────┐
