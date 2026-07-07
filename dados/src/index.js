@@ -16786,6 +16786,8 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const targetName = `@${targetId}`;
           
           // Carregar dados
+          const levelingData = loadLevelingSafe();
+          const econ = loadEconomy();
           // Ler commandStats com tratamento de erro
           let cmdStats = { commands: {} };
           try {
@@ -25925,6 +25927,8 @@ ${prefix}togglecmdvip premium_ia off`);
       case 'me':
         try {
           const targetUser = sender;
+          const levelingData = loadLevelingSafe();
+          const econ = loadEconomy();
           
           // Ler commandStats com tratamento de erro
           let cmdStats = { commands: {} };
