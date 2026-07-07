@@ -16855,24 +16855,26 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
           const bank = econUser.bank || 0;
           const totalCoins = balance + bank;
 
-          const userWarns = groupData.warnings?.[targetUser]?.count || 0;
+          // Advertências REAIS
+          const userWarnData = groupData.warnings?.[targetUser] || {};
+          const userAdvs = userWarnData.count || 0;
+          const advBar = '🟥'.repeat(userAdvs) + '⬜'.repeat(3 - userAdvs);
 
           // Cargo no grupo
           let cargo = '👤 Membro';
+          let cargoEmoji = '👤';
           if (isOwnerOrSub && targetUser === sender) {
-            cargo = '👑 Dono';
+            cargo = 'Dono';
+            cargoEmoji = '👑';
           } else if (idInArray(targetUser, groupAdmins)) {
-            cargo = '🛡️ Admin';
+            cargo = 'Admin';
+            cargoEmoji = '🛡️';
           } else if (groupData.alphas?.includes(targetUser)) {
-            cargo = '🐺 Alpha';
+            cargo = 'Alpha';
+            cargoEmoji = '🐺';
           } else if (groupData.moderators?.includes(targetUser)) {
-            cargo = '⚡ Moderador';
-          }
-
-          // Data de entrada no bot (do userContext)
-          let dataEntrada = 'Nao registrado';
-          if (primeiraConversa) {
-            dataEntrada = primeiraConversa.toLocaleDateString('pt-BR');
+            cargo = 'Mod';
+            cargoEmoji = '⚡';
           }
 
           // Msgs apagadas
@@ -16881,71 +16883,47 @@ O texto será extraído *exatamente* como está na imagem, sem resumir ou traduz
             msgsApagadas = groupData.trashMessages.filter(m => m.sender === targetUser).length;
           }
 
-          // Formatar data
-          const formatDate = (date) => {
-            if (!date) return 'Nao registrado';
-            try {
-              return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            } catch { return 'Nao registrado'; }
+          // Data de entrada
+          let dataEntrada = '-';
+          if (primeiraConversa) {
+            dataEntrada = primeiraConversa.toLocaleDateString('pt-BR');
+          }
+
+          // Frequência
+          const freqEmoji = {
+            'muito_baixa': '⚪',
+            'baixa': '🟢',
+            'media': '🟡',
+            'alta': '🟠',
+            'muito_alta': '🔴'
           };
 
-          // Frequência formatada
-          const freqMap = {
-            'muito_baixa': '⬜⬜⬜⬜⬜',
-            'baixa': '🟩⬜⬜⬜⬜',
-            'media': '🟩🟩⬜⬜⬜',
-            'alta': '🟩🟩🟩⬜⬜',
-            'muito_alta': '🟩🟩🟩🟩🟩'
-          };
-          const freqBar = freqMap[frequencia] || '⬜⬜⬜⬜⬜';
-
-          // Barra de progresso XP
+          // Barra XP
           const filledBars = Math.floor(xpProgress / 10);
-          const emptyBars = 10 - filledBars;
-          const xpBar = '▰'.repeat(filledBars) + '▱'.repeat(emptyBars);
+          const xpBar = '▰'.repeat(filledBars) + '▱'.repeat(10 - filledBars);
 
-          let msg = `╔══════════════════════╗
-║   📊 HISTORICO 📊    ║
-╠══════════════════════╣
-║                      ║
-║  👤 @${targetId}     ║
-║  ${cargo}              ║
-║                      ║
-╠══════════════════════╣
-║  📋 INFORMACOES       ║
-╠══════════════════════╣
-║  📅 Entrada: ${dataEntrada.padEnd(12)}║
-║  🏅 Patente: ${patent.padEnd(12)}║
-║                      ║
-╠══════════════════════╣
-║  💬 ATIVIDADE        ║
-╠══════════════════════╣
-║  💬 Msgs: ${String(totalMessages).padEnd(14)}║
-║  ⚒️ Cmds: ${String(totalCommands).padEnd(14)}║
-║  📊 Freq: ${freqBar}        ║
-║  🗑️ Apagadas: ${String(msgsApagadas).padEnd(10)}║
-║  🕐 Ultima: ${formatDate(ultimaConversa).substring(0, 14).padEnd(16)}║
-║                      ║
-╠══════════════════════╣
-║  ⭐ NIVEL             ║
-╠══════════════════════╣
-║  ⭐ Level: ${String(userLevel).padEnd(15)}║
-║  📈 XP: ${(userXp + '/' + xpForNext).padEnd(17)}║
-║  ${xpBar} ${String(xpProgress).padStart(3)}%  ║
-║                      ║
-╠══════════════════════╣
-║  💰 MOEDAS           ║
-╠══════════════════════╣
-║  💰 Carteira: ${String(balance.toLocaleString()).padEnd(11)}║
-║  🏦 Banco: ${String(bank.toLocaleString()).padEnd(14)}║
-║  💎 Total: ${String(totalCoins.toLocaleString()).padEnd(15)}║
-║                      ║
-╠══════════════════════╣
-║  ⚠️ STATUS           ║
-╠══════════════════════╣
-║  ⚠️ Warns: ${userWarns}/5             ║
-║                      ║
-╚══════════════════════╝`;
+          let msg = `╭━━━━━━━━━━━━━━━━━━━━━━━╮
+│  👤 *@${targetId}* ${cargoEmoji} ${cargo}
+╰━━━━━━━━━━━━━━━━━━━━━━━╯
+│ 📊 *ATIVIDADE*
+│ 💬 Msgs: \`${totalMessages}\`
+│ ⚒️ Cmds: \`${totalCommands}\`
+│ 🗑️ Apagadas: \`${msgsApagadas}\`
+│ 📅 Entrada: \`${dataEntrada}\`
+│ 🔥 Frequência: ${freqEmoji[frequencia] || '⚪'}
+│
+│ ⭐ *LEVELING*
+│ ⭐ Level: \`${userLevel}\` | XP: \`${userXp}/${xpForNext}\`
+│ ${xpBar} \`${xpProgress}%\`
+│ 🏅 Patente: \`${patent}\`
+│
+│ 💰 *ECONOMIA*
+│ 💰 \`$${balance.toLocaleString()}\` | 🏦 \`$${bank.toLocaleString()}\`
+│ 💎 Total: \`$${totalCoins.toLocaleString()}\`
+│
+│ ⚠️ *ADVERTÊNCIAS*
+│ ${advBar} \`${userAdvs}/3\`
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
 
           await reply(msg, { mentions: [targetUser] });
 
