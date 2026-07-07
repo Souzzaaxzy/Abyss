@@ -1281,6 +1281,8 @@ async function createBotSocket(authDir) {
                             
                             fs.writeFileSync(filePath, JSON.stringify(groupData, null, 2));
                             console.log(`[DELETED] Msg apagada por ${senderId}`);
+                            console.log(`[DELETED] userIndex: ${userIndex}, apagadas: ${userIndex !== -1 ? groupData.contador[userIndex].apagadas : 'novo user'}`);
+                            console.log(`[DELETED] arquivo: ${filePath}`);
                         } catch (e) {
                             console.error('[DELETED] Erro:', e);
                         }
