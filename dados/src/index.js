@@ -26372,13 +26372,7 @@ ${prefix}togglecmdvip premium_ia off`);
           
           msgCounter.setDailyGoal(from, goalValue);
           
-          const message = `╭━━━〔 🎯 META DIÁRIA DEFINIDA 〕━━━╮\n`;
-          message += `┃\n`;
-          message += `┃ ✅ Meta diária configurada!\n`;
-          message += `┃\n`;
-          message += `┃ 🎯 Meta: ${goalValue.toLocaleString('pt-BR')} mensagens\n`;
-          message += `┃\n`;
-          message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+          const message = `╭━━━〔 🎯 META DIÁRIA DEFINIDA 〕━━━╮\n┃\n┃ ✅ Meta diária configurada!\n┃\n┃ 🎯 Meta: ${goalValue.toLocaleString('pt-BR')} mensagens\n┃\n╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
           
           await reply(message);
         } catch (e) {
@@ -26408,13 +26402,7 @@ ${prefix}togglecmdvip premium_ia off`);
           
           msgCounter.setWeeklyGoal(from, goalValue);
           
-          const message = `╭━━━〔 🎯 META SEMANAL DEFINIDA 〕━━━╮\n`;
-          message += `┃\n`;
-          message += `┃ ✅ Meta semanal configurada!\n`;
-          message += `┃\n`;
-          message += `┃ 🎯 Meta: ${goalValue.toLocaleString('pt-BR')} mensagens\n`;
-          message += `┃\n`;
-          message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+          const message = `╭━━━〔 🎯 META SEMANAL DEFINIDA 〕━━━╮\n┃\n┃ ✅ Meta semanal configurada!\n┃\n┃ 🎯 Meta: ${goalValue.toLocaleString('pt-BR')} mensagens\n┃\n╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
           
           await reply(message);
         } catch (e) {

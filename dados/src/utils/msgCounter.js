@@ -335,9 +335,18 @@ const setDailyGoal = (groupId, goal) => {
   const data = loadMsgCounterData();
   initGroupCounter(groupId);
   
+  const currentTotal = data.groups[groupId].daily.total;
+  
   data.groups[groupId].settings.dailyGoal = goal;
-  data.groups[groupId].daily.goalReached = false;
-  data.groups[groupId].daily.goalNotificationSent = false;
+  
+  // Se a meta já foi atingida com o total atual, marcar como notificado para evitar spam
+  if (currentTotal >= goal) {
+    data.groups[groupId].daily.goalReached = true;
+    data.groups[groupId].daily.goalNotificationSent = true;
+  } else {
+    data.groups[groupId].daily.goalReached = false;
+    data.groups[groupId].daily.goalNotificationSent = false;
+  }
   
   saveMsgCounterData(data);
   return true;
@@ -347,9 +356,18 @@ const setWeeklyGoal = (groupId, goal) => {
   const data = loadMsgCounterData();
   initGroupCounter(groupId);
   
+  const currentTotal = data.groups[groupId].weekly.total;
+  
   data.groups[groupId].settings.weeklyGoal = goal;
-  data.groups[groupId].weekly.goalReached = false;
-  data.groups[groupId].weekly.goalNotificationSent = false;
+  
+  // Se a meta já foi atingida com o total atual, marcar como notificado para evitar spam
+  if (currentTotal >= goal) {
+    data.groups[groupId].weekly.goalReached = true;
+    data.groups[groupId].weekly.goalNotificationSent = true;
+  } else {
+    data.groups[groupId].weekly.goalReached = false;
+    data.groups[groupId].weekly.goalNotificationSent = false;
+  }
   
   saveMsgCounterData(data);
   return true;
