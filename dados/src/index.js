@@ -3175,41 +3175,46 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         // 📊 SISTEMA DE CONTADOR DE MENSAGENS (NOVO)
         // ═══════════════════════════════════════════════════════════════
         try {
+          // Não verificar meta se o comando for para definir meta
+          const skipGoalCheck = ['setdiario', 'setsemanal'].includes(command);
+          
           const userName = pushname || sender.split('@')[0];
           const counts = msgCounter.incrementMessageCount(from, sender, userName);
           
-          // Verificar se alguma meta foi atingida
-          const goalsResult = msgCounter.checkGoals(from);
-          
-          if (goalsResult.daily.reached) {
-            const stats = msgCounter.getGroupStats(from);
-            const goalMsg = `╭━━━〔 🎉 META DIÁRIA ATINGIDA! 〕━━━╮\n` +
-              `┃\n` +
-              `┃ 🎯 O grupo alcançou a meta de\n` +
-              `┃ ${stats.settings.dailyGoal.toLocaleString('pt-BR')} mensagens hoje!\n` +
-              `┃\n` +
-              `┃ 💬 Total: ${counts.dailyTotal.toLocaleString('pt-BR')} mensagens\n` +
-              `┃\n` +
-              `┃ Obrigado pela participação de todos! 🚀\n` +
-              `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+          // Verificar se alguma meta foi atingida (pular se for comando de meta)
+          if (!skipGoalCheck) {
+            const goalsResult = msgCounter.checkGoals(from);
             
-            await nazu.sendMessage(from, { text: goalMsg });
-          }
-          
-          if (goalsResult.weekly.reached) {
-            const stats = msgCounter.getGroupStats(from);
-            const goalMsg = `╭━━━〔 🎉 META SEMANAL ATINGIDA! 〕━━━╮\n` +
-              `┃\n` +
-              `┃ 🎯 O grupo alcançou a meta de\n` +
-              `┃ ${stats.settings.weeklyGoal.toLocaleString('pt-BR')} mensagens\n` +
-              `┃ nesta semana!\n` +
-              `┃\n` +
-              `┃ 💬 Total: ${counts.weeklyTotal.toLocaleString('pt-BR')} mensagens\n` +
-              `┃\n` +
-              `┃ Parabéns a todos que participaram! 🏆\n` +
-              `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+            if (goalsResult.daily.reached) {
+              const stats = msgCounter.getGroupStats(from);
+              const goalMsg = `╭━━━〔 🎉 META DIÁRIA ATINGIDA! 〕━━━╮\n` +
+                `┃\n` +
+                `┃ 🎯 O grupo alcançou a meta de\n` +
+                `┃ ${stats.settings.dailyGoal.toLocaleString('pt-BR')} mensagens hoje!\n` +
+                `┃\n` +
+                `┃ 💬 Total: ${counts.dailyTotal.toLocaleString('pt-BR')} mensagens\n` +
+                `┃\n` +
+                `┃ Obrigado pela participação de todos! 🚀\n` +
+                `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+              
+              await nazu.sendMessage(from, { text: goalMsg });
+            }
             
-            await nazu.sendMessage(from, { text: goalMsg });
+            if (goalsResult.weekly.reached) {
+              const stats = msgCounter.getGroupStats(from);
+              const goalMsg = `╭━━━〔 🎉 META SEMANAL ATINGIDA! 〕━━━╮\n` +
+                `┃\n` +
+                `┃ 🎯 O grupo alcançou a meta de\n` +
+                `┃ ${stats.settings.weeklyGoal.toLocaleString('pt-BR')} mensagens\n` +
+                `┃ nesta semana!\n` +
+                `┃\n` +
+                `┃ 💬 Total: ${counts.weeklyTotal.toLocaleString('pt-BR')} mensagens\n` +
+                `┃\n` +
+                `┃ Parabéns a todos que participaram! 🏆\n` +
+                `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+              
+              await nazu.sendMessage(from, { text: goalMsg });
+            }
           }
         } catch (msgCounterError) {
           console.error('❌ Erro no sistema de contador de mensagens:', msgCounterError.message);
