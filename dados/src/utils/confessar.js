@@ -85,6 +85,40 @@ function isValidPhoneNumber(number) {
   return true;
 }
 
+// Extrai o número do final da mensagem (preserva quebras de linha na mensagem)
+function extractNumberFromMessage(fullText) {
+  // Quebra por linhas primeiro
+  const lines = fullText.split('\n');
+  
+  // Procura o número na última linha ou última palavra
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    // Se a linha contém apenas o número
+    if (/^\d+$/.test(line)) {
+      const message = lines.slice(0, i).join('\n').trim();
+      return { message, number: line };
+    }
+  }
+  
+  // Se não encontrou número na última linha, procura a última palavra
+  const lastLine = lines[lines.length - 1];
+  const words = lastLine.trim().split(/\s+/);
+  
+  for (let i = words.length - 1; i >= 0; i--) {
+    if (/^\d+$/.test(words[i])) {
+      const number = words[i];
+      const messagePart = words.slice(0, i).join(' ');
+      const otherLines = lines.slice(0, -1).join('\n');
+      const fullMessage = otherLines 
+        ? (otherLines + '\n' + messagePart).trim() 
+        : messagePart;
+      return { message: fullMessage, number };
+    }
+  }
+  
+  return null;
+}
+
 // Formata número para JID do WhatsApp
 function formatToJid(phoneNumber) {
   const cleaned = phoneNumber.replace(/\D/g, '');
@@ -143,6 +177,7 @@ export {
   isOnCooldown,
   setCooldown,
   isValidPhoneNumber,
+  extractNumberFromMessage,
   formatToJid,
   checkNumberExists,
   sendIdentifiedConfession,
