@@ -1665,7 +1665,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         if (result.urls?.length > 0) {
           const videoUrl = result.urls[0];
 
-          const caption = `╭━━━〔 📱 𝗔𝗕𝗬𝗦𝗦 • 𝗧𝗜𝗞𝗧𝗢𝗞 📱 〕━━━╮\n` +
+          const caption = `╭━━━〔 📱 ${nomebot} • 𝗧𝗜𝗞𝗧𝗢𝗞 📱 〕━━━╮\n` +
             `┃\n` +
             `┃ 📱 ${result.title || 'Vídeo do TikTok'}\n` +
             `┃ 👤 ${result.author || 'Desconhecido'}\n` +
@@ -1700,7 +1700,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
 
         const media = result.data[0];
 
-        const caption = `╭━━━〔 📸 𝗔𝗕𝗬𝗦𝗦 • 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠 📸 〕━━━╮\n` +
+        const caption = `╭━━━〔 📸 ${nomebot} • 𝗜𝗡𝗦𝗧𝗔𝗚𝗥𝗔𝗠 📸 〕━━━╮\n` +
           `┃\n` +
           `┃ 📸 Conteúdo do Instagram\n` +
           `┃ 👤 ${result.user?.username || 'Usuário'}\n` +
@@ -1748,7 +1748,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         result = await facebook.downloadHD(url);
         if (result && result.ok && result.buffer) {
           const caption = `╭─────────────────────⭓\n` +
-            `│      📘 𝗔𝗕𝗬𝗦𝗦 📘\n` +
+            `│      📘 ${nomebot} 📘\n` +
             `├─────────────────────⭓\n` +
             `│\n` +
             `│ 🎶 Vídeo do Facebook\n` +
@@ -1774,7 +1774,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         if (result && result.ok && result.urls && result.urls.length > 0) {
           const mediaUrl = result.urls[0];
           const caption = `╭─────────────────────⭓\n` +
-            `│      📌 𝗔𝗕𝗬𝗦𝗦 📌\n` +
+            `│      📌 ${nomebot} 📌\n` +
             `├─────────────────────⭓\n` +
             `│\n` +
             `│ 🎶 Mídia do Pinterest\n` +
@@ -1806,7 +1806,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         result = await spotify.download(url);
         if (result && result.ok && result.buffer) {
           const caption = `╭─────────────────────⭓\n` +
-            `│      🎵 𝗔𝗕𝗬𝗦𝗦 🎵\n` +
+            `│      🎵 ${nomebot} 🎵\n` +
             `├─────────────────────⭓\n` +
             `│\n` +
             `│ 🎶 ${result.title || 'Música'}\n` +
@@ -1832,7 +1832,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         result = await soundcloud.download(url);
         if (result && result.ok && result.buffer) {
           const caption = `╭─────────────────────⭓\n` +
-            `│      ☁️ 𝗔𝗕𝗬𝗦𝗦 ☁️\n` +
+            `│      ☁️ ${nomebot} ☁️\n` +
             `├─────────────────────⭓\n` +
             `│\n` +
             `│ 🎶 ${result.title || 'Música'}\n` +
@@ -7365,7 +7365,7 @@ if (isCmd && command && !isOwnerOrSub) {
             const cap = isFinite(bankCapacity) ? bankCapacity : '∞';
             const usage = cap === '∞' ? '0%' : Math.floor(((me.bank || 0) / cap) * 100) + '%';
             return reply(`╭─────────────────────⭓\n` +
-              `│      🏦 𝗔𝗕𝗬𝗦𝗦 𝗕𝗔𝗡𝗞 🏦\n` +
+              `│      🏦 ${nomebot} BANK 🏦\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ 💰 Saldo » ${fmt(me.bank)}\n` +
@@ -7594,7 +7594,7 @@ if (isCmd && command && !isOwnerOrSub) {
             recalcEquipmentBonuses(me, econ.shop);
             const entries = Object.entries(me.inventory || {}).filter(([, q]) => q > 0);
             let text = `╭─────────────────────⭓\n` +
-              `│      🎒 𝗔𝗕𝗬𝗦𝗦 𝗜𝗡𝗩 🎒\n` +
+              `│      🎒 ${nomebot} INV 🎒\n` +
               `├─────────────────────⭓\n` +
               `│ 👤 Aventureiro » @${pushname}\n` +
               `│ ◈ Poder » ${me.power || 0}\n` +
@@ -7832,7 +7832,7 @@ if (isCmd && command && !isOwnerOrSub) {
             }
 
             let txt = `╭─────────────────────⭓\n` +
-                      `│      💼 𝗔𝗕𝗬𝗦𝗦 𝗝𝗢𝗕𝗦 💼\n` +
+                      `│      💼 ${nomebot} JOBS 💼\n` +
                       `├─────────────────────⭓\n│\n`;
             
             const icons = { dev: '🛠️', agente: '🕵️', cacador: '🏴‍☠️', magnata: '💎', cientista: '🧪' };
@@ -8111,7 +8111,7 @@ if (isCmd && command && !isOwnerOrSub) {
               me.stats.totalCrimes = (me.stats.totalCrimes || 0) + 1;
               saveEconomy(econ);
               return reply(`╭─────────────────────⭓\n` +
-              `│      🕵️ 𝗔𝗕𝗬𝗦𝗦 𝗖𝗥𝗜𝗠𝗘 🕵️\n` +
+              `│      🕵️ ${nomebot} CRIME 🕵️\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ ✅ Crime bem-sucedido!\n` +
@@ -8127,7 +8127,7 @@ if (isCmd && command && !isOwnerOrSub) {
               me.cooldowns.crime = Date.now() + 30 * 60 * 1000;
               saveEconomy(econ);
               return reply(`╭─────────────────────⭓\n` +
-              `│      🚔 𝗔𝗕𝗬𝗦𝗦 𝗖𝗥𝗜𝗠𝗘 🚔\n` +
+              `│      🚔 ${nomebot} CRIME 🚔\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ ❌ Você foi pego pela polícia!\n` +
@@ -8580,7 +8580,7 @@ if (isCmd && command && !isOwnerOrSub) {
             me.stats.workCount = (me.stats.workCount || 0) + 1;
             saveEconomy(econ);
             return reply(`╭─────────────────────⭓\n` +
-              `│      ⚒️ 𝗔𝗕𝗬𝗦𝗦 𝗪𝗢𝗥𝗞 ⚒️\n` +
+              `│      ⚒️ ${nomebot} WORK ⚒️\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ ✅ Trabalho concluído!\n` +
@@ -8855,7 +8855,7 @@ if (isCmd && command && !isOwnerOrSub) {
             saveEconomy(econ);
 
             let text = `╭─────────────────────⭓\n` +
-              `│      🎁 𝗔𝗕𝗬𝗦𝗦 𝗗𝗔𝗜𝗟𝗬 🎁\n` +
+              `│      🎁 ${nomebot} DAILY 🎁\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ 💰 Base » +${fmt(baseReward)}\n` +
@@ -8925,7 +8925,7 @@ if (isCmd && command && !isOwnerOrSub) {
         recalcEquipmentBonuses(me, econ.shop);
 
         let text = `╭─────────────────────⭓\n` +
-          `│      ◈ 𝗔𝗕𝗬𝗦𝗦 𝗚𝗘𝗔𝗥 ◈\n` +
+          `│      ◈ ${nomebot} GEAR ◈\n` +
           `├─────────────────────⭓\n` +
           `│ 👤 Aventureiro » @${pushname}\n` +
           `├─────────────────────⭓\n` +
@@ -9021,7 +9021,7 @@ if (isCmd && command && !isOwnerOrSub) {
 
         if (me.pets.length === 0) {
           let text = `╭─────────────────────⭓\n` +
-                     `│      🐾 𝗔𝗕𝗬𝗦𝗦 • 𝗣𝗘𝗧𝗦 🐾\n` +
+                     `│      🐾 ${nomebot} • 𝗣𝗘𝗧𝗦 🐾\n` +
                      `├─────────────────────⭓\n│\n` +
                      `│ Você ainda não tem companheiros!\n│\n` +
                      `├──── 𝗣𝗘𝗧𝗦 𝗜𝗡𝗜𝗖𝗜𝗔𝗜𝗦 ────⭓\n│\n` +
@@ -9035,7 +9035,7 @@ if (isCmd && command && !isOwnerOrSub) {
         }
 
         let text = `╭─────────────────────⭓\n` +
-                   `│      🐾 𝗔𝗕𝗬𝗦𝗦 • 𝗣𝗘𝗧𝗦 🐾\n` +
+                   `│      🐾 ${nomebot} • 𝗣𝗘𝗧𝗦 🐾\n` +
                    `├─────────────────────⭓\n` +
                    `│ 👤 Treinador » ${pushname}\n` +
                    `│ 🐾 Slots » ${me.pets.length}/5\n` +
@@ -9135,7 +9135,7 @@ if (isCmd && command && !isOwnerOrSub) {
 
         if (!type || !petTypes[type]) {
           let text = `╭─────────────────────⭓\n` +
-                     `│      🐾 𝗔𝗕𝗬𝗦𝗦 𝗣𝗘𝗧 𝗦𝗛𝗢𝗣 🐾\n` +
+                     `│      🐾 ${nomebot} PET SHOP 🐾\n` +
                      `├─────────────────────⭓\n│\n`;
 
           Object.entries(petTypes).forEach(([key, pet]) => {
@@ -29999,7 +29999,7 @@ break;
             const owner = groupMetadata.owner || from.split('-')[0] + '@s.whatsapp.net';
             
             const gpInfoMsg = `╭─────────────────────⭓\n` +
-              `│      👥 𝗔𝗕𝗬𝗦𝗦 𝗚𝗥𝗢𝗨𝗣 👥\n` +
+              `│      👥 ${nomebot} GROUP 👥\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ 🏷️ Nome: ${groupName}\n` +
