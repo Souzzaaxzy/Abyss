@@ -26698,6 +26698,106 @@ ${prefix}togglecmdvip premium_ia off`);
         }
         break;
         
+      case 'resetmsgdiario':
+        try {
+          if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
+          
+          // Verificar se é admin ou dono
+          const isAdmin = isGroupAdmin || isBotAdmin;
+          const isOwner = sender === numerodono;
+          
+          if (!isAdmin && !isOwner) {
+            return reply("◈ Apenas admins podem resetar estatísticas.");
+          }
+          
+          const args = body.trim().split(' ');
+          const confirm = args[1]?.toLowerCase();
+          
+          if (confirm !== 'confirmar' && confirm !== 'confirm') {
+            const message = `╭━━━〔 ⚠️ CONFIRMAR RESET 〕━━━╮\n`;
+            message += `┃\n`;
+            message += `┃ Tem certeza que deseja resetar\n`;
+            message += `┃ as estatísticas diárias?\n`;
+            message += `┃\n`;
+            message += `┃ ⚠️ Esta ação não pode\n`;
+            message += `┃ ser desfeita!\n`;
+            message += `┃\n`;
+            message += `┃ Para confirmar, use:\n`;
+            message += `┃ *${groupPrefix}resetmsgdiario confirmar*\n`;
+            message += `┃\n`;
+            message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+            return reply(message);
+          }
+          
+          msgCounter.resetDailyManual(from);
+          const userName = pushname || sender.split('@')[0];
+          
+          const message = `╭━━━〔 🗑️ RESET DIÁRIO 〕━━━╮\n`;
+          message += `┃\n`;
+          message += `┃ ✅ Estatísticas diárias resetadas!\n`;
+          message += `┃\n`;
+          message += `┃ 👥 Grupo: ${groupName || 'Grupo'}\n`;
+          message += `┃ 👤 Resetado por: @${userName.split(' ')[0]}\n`;
+          message += `┃\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+          
+          await reply(message);
+        } catch (e) {
+          console.error('[RESETMSGDIARIO] Erro:', e);
+          await reply("❌ Ocorreu um erro ao resetar. Tente novamente.");
+        }
+        break;
+        
+      case 'resetmsgsemanal':
+        try {
+          if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
+          
+          // Verificar se é admin ou dono
+          const isAdmin = isGroupAdmin || isBotAdmin;
+          const isOwner = sender === numerodono;
+          
+          if (!isAdmin && !isOwner) {
+            return reply("◈ Apenas admins podem resetar estatísticas.");
+          }
+          
+          const args = body.trim().split(' ');
+          const confirm = args[1]?.toLowerCase();
+          
+          if (confirm !== 'confirmar' && confirm !== 'confirm') {
+            const message = `╭━━━〔 ⚠️ CONFIRMAR RESET 〕━━━╮\n`;
+            message += `┃\n`;
+            message += `┃ Tem certeza que deseja resetar\n`;
+            message += `┃ as estatísticas semanais?\n`;
+            message += `┃\n`;
+            message += `┃ ⚠️ Esta ação não pode\n`;
+            message += `┃ ser desfeita!\n`;
+            message += `┃\n`;
+            message += `┃ Para confirmar, use:\n`;
+            message += `┃ *${groupPrefix}resetmsgsemanal confirmar*\n`;
+            message += `┃\n`;
+            message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+            return reply(message);
+          }
+          
+          msgCounter.resetWeeklyManual(from);
+          const userName = pushname || sender.split('@')[0];
+          
+          const message = `╭━━━〔 🗑️ RESET SEMANAL 〕━━━╮\n`;
+          message += `┃\n`;
+          message += `┃ ✅ Estatísticas semanais resetadas!\n`;
+          message += `┃\n`;
+          message += `┃ 👥 Grupo: ${groupName || 'Grupo'}\n`;
+          message += `┃ 👤 Resetado por: @${userName.split(' ')[0]}\n`;
+          message += `┃\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+          
+          await reply(message);
+        } catch (e) {
+          console.error('[RESETMSGSEMANAL] Erro:', e);
+          await reply("❌ Ocorreu um erro ao resetar. Tente novamente.");
+        }
+        break;
+        
       case 'setsemanal':
         try {
           if (!isGroup) return reply("◈ Este comando só funciona em grupos.");

@@ -533,6 +533,88 @@ const resetWeeklyCounters = () => {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 🔧 RESET MANUAL (ADMIN)
+// ═══════════════════════════════════════════════════════════════
+
+const resetDailyManual = (groupId) => {
+  const data = loadMsgCounterData();
+  const groupData = data.groups[groupId];
+  
+  if (!groupData) return false;
+  
+  const today = getDateInfo();
+  
+  // Salvar no histórico antes de resetar
+  if (groupData.daily.total > 0) {
+    if (!data.groups[groupId].history) {
+      data.groups[groupId].history = {};
+    }
+    data.groups[groupId].history[groupData.daily.date] = {
+      date: groupData.daily.date,
+      total: groupData.daily.total,
+      stickers: groupData.daily.stickers || 0,
+      images: groupData.daily.images || 0,
+      videos: groupData.daily.videos || 0,
+      audios: groupData.daily.audios || 0,
+      users: { ...groupData.daily.users }
+    };
+    
+    // Manter apenas últimos 90 dias
+    const dates = Object.keys(data.groups[groupId].history).sort();
+    while (dates.length > 90) {
+      delete data.groups[groupId].history[dates.shift()];
+    }
+  }
+  
+  // Resetar contador diário
+  data.groups[groupId].daily = {
+    date: today.date,
+    total: 0,
+    stickers: 0,
+    images: 0,
+    videos: 0,
+    audios: 0,
+    users: {},
+    goalReached: false,
+    goalNotificationSent: false
+  };
+  
+  data.groups[groupId].lastUpdate = new Date().toISOString();
+  saveMsgCounterData(data);
+  
+  console.log('🗑️ Reset manual diário realizado no grupo:', groupId);
+  return true;
+};
+
+const resetWeeklyManual = (groupId) => {
+  const data = loadMsgCounterData();
+  const groupData = data.groups[groupId];
+  
+  if (!groupData) return false;
+  
+  const today = getDateInfo();
+  
+  // Resetar contador semanal
+  data.groups[groupId].weekly = {
+    weekStart: today.weekStart,
+    total: 0,
+    stickers: 0,
+    images: 0,
+    videos: 0,
+    audios: 0,
+    users: {},
+    goalReached: false,
+    goalNotificationSent: false
+  };
+  
+  data.groups[groupId].lastUpdate = new Date().toISOString();
+  saveMsgCounterData(data);
+  
+  console.log('🗑️ Reset manual semanal realizado no grupo:', groupId);
+  return true;
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 📤 MENSAGENS DE RESULTADO
 // ═══════════════════════════════════════════════════════════════
 
@@ -945,6 +1027,8 @@ export {
   checkGoals,
   resetDailyCounters,
   resetWeeklyCounters,
+  resetDailyManual,
+  resetWeeklyManual,
   formatTopRanking,
   formatDailyStats,
   formatWeeklyStats,
@@ -979,6 +1063,8 @@ const msgCounterExports = {
   checkGoals,
   resetDailyCounters,
   resetWeeklyCounters,
+  resetDailyManual,
+  resetWeeklyManual,
   formatTopRanking,
   formatDailyStats,
   formatWeeklyStats,

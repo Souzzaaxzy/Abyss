@@ -65,6 +65,16 @@ ${middleBorder} 📊 Exibe metas do grupo
 ${bottomBorder}
 
 ${menuTopBorder}
+│ 🗑️ RESET DE ESTATÍSTICAS
+${middleBorder}
+${middleBorder} ${menuItemIcon}${prefix}resetmsgdiario
+${middleBorder} ${menuItemIcon}${prefix}resetmsgsemanal
+${middleBorder}
+${middleBorder} ⚠️ Requer confirmação
+${middleBorder} Use: ${prefix}resetmsgdiario confirmar
+${bottomBorder}
+
+${menuTopBorder}
 │ 🔒 CONTROLE DE ACESSO
 ${middleBorder}
 ${middleBorder} ${menuItemIcon}${prefix}blockuser
