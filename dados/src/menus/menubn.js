@@ -68,6 +68,8 @@ ${bottomBorder}
 ${menuTopBorder}
 │ ${interactionsMenuTitle}
 ${middleBorder}
+${middleBorder}${menuItemIcon}${prefix}confessar
+${middleBorder}${menuItemIcon}${prefix}confessarn
 ${middleBorder}${menuItemIcon}${prefix}chute
 ${middleBorder}${menuItemIcon}${prefix}chutar
 ${middleBorder}${menuItemIcon}${prefix}tapa

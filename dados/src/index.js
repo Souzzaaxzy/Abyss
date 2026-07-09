@@ -172,6 +172,16 @@ import {
   clearWarningCooldown
 } from './utils/tempMute.js';
 import {
+  isOnCooldown,
+  setCooldown,
+  isValidPhoneNumber,
+  formatToJid,
+  checkNumberExists,
+  sendIdentifiedConfession,
+  sendAnonymousConfession,
+  MAX_MESSAGE_LENGTH
+} from './utils/confessar.js';
+import {
   formatUptime,
   normalizar,
   isGroupId,
@@ -6112,6 +6122,197 @@ if (isCmd && command && !isOwnerOrSub) {
     }
 
     switch (command) {
+
+      // ═══════════════════════════════════════════════════════════════
+      // 💌 SISTEMA DE CONFISSÕES
+      // ═══════════════════════════════════════════════════════════════
+      case 'confessar': {
+        try {
+          // Verifica se está no privado
+          if (isGroup) {
+            return reply('❌ Este comando só pode ser utilizado no privado do bot.');
+          }
+          
+          // Verifica cooldown
+          const cooldownCheck = isOnCooldown(sender);
+          if (cooldownCheck.onCooldown) {
+            return reply(`⏳ Aguarde ${cooldownCheck.remaining} segundos antes de enviar outra mensagem.`);
+          }
+          
+          // Verifica se há argumentos
+          if (!q || q.trim().length === 0) {
+            return reply(`📝 *Como usar:* ${prefix}confessar (seu nome) (número) (mensagem)\n\n📌 *Exemplo:*\n${prefix}confessar João 5511999999999 Oi! Você é incrível!`);
+          }
+          
+          // Faz parse dos argumentos
+          // Formato: nome número mensagem
+          // O número é identificado por ter apenas dígitos no final
+          const parts = q.trim().split(/\s+/);
+          
+          if (parts.length < 3) {
+            return reply(`❌ Formato inválido!\n\n📝 *Como usar:* ${prefix}confessar (seu nome) (número) (mensagem)\n\n📌 *Exemplo:*\n${prefix}confessar João 5511999999999 Oi! Você é incrível!`);
+          }
+          
+          // Encontra o número (último argumento que é apenas dígitos)
+          let numberIndex = -1;
+          for (let i = parts.length - 1; i >= 0; i--) {
+            if (/^\d+$/.test(parts[i])) {
+              numberIndex = i;
+              break;
+            }
+          }
+          
+          if (numberIndex === -1) {
+            return reply(`❌ Informe um número válido no formato:\n5511999999999`);
+          }
+          
+          const number = parts[numberIndex];
+          
+          // Valida o número
+          if (!isValidPhoneNumber(number)) {
+            return reply(`❌ Informe um número válido no formato:\n5511999999999`);
+          }
+          
+          // Separa nome e mensagem
+          const senderName = parts.slice(0, numberIndex).join(' ');
+          const message = parts.slice(numberIndex + 1).join(' ').trim();
+          
+          // Verifica nome
+          if (!senderName || senderName.trim().length === 0) {
+            return reply('❌ Informe o nome que será exibido ao destinatário.');
+          }
+          
+          // Verifica mensagem
+          if (!message || message.trim().length === 0) {
+            return reply('❌ Você precisa informar uma mensagem.');
+          }
+          
+          // Limita tamanho da mensagem
+          const finalMessage = message.length > MAX_MESSAGE_LENGTH 
+            ? message.substring(0, MAX_MESSAGE_LENGTH) 
+            : message;
+          
+          // Formata número para JID
+          const recipientJid = formatToJid(number);
+          
+          // Verifica se o número existe no WhatsApp
+          const numberExists = await checkNumberExists(nazu, recipientJid);
+          if (!numberExists) {
+            return reply('❌ O número informado não possui uma conta no WhatsApp.');
+          }
+          
+          // Não pode enviar para si mesmo
+          const botNumber = nazu.user?.id?.replace(':null', '').replace('@s.whatsapp.net', '') || '';
+          if (number === botNumber || recipientJid === sender) {
+            return reply('❌ Você não pode enviar uma mensagem para si mesmo.');
+          }
+          
+          // Envia a confissão
+          await sendIdentifiedConfession(nazu, senderName, recipientJid, finalMessage);
+          
+          // Define cooldown
+          setCooldown(sender);
+          
+          // Confirma envio
+          await reply('✅ Sua mensagem foi enviada com sucesso!');
+          
+        } catch (e) {
+          console.error('Erro no comando confessar:', e);
+          await reply('❌ Não foi possível enviar a mensagem. Tente novamente mais tarde.');
+        }
+        break;
+      }
+      
+      case 'confessarn': {
+        try {
+          // Verifica se está no privado
+          if (isGroup) {
+            return reply('❌ Este comando só pode ser utilizado no privado do bot.');
+          }
+          
+          // Verifica cooldown
+          const cooldownCheck = isOnCooldown(sender);
+          if (cooldownCheck.onCooldown) {
+            return reply(`⏳ Aguarde ${cooldownCheck.remaining} segundos antes de enviar outra mensagem.`);
+          }
+          
+          // Verifica se há argumentos
+          if (!q || q.trim().length === 0) {
+            return reply(`📝 *Como usar:* ${prefix}confessarn (mensagem) (número)\n\n📌 *Exemplo:*\n${prefix}confessarn Você é especial! 5511999999999`);
+          }
+          
+          // Faz parse dos argumentos
+          // Formato: mensagem número
+          // O número é identificado por ter apenas dígitos no final
+          const parts = q.trim().split(/\s+/);
+          
+          if (parts.length < 2) {
+            return reply(`❌ Formato inválido!\n\n📝 *Como usar:* ${prefix}confessarn (mensagem) (número)\n\n📌 *Exemplo:*\n${prefix}confessarn Você é especial! 5511999999999`);
+          }
+          
+          // Encontra o número (último argumento que é apenas dígitos)
+          let numberIndex = -1;
+          for (let i = parts.length - 1; i >= 0; i--) {
+            if (/^\d+$/.test(parts[i])) {
+              numberIndex = i;
+              break;
+            }
+          }
+          
+          if (numberIndex === -1) {
+            return reply(`❌ Informe um número válido no formato:\n5511999999999`);
+          }
+          
+          const number = parts[numberIndex];
+          
+          // Valida o número
+          if (!isValidPhoneNumber(number)) {
+            return reply(`❌ Informe um número válido no formato:\n5511999999999`);
+          }
+          
+          // Separa mensagem
+          const message = parts.slice(0, numberIndex).join(' ').trim();
+          
+          // Verifica mensagem
+          if (!message || message.trim().length === 0) {
+            return reply('❌ Você precisa informar uma mensagem.');
+          }
+          
+          // Limita tamanho da mensagem
+          const finalMessage = message.length > MAX_MESSAGE_LENGTH 
+            ? message.substring(0, MAX_MESSAGE_LENGTH) 
+            : message;
+          
+          // Formata número para JID
+          const recipientJid = formatToJid(number);
+          
+          // Verifica se o número existe no WhatsApp
+          const numberExists = await checkNumberExists(nazu, recipientJid);
+          if (!numberExists) {
+            return reply('❌ O número informado não possui uma conta no WhatsApp.');
+          }
+          
+          // Não pode enviar para si mesmo
+          const botNumber = nazu.user?.id?.replace(':null', '').replace('@s.whatsapp.net', '') || '';
+          if (number === botNumber || recipientJid === sender) {
+            return reply('❌ Você não pode enviar uma mensagem para si mesmo.');
+          }
+          
+          // Envia a confissão anônima
+          await sendAnonymousConfession(nazu, recipientJid, finalMessage);
+          
+          // Define cooldown
+          setCooldown(sender);
+          
+          // Confirma envio
+          await reply('✅ Sua confissão anônima foi enviada com sucesso!');
+          
+        } catch (e) {
+          console.error('Erro no comando confessarn:', e);
+          await reply('❌ Não foi possível enviar a mensagem. Tente novamente mais tarde.');
+        }
+        break;
+      }
 
       case 'roles':
       case 'role.lista':
