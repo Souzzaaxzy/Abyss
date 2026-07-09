@@ -64,6 +64,10 @@ ${middleBorder}${menuItemIcon}${prefix}videomenu
 ${middleBorder}${menuItemIcon}${prefix}audiomenu
 ${middleBorder}${menuItemIcon}${prefix}lermais
 ${middleBorder}${menuItemIcon}${prefix}personalizargrupo
+${middleBorder}
+${middleBorder}📷 *MÍDIA RESPOSTA PREFIXO:*
+${middleBorder}${menuItemIcon}${prefix}fotoprefix
+${middleBorder}${menuItemIcon}${prefix}videoprefix
 ${bottomBorder}
 
 ${menuTopBorder}
