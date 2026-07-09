@@ -538,14 +538,18 @@ const resetWeeklyCounters = () => {
 
 const resetDailyManual = (groupId) => {
   const data = loadMsgCounterData();
+  
+  // Inicializar grupo se não existir
+  if (!data.groups[groupId]) {
+    initGroupCounter(groupId);
+    return true;
+  }
+  
   const groupData = data.groups[groupId];
-  
-  if (!groupData) return false;
-  
   const today = getDateInfo();
   
   // Salvar no histórico antes de resetar
-  if (groupData.daily.total > 0) {
+  if (groupData.daily && groupData.daily.total > 0) {
     if (!data.groups[groupId].history) {
       data.groups[groupId].history = {};
     }
@@ -588,9 +592,12 @@ const resetDailyManual = (groupId) => {
 
 const resetWeeklyManual = (groupId) => {
   const data = loadMsgCounterData();
-  const groupData = data.groups[groupId];
   
-  if (!groupData) return false;
+  // Inicializar grupo se não existir
+  if (!data.groups[groupId]) {
+    initGroupCounter(groupId);
+    return true;
+  }
   
   const today = getDateInfo();
   
@@ -805,15 +812,15 @@ const getStatsByDate = (groupId, dateStr) => {
   
   // Verificar se é o dia atual
   const today = getDateInfo();
-  if (dateStr === today.date) {
+  if (dateStr === today.date && groupData.daily) {
     return {
       date: dateStr,
-      total: groupData.daily.total,
+      total: groupData.daily.total || 0,
       stickers: groupData.daily.stickers || 0,
       images: groupData.daily.images || 0,
       videos: groupData.daily.videos || 0,
       audios: groupData.daily.audios || 0,
-      users: groupData.daily.users
+      users: groupData.daily.users || {}
     };
   }
   
@@ -883,14 +890,26 @@ const getTopUsersByDate = (groupId, dateStr, limit = 3) => {
 
 const updateRecords = (groupId, userId) => {
   const data = loadMsgCounterData();
+  
+  // Inicializar grupo se não existir
+  if (!data.groups[groupId]) {
+    initGroupCounter(groupId);
+    return;
+  }
+  
   const groupData = data.groups[groupId];
-  
-  if (!groupData) return;
-  
   const today = getDateInfo();
   
+  // Inicializar records se não existirem
+  if (!groupData.records) {
+    groupData.records = {
+      daily: { total: 0, date: null },
+      weekly: { total: 0, weekStart: null, weekEnd: null }
+    };
+  }
+  
   // Atualizar recorde diário do grupo
-  if (groupData.daily.total > (groupData.records.daily.total || 0)) {
+  if (groupData.daily && groupData.daily.total > (groupData.records.daily?.total || 0)) {
     groupData.records.daily = {
       total: groupData.daily.total,
       date: today.date
@@ -898,7 +917,7 @@ const updateRecords = (groupId, userId) => {
   }
   
   // Atualizar recorde semanal do grupo
-  if (groupData.weekly.total > (groupData.records.weekly.total || 0)) {
+  if (groupData.weekly && groupData.weekly.total > (groupData.records.weekly?.total || 0)) {
     // Calcular fim da semana
     const weekEnd = new Date(today.date);
     weekEnd.setDate(weekEnd.getDate() + 6);
@@ -912,8 +931,9 @@ const updateRecords = (groupId, userId) => {
   }
   
   // Atualizar recorde pessoal do usuário
-  const userData = groupData.daily.users[userId];
-  if (userData) {
+  if (groupData.daily && groupData.daily.users && groupData.daily.users[userId]) {
+    const userData = groupData.daily.users[userId];
+    
     if (!userData.personalRecord) {
       userData.personalRecord = {
         daily: { total: 0, date: null },
@@ -922,7 +942,7 @@ const updateRecords = (groupId, userId) => {
     }
     
     // Recorde pessoal diário
-    if (userData.count > (userData.personalRecord.daily.total || 0)) {
+    if (userData.count > (userData.personalRecord.daily?.total || 0)) {
       userData.personalRecord.daily = {
         total: userData.count,
         date: today.date,
@@ -934,9 +954,10 @@ const updateRecords = (groupId, userId) => {
     }
   }
   
-  // Atualizar recorde pessoal semanal (usar weekly do usuário)
-  const weeklyUserData = groupData.weekly.users[userId];
-  if (weeklyUserData) {
+  // Atualizar recorde pessoal semanal
+  if (groupData.weekly && groupData.weekly.users && groupData.weekly.users[userId]) {
+    const weeklyUserData = groupData.weekly.users[userId];
+    
     if (!weeklyUserData.personalRecord) {
       weeklyUserData.personalRecord = {
         daily: { total: 0, date: null },
@@ -944,7 +965,7 @@ const updateRecords = (groupId, userId) => {
       };
     }
     
-    if (weeklyUserData.count > (weeklyUserData.personalRecord.weekly.total || 0)) {
+    if (weeklyUserData.count > (weeklyUserData.personalRecord.weekly?.total || 0)) {
       const weekEnd = new Date(today.date);
       weekEnd.setDate(weekEnd.getDate() + 6);
       const weekEndStr = `${weekEnd.getFullYear()}-${String(weekEnd.getMonth() + 1).padStart(2, '0')}-${String(weekEnd.getDate()).padStart(2, '0')}`;
@@ -992,8 +1013,8 @@ const getUserRecords = (groupId, userId) => {
     };
   }
   
-  const userData = groupData.daily.users[userId];
-  const weeklyUserData = groupData.weekly.users[userId];
+  const userData = groupData.daily?.users?.[userId];
+  const weeklyUserData = groupData.weekly?.users?.[userId];
   
   const dailyRecord = userData?.personalRecord?.daily || { total: 0, date: null, stickers: 0, images: 0, videos: 0, audios: 0 };
   const weeklyRecord = weeklyUserData?.personalRecord?.weekly || { total: 0, weekStart: null, weekEnd: null, stickers: 0, images: 0, videos: 0, audios: 0 };
