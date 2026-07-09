@@ -68,6 +68,7 @@ ${menuTopBorder}
 ${middleBorder}
 ${middleBorder}${menuItemIcon}${prefix}msgdiario
 ${middleBorder}${menuItemIcon}${prefix}msgsemanal
+${middleBorder}${menuItemIcon}${prefix}estdia DD/MM
 ${middleBorder}${menuItemIcon}${prefix}topdiario
 ${middleBorder}${menuItemIcon}${prefix}topsemanal
 ${middleBorder}${menuItemIcon}${prefix}mediario

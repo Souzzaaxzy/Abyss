@@ -26366,6 +26366,92 @@ ${prefix}togglecmdvip premium_ia off`);
         }
         break;
         
+      case 'estdia':
+        try {
+          if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
+          
+          // Extrair data do comando (formato DD/MM)
+          const args = body.trim().split(' ');
+          const dateInput = args[1];
+          
+          if (!dateInput) {
+            return reply(`◈ Uso incorreto!\n\n📝 Exemplo: *${groupPrefix}estdia 09/07*\n\n💡 Informe a data no formato DD/MM para consultar as estatísticas.`);
+          }
+          
+          // Validar formato da data
+          const dateRegex = /^(\d{1,2})\/(\d{1,2})$/;
+          const match = dateInput.match(dateRegex);
+          
+          if (!match) {
+            return reply(`◈ Formato inválido!\n\n📝 Use o formato: DD/MM\n\n💡 Exemplo: *${groupPrefix}estdia 09/07*`);
+          }
+          
+          const day = parseInt(match[1]);
+          const month = parseInt(match[2]);
+          
+          if (day < 1 || day > 31 || month < 1 || month > 12) {
+            return reply(`◈ Data inválida!\n\n📅 Verifique o dia e mês informados.\n\n💡 Exemplo: *${groupPrefix}estdia 09/07*`);
+          }
+          
+          // Converter para formato interno (YYYY-MM-DD)
+          const now = new Date();
+          const year = now.getFullYear();
+          const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          
+          // Buscar estatísticas
+          const stats = msgCounter.getStatsByDate(from, dateStr);
+          const topUsers = msgCounter.getTopUsersByDate(from, dateStr, 3);
+          
+          if (!stats) {
+            const formattedDate = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+            return reply(`╭━━━〔 📅 ESTATÍSTICAS DO DIA 〕━━━╮\n┃\n┃ 📆 Data: ${formattedDate}\n┃\n┃ ⚠️ Não há registros disponíveis\n┃ para esta data.\n┃\n┃ 💡 Os dados são mantidos por\n┃ até 90 dias.\n╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`);
+          }
+          
+          // Formatar data para exibição
+          const formattedDate = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+          const totalMedia = (stats.stickers || 0) + (stats.images || 0) + (stats.videos || 0);
+          const userCount = stats.users ? Object.keys(stats.users).length : 0;
+          const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          
+          let message = `╭━━━〔 📅 ESTATÍSTICAS DO DIA 〕━━━╮\n`;
+          message += `┃ 👥 Grupo: ${groupName || 'Grupo'}\n`;
+          message += `┃ 📆 Data: ${formattedDate}\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\n`;
+          message += `┃\n`;
+          message += `🏅 Ranking de usuários\n`;
+          message += `━━━━━━━━━━━━━━\n`;
+          
+          if (topUsers.length === 0) {
+            message += `┃ Nenhum registro de atividade.\n`;
+          } else {
+            const medals = ['🥇', '🥈', '🥉'];
+            topUsers.forEach((user, index) => {
+              const userMedia = (user.stickers || 0) + (user.images || 0) + (user.videos || 0);
+              message += `┃\n`;
+              message += `┃ ${medals[index]} #${index + 1} @${user.name.split(' ')[0]}\n`;
+              message += `┃    💬 Msgs: ${user.count.toLocaleString('pt-BR')}\n`;
+              message += `┃    🎭 Figs: ${user.stickers || 0}\n`;
+              message += `┃    🖼️ Mídias: ${userMedia}\n`;
+              message += `┃    🎵 Áudios: ${user.audios || 0}\n`;
+            });
+          }
+          
+          message += `┃\n`;
+          message += `━━━━━━━━━━━━━━\n`;
+          message += `┃\n`;
+          message += `┃ 📌 Total de msgs: ${(stats.total || 0).toLocaleString('pt-BR')}\n`;
+          message += `┃ 👥 Usuários ativos: ${userCount}\n`;
+          message += `┃ 🕒 Consulta: ${currentTime}\n`;
+          message += `┃\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
+          
+          await reply(message);
+        } catch (e) {
+          console.error('[ESTDIA] Erro:', e);
+          await reply("❌ Ocorreu um erro ao buscar as estatísticas. Tente novamente.");
+        }
+        break;
+        
       case 'mediario':
         try {
           if (!isGroup) return reply("◈ Este comando só funciona em grupos.");

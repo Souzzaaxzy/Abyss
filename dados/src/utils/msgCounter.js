@@ -448,9 +448,36 @@ const resetDailyCounters = () => {
   const today = getDateInfo();
   
   for (const groupId of Object.keys(data.groups)) {
+    // Salvar dia atual no histórico antes de resetar
+    const currentDaily = data.groups[groupId].daily;
+    if (currentDaily && currentDaily.total > 0) {
+      if (!data.groups[groupId].history) {
+        data.groups[groupId].history = {};
+      }
+      data.groups[groupId].history[currentDaily.date] = {
+        date: currentDaily.date,
+        total: currentDaily.total,
+        stickers: currentDaily.stickers || 0,
+        images: currentDaily.images || 0,
+        videos: currentDaily.videos || 0,
+        audios: currentDaily.audios || 0,
+        users: { ...currentDaily.users }
+      };
+      
+      // Manter apenas últimos 90 dias
+      const dates = Object.keys(data.groups[groupId].history).sort();
+      while (dates.length > 90) {
+        delete data.groups[groupId].history[dates.shift()];
+      }
+    }
+    
     data.groups[groupId].daily = {
       date: today.date,
       total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
       users: {},
       goalReached: false,
       goalNotificationSent: false
@@ -660,6 +687,97 @@ const cleanInactiveUsers = (groupId, activeUserIds) => {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 📅 ESTATÍSTICAS POR DATA
+// ═══════════════════════════════════════════════════════════════
+
+const getStatsByDate = (groupId, dateStr) => {
+  const data = loadMsgCounterData();
+  const groupData = data.groups[groupId];
+  
+  if (!groupData) {
+    return null;
+  }
+  
+  // Buscar no histórico se disponível
+  if (groupData.history && groupData.history[dateStr]) {
+    return groupData.history[dateStr];
+  }
+  
+  // Verificar se é o dia atual
+  const today = getDateInfo();
+  if (dateStr === today.date) {
+    return {
+      date: dateStr,
+      total: groupData.daily.total,
+      stickers: groupData.daily.stickers || 0,
+      images: groupData.daily.images || 0,
+      videos: groupData.daily.videos || 0,
+      audios: groupData.daily.audios || 0,
+      users: groupData.daily.users
+    };
+  }
+  
+  return null;
+};
+
+const saveDayToHistory = (groupId) => {
+  const data = loadMsgCounterData();
+  const groupData = data.groups[groupId];
+  
+  if (!groupData) return;
+  
+  const date = groupData.daily.date;
+  
+  // Inicializar histórico se não existir
+  if (!data.groups[groupId].history) {
+    data.groups[groupId].history = {};
+  }
+  
+  // Salvar dia atual no histórico antes do reset
+  data.groups[groupId].history[date] = {
+    date: date,
+    total: groupData.daily.total,
+    stickers: groupData.daily.stickers || 0,
+    images: groupData.daily.images || 0,
+    videos: groupData.daily.videos || 0,
+    audios: groupData.daily.audios || 0,
+    users: { ...groupData.daily.users }
+  };
+  
+  // Manter apenas últimos 90 dias no histórico
+  const dates = Object.keys(data.groups[groupId].history).sort();
+  while (dates.length > 90) {
+    delete data.groups[groupId].history[dates.shift()];
+  }
+  
+  saveMsgCounterData(data);
+};
+
+const getTopUsersByDate = (groupId, dateStr, limit = 3) => {
+  const stats = getStatsByDate(groupId, dateStr);
+  
+  if (!stats || !stats.users) {
+    return [];
+  }
+  
+  // Converter usuários em array e ordenar
+  const usersArray = Object.entries(stats.users).map(([userId, userData]) => ({
+    userId,
+    name: userData.name || 'Usuário',
+    count: userData.count || 0,
+    stickers: userData.stickers || 0,
+    images: userData.images || 0,
+    videos: userData.videos || 0,
+    audios: userData.audios || 0
+  }));
+  
+  // Ordenar por total de mensagens
+  usersArray.sort((a, b) => b.count - a.count);
+  
+  return usersArray.slice(0, limit);
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 📤 EXPORTAÇÃO
 // ═══════════════════════════════════════════════════════════════
 
@@ -687,7 +805,10 @@ export {
   formatWeeklyStats,
   initResetScheduler,
   setSender,
-  cleanInactiveUsers
+  cleanInactiveUsers,
+  getStatsByDate,
+  saveDayToHistory,
+  getTopUsersByDate
 };
 
 // Export default as an object with all functions
@@ -715,7 +836,10 @@ const msgCounterExports = {
   formatWeeklyStats,
   initResetScheduler,
   setSender,
-  cleanInactiveUsers
+  cleanInactiveUsers,
+  getStatsByDate,
+  saveDayToHistory,
+  getTopUsersByDate
 };
 
 export default msgCounterExports;
