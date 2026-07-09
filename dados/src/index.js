@@ -26356,7 +26356,7 @@ ${prefix}togglecmdvip premium_ia off`);
           if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
           
           // Verificar se é admin ou dono
-          const isAdmin = isGroupAdmins || isBotAdmin;
+          const isAdmin = isGroupAdmin || isBotAdmin;
           const isOwner = sender === numerodono;
           
           if (!isAdmin && !isOwner) {
@@ -26392,7 +26392,7 @@ ${prefix}togglecmdvip premium_ia off`);
           if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
           
           // Verificar se é admin ou dono
-          const isAdmin = isGroupAdmins || isBotAdmin;
+          const isAdmin = isGroupAdmin || isBotAdmin;
           const isOwner = sender === numerodono;
           
           if (!isAdmin && !isOwner) {
