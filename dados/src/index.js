@@ -24419,10 +24419,21 @@ ${prefix}setgroq sua_chave_aqui
         try {
           if (!isOwnerOrSub) return reply("Este comando é exclusivo para o meu dono!");
           if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Abyss`);
+          
           let config = JSON.parse(fs.readFileSync(CONFIG_FILE));
+          const nomeAntigo = config.nomebot;
           config.nomebot = q;
           writeJsonFile(CONFIG_FILE, config);
-          await reply(`Nome do bot alterado com sucesso para "${q}"!`);
+          
+          // Atualiza o nome do perfil do WhatsApp
+          try {
+            await nazu.updateProfileName(q);
+            await reply(`✅ *Nome do bot alterado com sucesso!*\n\n📝 Nome anterior: ${nomeAntigo}\n📝 Novo nome: ${q}\n\n🌐 Nome do perfil atualizado!`);
+          } catch (profileError) {
+            // Se falhar o perfil, ainda assim atualiza o config
+            console.error('Erro ao atualizar perfil:', profileError);
+            await reply(`✅ *Nome do bot alterado com sucesso!*\n\n📝 Nome anterior: ${nomeAntigo}\n📝 Novo nome: ${q}\n\n⚠️ Nota: Nome do perfil pode não ter sido atualizado.`);
+          }
         } catch (e) {
           console.error(e);
           await reply("🐝 Ops! Ocorreu um erro inesperado. Tente novamente em alguns instantes, por favor! 🥺");
