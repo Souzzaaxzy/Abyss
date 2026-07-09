@@ -7284,7 +7284,7 @@ if (isCmd && command && !isOwnerOrSub) {
             const combatStats = calculateCombatStats(me, econ);
             
             let text = `╭─────────────────────⭓\n` +
-              `│      ◈ 𝗔𝗕𝗬𝗦𝗦 𝗔𝗩𝗘𝗡𝗧𝗨𝗥𝗘𝗜𝗥𝗢 ◈\n` +
+              `│      ◈ ${nomebot} AVENTUREIRO ◈\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ 👤 Usuário » @${sender.split('@')[0]}\n` +
@@ -7344,7 +7344,7 @@ if (isCmd && command && !isOwnerOrSub) {
             const bankUsage = bankCap === '∞' ? '0%' : Math.floor(((me.bank || 0) / bankCap) * 100) + '%';
             
             const walletMsg = `╭─────────────────────⭓\n` +
-              `│      💰 𝗔𝗕𝗬𝗦𝗦 𝗕𝗔𝗡𝗞 💰\n` +
+              `│      💰 ${nomebot} BANK 💰\n` +
               `├─────────────────────⭓\n` +
               `│\n` +
               `│ 👤 Usuário » @${sender.split('@')[0]}\n` +
@@ -32897,7 +32897,7 @@ case 'assistent':
                 `• Sistema: ${st.ativo ? 'Ativado' : 'Desativado'}\n` +
                 `• Intervalo entre falas: ${st.cooldown}\n` +
                 `• Chance de resposta: ${st.chance}\n` +
-                `• Abyss News: ${st.jornal}\n` +
+                `• ${nomebot} News: ${st.jornal}\n` +
                 `• Total de eventos: ${st.eventosRegistrados}`);
 
             default:
