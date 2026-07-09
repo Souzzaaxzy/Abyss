@@ -26590,6 +26590,123 @@ ${prefix}togglecmdvip premium_ia off`);
         }
         break;
         
+      case 'pdiario':
+        try {
+          if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
+          
+          const userName = pushname || sender.split('@')[0];
+          const detailedRank = msgCounter.getUserDetailedRank(from, sender, 'daily');
+          
+          let message = `╭━━━〔 📅 POSIÇÃO DIÁRIA 〕━━━╮\n`;
+          message += `┃ 👤 Usuário: @${userName.split(' ')[0]}\n`;
+          message += `┃ 👥 Grupo: ${groupName || 'Grupo'}\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯\n`;
+          message += `┃\n`;
+          
+          if (!detailedRank.hasActivity) {
+            message += `┃ 📭 Você ainda não possui\n`;
+            message += `┃ atividade registrada hoje.\n`;
+            message += `┃\n`;
+            message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+            return reply(message);
+          }
+          
+          if (detailedRank.isLeader) {
+            message += `┃ 👑 Você está liderando\n`;
+            message += `┃ o ranking diário!\n`;
+            message += `┃\n`;
+          }
+          
+          message += `┃ 🏅 Posição: #${detailedRank.rank} de ${detailedRank.total}\n`;
+          message += `┃\n`;
+          message += `┃ 💬 Mensagens: ${detailedRank.count.toLocaleString('pt-BR')}\n`;
+          message += `┃ 🎭 Figurinhas: ${detailedRank.stickers}\n`;
+          message += `┃ 🖼️ Mídias: ${(detailedRank.images || 0) + (detailedRank.videos || 0)}\n`;
+          message += `┃ 🎵 Áudios: ${detailedRank.audios}\n`;
+          message += `┃\n`;
+          
+          if (detailedRank.nextUser && !detailedRank.isLeader) {
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `┃\n`;
+            message += `┃ ⬆️ Faltam ${detailedRank.messagesToNext} mensagens\n`;
+            message += `┃ para alcançar o #${detailedRank.rank - 1}\n`;
+            message += `┃ (@${detailedRank.nextUser.name.split(' ')[0]})\n`;
+            message += `┃\n`;
+          }
+          
+          message += `━━━━━━━━━━━━━━━━━━━━\n`;
+          message += `┃\n`;
+          message += `┃ 📊 Continue participando\n`;
+          message += `┃ para subir no ranking!\n`;
+          message += `┃\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+          
+          await reply(message);
+        } catch (e) {
+          console.error('[PDIARIO] Erro:', e);
+          await reply("❌ Ocorreu um erro ao buscar sua posição. Tente novamente.");
+        }
+        break;
+        
+      case 'psemanal':
+        try {
+          if (!isGroup) return reply("◈ Este comando só funciona em grupos.");
+          
+          const userName = pushname || sender.split('@')[0];
+          const detailedRank = msgCounter.getUserDetailedRank(from, sender, 'weekly');
+          
+          let message = `╭━━━〔 🔥 POSIÇÃO SEMANAL 〕━━━╮\n`;
+          message += `┃ 👤 Usuário: @${userName.split(' ')[0]}\n`;
+          message += `┃ 👥 Grupo: ${groupName || 'Grupo'}\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯\n`;
+          message += `┃\n`;
+          
+          if (!detailedRank.hasActivity) {
+            message += `┃ 📭 Você ainda não possui\n`;
+            message += `┃ atividade registrada\n`;
+            message += `┃ nesta semana.\n`;
+            message += `┃\n`;
+            message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+            return reply(message);
+          }
+          
+          if (detailedRank.isLeader) {
+            message += `┃ 👑 Você é o líder\n`;
+            message += `┃ do ranking semanal!\n`;
+            message += `┃\n`;
+          }
+          
+          message += `┃ 🏅 Posição: #${detailedRank.rank} de ${detailedRank.total}\n`;
+          message += `┃\n`;
+          message += `┃ 💬 Mensagens: ${detailedRank.count.toLocaleString('pt-BR')}\n`;
+          message += `┃ 🎭 Figurinhas: ${detailedRank.stickers}\n`;
+          message += `┃ 🖼️ Mídias: ${(detailedRank.images || 0) + (detailedRank.videos || 0)}\n`;
+          message += `┃ 🎵 Áudios: ${detailedRank.audios}\n`;
+          message += `┃\n`;
+          
+          if (detailedRank.nextUser && !detailedRank.isLeader) {
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `┃\n`;
+            message += `┃ ⬆️ Faltam ${detailedRank.messagesToNext} mensagens\n`;
+            message += `┃ para alcançar o #${detailedRank.rank - 1}\n`;
+            message += `┃ (@${detailedRank.nextUser.name.split(' ')[0]})\n`;
+            message += `┃\n`;
+          }
+          
+          message += `━━━━━━━━━━━━━━━━━━━━\n`;
+          message += `┃\n`;
+          message += `┃ 📈 Continue ativo para\n`;
+          message += `┃ subir no ranking!\n`;
+          message += `┃\n`;
+          message += `╰━━━━━━━━━━━━━━━━━━━━╯`;
+          
+          await reply(message);
+        } catch (e) {
+          console.error('[PSEMANAL] Erro:', e);
+          await reply("❌ Ocorreu um erro ao buscar sua posição. Tente novamente.");
+        }
+        break;
+        
       case 'mediario':
         try {
           if (!isGroup) return reply("◈ Este comando só funciona em grupos.");

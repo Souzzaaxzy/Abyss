@@ -439,6 +439,70 @@ const getUserRank = (groupId, userId, period = 'daily') => {
   };
 };
 
+const getUserDetailedRank = (groupId, userId, period = 'daily') => {
+  const stats = getGroupStats(groupId);
+  const users = period === 'daily' ? stats.daily.users : stats.weekly.users;
+  
+  if (!users) {
+    return {
+      rank: 0,
+      count: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
+      total: 0,
+      nextUser: null,
+      messagesToNext: 0
+    };
+  }
+  
+  // Obter dados do usuário
+  const userData = users[userId];
+  const userCount = userData?.count || 0;
+  const userStickers = userData?.stickers || 0;
+  const userImages = userData?.images || 0;
+  const userVideos = userData?.videos || 0;
+  const userAudios = userData?.audios || 0;
+  
+  // Ordenar usuários por contagem
+  const sortedUsers = Object.entries(users)
+    .sort((a, b) => (b[1].count || 0) - (a[1].count || 0));
+  
+  const rank = sortedUsers.findIndex(([id]) => id === userId) + 1;
+  
+  // Calcular mensagens para o próximo
+  let nextUser = null;
+  let messagesToNext = 0;
+  
+  if (rank > 1 && sortedUsers.length > 1) {
+    const userAbove = sortedUsers[rank - 2]; // rank é 1-based, array é 0-based
+    if (userAbove) {
+      const nextCount = userAbove[1].count || 0;
+      messagesToNext = Math.max(0, nextCount - userCount + 1);
+      nextUser = {
+        id: userAbove[0],
+        name: userAbove[1].name || 'Usuário',
+        count: nextCount
+      };
+    }
+  }
+  
+  return {
+    rank,
+    count: userCount,
+    stickers: userStickers,
+    images: userImages,
+    videos: userVideos,
+    audios: userAudios,
+    total: sortedUsers.length,
+    nextUser,
+    messagesToNext,
+    isLeader: rank === 1 && sortedUsers.length > 0,
+    hasActivity: userCount > 0
+  };
+};
+
 // ═══════════════════════════════════════════════════════════════
 // 🎯 SISTEMA DE METAS
 // ═══════════════════════════════════════════════════════════════
@@ -1118,6 +1182,7 @@ export {
   getUserStats,
   getTopUsers,
   getUserRank,
+  getUserDetailedRank,
   setDailyGoal,
   setWeeklyGoal,
   checkGoals,
@@ -1154,6 +1219,7 @@ const msgCounterExports = {
   getUserStats,
   getTopUsers,
   getUserRank,
+  getUserDetailedRank,
   setDailyGoal,
   setWeeklyGoal,
   checkGoals,
