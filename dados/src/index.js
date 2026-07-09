@@ -3324,9 +3324,9 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         console.error('❌ Erro no sistema de leveling:', levelingError.message);
       }
     }
-    async function sendAbyssWarning(text) {
+    async function sendBotWarning(text) {
       const warningMessage = `╭─────────────────────⭓\n` +
-        `│      ⚠️ 𝗔𝗕𝗬𝗦𝗦 𝗔𝗩𝗜𝗦𝗢 ⚠️\n` +
+        `│      ⚠️ ${nomebot.toUpperCase()} AVISO ⚠️\n` +
         `├─────────────────────⭓\n` +
         `│\n` +
         `│ ❌ ${text}\n` +
@@ -3334,6 +3334,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         `╰─────────────────────⭓`;
       return reply(warningMessage);
     }
+    // Alias para manter compatibilidade
+    const sendAbyssWarning = sendBotWarning;
 
     async function reply(text, options = {}) {
       try {
@@ -7470,7 +7472,7 @@ if (isCmd && command && !isOwnerOrSub) {
 
             const catArg = args[0];
             if (!catArg || !['armas', 'armaduras', 'escudos', 'elmos', 'acessorios', 'botas', 'ferramentas', 'consumiveis'].includes(catArg)) {
-              let text = `╭━━━⊱ 🛍️ *LOJA ABYSS* 🛍️ ⊱━━━╮\n│\n`;
+              let text = `╭━━━⊱ 🛍️ *LOJA ${nomebot.toUpperCase()}* 🛍️ ⊱━━━╮\n│\n`;
               text += `│ 🌌 *${pushname}*! Escolha uma categoria:\n│\n`;
               text += `│ ◈ *${prefix}loja armas*\n`;
               text += `│ ⚙️ *${prefix}loja armaduras*\n`;
@@ -22061,7 +22063,7 @@ break;
 │ 🔄 *Atualizado:* ${updatedAt}
 │ 📤 *Último push:* ${pushedAt}
 │
-│ ⏱️ *Abyss vem sendo ativamente*
+│ ⏱️ *${nomebot} vem sendo ativamente*
 │ *mantida há:* ${tempoAtivo}
 │
 │ 🔗 *Links:*
@@ -26205,7 +26207,7 @@ ${prefix}togglecmdvip premium_ia off`);
               }
             }
           }
-          blad += `╰━━━〔 ⭐ ABYSS ⭐ 〕━━━╯`;
+          blad += `╰━━━〔 ⭐ ${nomebot} ⭐ 〕━━━╯`;
           await nazu.sendMessage(from, {
             text: blad,
             mentions: menc
@@ -27965,8 +27967,6 @@ ${prefix}togglecmdvip premium_ia off`);
           const os = await import('os');
           
           // ==================== BOT INFO ====================
-          const config = loadJsonFile(CONFIG_FILE, {});
-          const botName = config.nomedobot || 'AbyssBot';
           const botPrefix = config.prefixo || '/';
           
           // Uptime
@@ -28046,11 +28046,11 @@ ${prefix}togglecmdvip premium_ia off`);
           const painelMsg = `
 ╔══════════════════════════════════════╗
 ║   👑 *PAINEL ADMINISTRATIVO* 👑
-║   ${botName}
+║   ${nomebot}
 ╚══════════════════════════════════════╝
 
 ┌─ 🤖 *BOT* ─────────────────────────┐
-│ ✦ Prefixo: ${botPrefix}
+│ ✦ Prefixo: ${prefixo}
 │ ✦ Uptime: ${uptimeStr}
 │ ✦ Comandos: ${totalCmds} execuções
 │ ✦ Comandos carregados: ${cmdCount}
@@ -28240,7 +28240,7 @@ case 'sfundo':
         {
           sticker: buffer,
           author: `${pushname}\n${nomebot}\n${nomedono}`,
-          packname: 'Abyss - Stickers',
+          packname: `${nomebot} - Stickers`,
           type: 'image'
         },
         {

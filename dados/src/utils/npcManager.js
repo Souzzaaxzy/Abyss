@@ -13,6 +13,17 @@ const GRUPOS_DIR = path.join(__dirname, '../../database/grupos');
 const DATABASE_DIR = './dados';
 const NPC_MEMORY_FILE = `${DATABASE_DIR}/npc_memory.json`;
 const NPC_EVENTS_FILE = `${DATABASE_DIR}/npc_events.json`;
+const CONFIG_FILE = path.join(__dirname, '../config.json');
+
+// Função para obter o nome do bot dinamicamente
+function getBotName() {
+  try {
+    const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+    return config.nomebot || 'Abyss';
+  } catch (e) {
+    return 'Abyss';
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // 📊 10 FRASES PARA CADA EVENTO (TODOS OS EVENTOS DO BOT)
@@ -769,7 +780,7 @@ class NPCManager {
       `${i+1}. ${type.replace(/_/g, ' ')} (${count}x)`
     ).join('\n');
     
-    return `📰 *ABYSS NEWS - ${new Date().toLocaleDateString('pt-BR')}*
+    return `📰 *${getBotName().toUpperCase()} NEWS - ${new Date().toLocaleDateString('pt-BR')}*
 
 Bom dia! Resumo dos eventos de HOJE:
 
