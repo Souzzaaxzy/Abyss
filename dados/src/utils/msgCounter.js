@@ -305,19 +305,53 @@ const getGroupStats = (groupId) => {
   
   if (!groupData) {
     return {
-      daily: { total: 0, users: {} },
-      weekly: { total: 0, users: {} },
+      daily: { total: 0, stickers: 0, images: 0, videos: 0, audios: 0, users: {} },
+      weekly: { total: 0, stickers: 0, images: 0, videos: 0, audios: 0, users: {} },
       settings: { dailyGoal: null, weeklyGoal: null }
     };
   }
   
   const today = getDateInfo();
   
+  // Inicializar daily se não existir
+  if (!groupData.daily) {
+    groupData.daily = {
+      date: today.date,
+      total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
+      users: {},
+      goalReached: false,
+      goalNotificationSent: false
+    };
+  }
+  
+  // Inicializar weekly se não existir
+  if (!groupData.weekly) {
+    groupData.weekly = {
+      weekStart: today.weekStart,
+      total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
+      users: {},
+      goalReached: false,
+      goalNotificationSent: false
+    };
+  }
+  
   // Verificar se é um novo dia
   if (groupData.daily.date !== today.date) {
     groupData.daily = {
       date: today.date,
       total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
       users: {},
       goalReached: false,
       goalNotificationSent: false
@@ -331,6 +365,10 @@ const getGroupStats = (groupId) => {
     groupData.weekly = {
       weekStart: today.weekStart,
       total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
       users: {},
       goalReached: false,
       goalNotificationSent: false
@@ -350,8 +388,8 @@ const getUserStats = (groupId, userId) => {
   const stats = getGroupStats(groupId);
   
   return {
-    daily: stats.daily.users[userId] || { name: 'Usuário', count: 0 },
-    weekly: stats.weekly.users[userId] || { name: 'Usuário', count: 0 }
+    daily: stats.daily.users?.[userId] || { name: 'Usuário', count: 0, stickers: 0, images: 0, videos: 0, audios: 0 },
+    weekly: stats.weekly.users?.[userId] || { name: 'Usuário', count: 0, stickers: 0, images: 0, videos: 0, audios: 0 }
   };
 };
 
@@ -359,11 +397,17 @@ const getTopUsers = (groupId, period = 'daily', limit = 5) => {
   const stats = getGroupStats(groupId);
   const users = period === 'daily' ? stats.daily.users : stats.weekly.users;
   
+  if (!users) return [];
+  
   const sortedUsers = Object.entries(users)
     .map(([id, data]) => ({
       id,
-      name: data.name,
-      count: data.count
+      name: data.name || 'Usuário',
+      count: data.count || 0,
+      stickers: data.stickers || 0,
+      images: data.images || 0,
+      videos: data.videos || 0,
+      audios: data.audios || 0
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
@@ -378,10 +422,13 @@ const getTopUsers = (groupId, period = 'daily', limit = 5) => {
 const getUserRank = (groupId, userId, period = 'daily') => {
   const stats = getGroupStats(groupId);
   const users = period === 'daily' ? stats.daily.users : stats.weekly.users;
+  
+  if (!users) return { rank: 0, count: 0, total: 0 };
+  
   const userCount = users[userId]?.count || 0;
   
   const sortedUsers = Object.entries(users)
-    .sort((a, b) => b[1].count - a[1].count);
+    .sort((a, b) => (b[1].count || 0) - (a[1].count || 0));
   
   const rank = sortedUsers.findIndex(([id]) => id === userId) + 1;
   
@@ -400,6 +447,20 @@ const setDailyGoal = (groupId, goal) => {
   const data = loadMsgCounterData();
   initGroupCounter(groupId);
   
+  if (!data.groups[groupId].daily) {
+    data.groups[groupId].daily = {
+      date: getDateInfo().date,
+      total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
+      users: {},
+      goalReached: false,
+      goalNotificationSent: false
+    };
+  }
+  
   data.groups[groupId].settings.dailyGoal = goal;
   
   // Resetar flags para permitir nova notificação quando a nova meta for atingida
@@ -413,6 +474,20 @@ const setDailyGoal = (groupId, goal) => {
 const setWeeklyGoal = (groupId, goal) => {
   const data = loadMsgCounterData();
   initGroupCounter(groupId);
+  
+  if (!data.groups[groupId].weekly) {
+    data.groups[groupId].weekly = {
+      weekStart: getDateInfo().weekStart,
+      total: 0,
+      stickers: 0,
+      images: 0,
+      videos: 0,
+      audios: 0,
+      users: {},
+      goalReached: false,
+      goalNotificationSent: false
+    };
+  }
   
   data.groups[groupId].settings.weeklyGoal = goal;
   
@@ -431,12 +506,12 @@ const checkGoals = (groupId) => {
   if (!groupData) return { daily: false, weekly: false };
   
   const results = {
-    daily: { reached: false, alreadyNotified: groupData.daily.goalNotificationSent },
-    weekly: { reached: false, alreadyNotified: groupData.weekly.goalNotificationSent }
+    daily: { reached: false, alreadyNotified: groupData.daily?.goalNotificationSent || false },
+    weekly: { reached: false, alreadyNotified: groupData.weekly?.goalNotificationSent || false }
   };
   
   // Verificar meta diária
-  if (groupData.settings.dailyGoal && !groupData.daily.goalNotificationSent) {
+  if (groupData.settings.dailyGoal && groupData.daily && !groupData.daily.goalNotificationSent) {
     if (groupData.daily.total >= groupData.settings.dailyGoal) {
       groupData.daily.goalReached = true;
       groupData.daily.goalNotificationSent = true;
@@ -445,7 +520,7 @@ const checkGoals = (groupId) => {
   }
   
   // Verificar meta semanal
-  if (groupData.settings.weeklyGoal && !groupData.weekly.goalNotificationSent) {
+  if (groupData.settings.weeklyGoal && groupData.weekly && !groupData.weekly.goalNotificationSent) {
     if (groupData.weekly.total >= groupData.settings.weeklyGoal) {
       groupData.weekly.goalReached = true;
       groupData.weekly.goalNotificationSent = true;
