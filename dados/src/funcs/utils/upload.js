@@ -1,12 +1,11 @@
 import axios from 'axios';
 
 // --- CONFIGURAÇÃO ---
-const tokenParts = ["SUA_API_KEY_AQUI"];
 const CONFIG = {
     GITHUB: {
         REPO: 'uploadsnew/uploads',
         API_URL: 'https://api.github.com/repos',
-        TOKEN: tokenParts.join(""),
+        TOKEN: process.env.GITHUB_UPLOAD_TOKEN || '',
     },
     FILE_TYPES: {
         fotos: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'ico', 'jfif', 'heic'],
