@@ -4954,9 +4954,11 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
         if (adoptionManager && adoptionManager.hasPendingRequest) {
           try {
             if (adoptionManager.hasPendingRequest(from) && body) {
-              const adoptionResponse = adoptionManager.processResponse(from, sender, body);
-              // Somente responde se for uma resposta válida do alvo (não null)
-              if (adoptionResponse && adoptionResponse.message) {
+              const adoptionResponse = await adoptionManager.processResponse(from, sender, body);
+              // Se retornar null, significa que não deve responder (outro usuário ou sem resposta)
+              if (adoptionResponse === null) {
+                // Não fazer nada - usuário não é o alvo da adoção
+              } else if (adoptionResponse && adoptionResponse.message) {
                 await nazu.sendMessage(from, {
                   text: adoptionResponse.message,
                   mentions: adoptionResponse.mentions || []

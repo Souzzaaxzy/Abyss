@@ -118,23 +118,23 @@ class AdoptionManager {
   processResponse(groupId, responderId, rawResponse) {
     const pending = this.pendingAdoptions.get(groupId);
     if (!pending) {
-      return { success: false, reason: 'no_pending' };
+      return null; // Sem pedido pendente - ignorar
     }
     
     const responder = this._normalizeId(responderId);
+    const target = this._normalizeId(pending.target);
     
     // Somente o alvo pode responder - se não for o alvo, retorna null para ignorar
-    if (responder !== pending.target) {
+    if (responder !== target) {
+      console.log(`[ADOPTION] Ignorando resposta de ${responder} - não é o alvo (${target})`);
       return null; // IGNORAR completamente - não responde nada
     }
     
     const decision = this._normalizeDecision(rawResponse);
     if (!decision) {
-      return {
-        success: false,
-        reason: 'invalid',
-        message: '❌ Resposta inválida. Use "sim" para aceitar ou "não" para recusar.'
-      };
+      // Resposta inválida do alvo - retorna null para ignorar também
+      // Não responde "resposta inválida" para não poluir o chat
+      return null;
     }
     
     this.pendingAdoptions.delete(groupId);
