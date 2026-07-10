@@ -12,7 +12,16 @@ class AdoptionManager {
   }
 
   _normalizeId(id) {
-    return typeof id === 'string' ? id.trim().toLowerCase() : '';
+    if (typeof id !== 'string') return '';
+    // Remove everything after @ for comparison
+    const normalized = id.trim().toLowerCase();
+    return normalized.split('@')[0];
+  }
+
+  _compareIds(id1, id2) {
+    const n1 = this._normalizeId(id1);
+    const n2 = this._normalizeId(id2);
+    return n1 === n2;
   }
 
   createAdoptionRequest(groupId, requesterId, targetId) {
@@ -62,7 +71,7 @@ class AdoptionManager {
   _getPendingRequestForTarget(groupId, targetId) {
     const request = this.pendingAdoptions.get(groupId);
     if (!request) return null;
-    if (this._normalizeId(request.target) === this._normalizeId(targetId)) {
+    if (this._compareIds(request.target, targetId)) {
       return request;
     }
     return null;
@@ -121,12 +130,9 @@ class AdoptionManager {
       return null; // Sem pedido pendente - ignorar
     }
     
-    const responder = this._normalizeId(responderId);
-    const target = this._normalizeId(pending.target);
-    
     // Somente o alvo pode responder - se não for o alvo, retorna null para ignorar
-    if (responder !== target) {
-      console.log(`[ADOPTION] Ignorando resposta de ${responder} - não é o alvo (${target})`);
+    if (!this._compareIds(responderId, pending.target)) {
+      console.log(`[ADOPTION] Ignorando resposta de ${responderId} - não é o alvo (${pending.target})`);
       return null; // IGNORAR completamente - não responde nada
     }
     
@@ -232,7 +238,7 @@ class AdoptionManager {
 
   resetAdoption(groupId, targetId) {
     const request = this.pendingAdoptions.get(groupId);
-    if (request && this._normalizeId(request.target) === this._normalizeId(targetId)) {
+    if (request && this._compareIds(request.target, targetId)) {
       this.pendingAdoptions.delete(groupId);
     }
     return true;
