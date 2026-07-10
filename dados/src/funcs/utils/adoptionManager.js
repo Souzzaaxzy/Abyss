@@ -163,8 +163,8 @@ class AdoptionManager {
 
   async _applyAdoption(request) {
     const econ = loadEconomy();
-    const adopterData = econ.users[request.requester];
-    const childData = econ.users[request.target];
+    const adopterData = econ.users[request.requesterRaw];
+    const childData = econ.users[request.targetRaw];
     
     if (!adopterData || !childData) {
       return { success: false, message: '❌ Erro ao processar adoção. Dados não encontrados.' };
