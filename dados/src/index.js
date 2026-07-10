@@ -11999,24 +11999,54 @@ if (isCmd && command && !isOwnerOrSub) {
           targetUser.family = { spouse: null, children: [], parents: [], siblings: [] };
         }
 
-        // Buscar todos os usuários para encontrar quem tem este usuário como filho
-        let resetCount = 0;
-        for (const userId in econ.users) {
-          const userData = econ.users[userId];
-          if (userData && userData.family && userData.family.children) {
-            if (userData.family.children.includes(target)) {
-              userData.family.children = userData.family.children.filter(child => child !== target);
-              resetCount++;
+        let childrenResetCount = 0;
+        let parentsResetCount = 0;
+
+        // 1. Obter todos os filhos do usuário alvo ANTES de limpar
+        const targetChildren = targetUser.family.children ? [...targetUser.family.children] : [];
+
+        // 2. Para cada filho do usuário alvo, remover TODAS as referências de pai/mãe
+        for (const childId of targetChildren) {
+          const childData = econ.users[childId];
+          if (childData && childData.family) {
+            if (!childData.family.parents) childData.family.parents = [];
+            
+            // Remover o alvo dos pais
+            if (childData.family.parents.includes(target)) {
+              childData.family.parents = childData.family.parents.filter(parent => parent !== target);
+              parentsResetCount++;
             }
+            
+            // Também remover o spouse/parceiro do alvo dos pais (se existir)
+            const activePair = relationshipManager.getActivePairForUser(target, from);
+            if (activePair && activePair.partnerId && childData.family.parents.includes(activePair.partnerId)) {
+              childData.family.parents = childData.family.parents.filter(parent => parent !== activePair.partnerId);
+            }
+            
+            childrenResetCount++;
           }
         }
 
-        // Limpar pais do usuário alvo
+        // 3. Limpar todos os filhos do usuário alvo
+        targetUser.family.children = [];
+
+        // 4. Também remover o alvo dos children do spouse/parceiro (se houver)
+        const targetActivePair = relationshipManager.getActivePairForUser(target, from);
+        if (targetActivePair && targetActivePair.partnerId) {
+          const spouseData = getEcoUser(econ, targetActivePair.partnerId);
+          if (spouseData && spouseData.family && spouseData.family.children) {
+            const originalLength = spouseData.family.children.length;
+            spouseData.family.children = spouseData.family.children.filter(child => child !== target);
+            // Não contamos isso duplicadamente
+          }
+        }
+
+        // 5. Limpar os pais do usuário alvo
         if (targetUser.family.parents && targetUser.family.parents.length > 0) {
           targetUser.family.parents = [];
         }
 
-        // Remover qualquer solicitação pendente de adoção para este usuário
+        // 6. Remover qualquer solicitação pendente de adoção para este usuário
         adoptionManager.resetAdoption(from, target);
 
         saveEconomy(econ);
@@ -12025,8 +12055,9 @@ if (isCmd && command && !isOwnerOrSub) {
         text += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n`;
         text += `✅ A árvore genealógica de adoção de @${target.split('@')[0]} foi resetada com sucesso.\n\n`;
         text += `📋 *Ações realizadas:*\n`;
-        text += `• Removidos ${resetCount} vínculo(s) de adoção (pais)\n`;
-        text += `• Removida(s) conexão(ões) com filho(s)\n`;
+        text += `• Removidos ${childrenResetCount} filho(s) adotivo(s)\n`;
+        text += `• Removidas ${parentsResetCount} referência(s) de pai/mãe adotivo\n`;
+        text += `• Conexões com cônjuges também foram limpas\n`;
         text += `• Solicitação pendente cancelada (se houver)\n\n`;
         text += `💡 Relacionamentos e casamentos permanecem intactos.`;
 
