@@ -1551,15 +1551,15 @@ async function makeGroqRequest(modelo, texto, systemPrompt = null, historico = [
         {
           messages,
           model: groqModel,
-          temperature: 0.7,
-          max_tokens: 2000
+          temperature: 0.8,
+          max_tokens: 4096
         },
         {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${GROQ_API_KEY}`
           },
-          timeout: 60000
+          timeout: 90000
         }
       );
 
@@ -1747,9 +1747,9 @@ function updateHistorico(grupoUserId, role, content, nome = null) {
   
   historico[grupoUserId].push(entry);
   
-  // Manter apenas as últimas 6 interações para contexto
-  if (historico[grupoUserId].length > 6) {
-    historico[grupoUserId] = historico[grupoUserId].slice(-6);
+  // Manter as últimas 12 interações para contexto mais fluido (6 do usuário + 6 da IA)
+  if (historico[grupoUserId].length > 12) {
+    historico[grupoUserId] = historico[grupoUserId].slice(-12);
   }
 }
 
