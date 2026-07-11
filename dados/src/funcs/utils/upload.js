@@ -5,7 +5,7 @@ const CONFIG = {
     GITHUB: {
         REPO: 'uploadsnew/uploads',
         API_URL: 'https://api.github.com/repos',
-        TOKEN: process.env.GITHUB_UPLOAD_TOKEN || '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',
+        TOKEN: process.env.GITHUB_UPLOAD_TOKEN || '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',
     },
     FILE_TYPES: {
         fotos: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'ico', 'jfif', 'heic'],
