@@ -35599,19 +35599,23 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
           const randomHumor =
             humors[Math.floor(Math.random() * humors.length)];
 
-          // Path para imagem padrão local
-          const defaultProfilePic = __dirname + '/../midias/menu.jpg';
+          // URL da imagem padrão (fallback quando usuário não tem foto)
+          const defaultProfilePic = 'https://drive.google.com/uc?export=download&id=1eNOTypHiNf1tLTHME6If8XOt6a8nHqk_';
 
-          let profilePic;
+          let profilePic = defaultProfilePic;
+          let profilePicValida = false;
 
           try {
-            profilePic = await nazu.profilePictureUrl(target, 'image');
+            const picUrl = await nazu.profilePictureUrl(target, 'image');
+            if (picUrl && typeof picUrl === 'string' && picUrl.startsWith('http')) {
+              profilePic = picUrl;
+              profilePicValida = true;
+            }
           } catch (error) {
             console.warn(
               `Falha ao obter foto do perfil de ${targetName}:`,
               error.message
             );
-            profilePic = defaultProfilePic;
           }
 
           // BIO
@@ -35706,12 +35710,26 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
             );
           } catch (sendError) {
             console.error('Erro ao enviar imagem do perfil:', sendError.message);
-            // Se falhar ao enviar com imagem, tenta enviar apenas texto
-            await nazu.sendMessage(
-              from,
-              { text: perfilText, mentions: [target] },
-              { quoted: info }
-            );
+            // Tenta novamente com a imagem padrão como fallback final
+            try {
+              await nazu.sendMessage(
+                from,
+                {
+                  image: { url: defaultProfilePic },
+                  caption: perfilText,
+                  mentions: [target]
+                },
+                { quoted: info }
+              );
+            } catch (fallbackError) {
+              console.error('Erro ao enviar com fallback:', fallbackError.message);
+              // Se falhar tudo, tenta enviar apenas texto
+              await nazu.sendMessage(
+                from,
+                { text: perfilText, mentions: [target] },
+                { quoted: info }
+              );
+            }
           }
 
         } catch (error) {
