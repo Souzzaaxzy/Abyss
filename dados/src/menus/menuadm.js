@@ -52,6 +52,7 @@ ${middleBorder} ${menuItemIcon}${prefix}resetrank
 ${middleBorder} ${menuItemIcon}${prefix}mantercontador
 ${middleBorder} ${menuItemIcon}${prefix}atividade
 ${middleBorder} ${menuItemIcon}${prefix}checkativo
+${middleBorder} ${menuItemIcon}${prefix}getpp (@user ou reply)
 ${bottomBorder}
 
 ${menuTopBorder}

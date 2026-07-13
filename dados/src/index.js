@@ -31089,6 +31089,65 @@ break;
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
         }
         break;
+
+      case 'getpp':
+        try {
+          if (!isGroup) return sendAbyssWarning("◈ Este comando é só para grupos.");
+          if (!isGroupAdmin) return reply("Comando restrito a Administradores ou Moderadores com permissão. 💔");
+
+          // Identificar o alvo: menção primeiro, depois reply
+          const mentionedJids = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          const quotedParticipant = info.message?.extendedTextMessage?.contextInfo?.participant;
+
+          let targetUser = null;
+
+          // Prioridade 1: Usuário mencionado
+          if (mentionedJids && mentionedJids.length > 0) {
+            targetUser = mentionedJids[0];
+          }
+          // Prioridade 2: Usuário da mensagem respondida
+          else if (quotedParticipant) {
+            targetUser = quotedParticipant;
+          }
+
+          // Se nenhum alvo foi identificado
+          if (!targetUser) {
+            return reply(`◈ *Como usar o comando ${groupPrefix}getpp:*\n\n` +
+              `➤ Marque alguém: ${groupPrefix}getpp @usuario\n` +
+              `➤ Ou responda a mensagem de alguém: ${groupPrefix}getpp\n\n` +
+              `_Este comando é exclusivo para administradores._`);
+          }
+
+          // Buscar foto de perfil
+          let profilePicUrl;
+          try {
+            profilePicUrl = await nazu.profilePictureUrl(targetUser, 'image');
+          } catch (err) {
+            console.error('Erro ao buscar foto de perfil:', err);
+            profilePicUrl = null;
+          }
+
+          if (!profilePicUrl) {
+            return reply("❌ Este usuário não possui foto de perfil disponível.");
+          }
+
+          // Obter nome do usuário para a legenda
+          const targetUserName = getUserName(targetUser) || targetUser.split('@')[0];
+
+          // Enviar a foto de perfil
+          await nazu.sendMessage(from, {
+            image: { url: profilePicUrl },
+            caption: `📸 *Foto de Perfil*\n\n` +
+                     `👤 Usuário: @${targetUserName}`,
+            mentions: [targetUser]
+          });
+
+        } catch (e) {
+          console.error('Erro no comando getpp:', e);
+          await reply("❌ Não foi possível obter a foto de perfil deste usuário.");
+        }
+        break;
+
       case 'antilinkhard':
         try {
           if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
