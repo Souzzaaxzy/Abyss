@@ -33,6 +33,3 @@ logs/
 # Build
 dist/
 build/
-# Free Fire API Credentials
-dados/database/dono/ff_credentials_*.json
-!dados/database/dono/ff_credentials_br_exemplo.json
