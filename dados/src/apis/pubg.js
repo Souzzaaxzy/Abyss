@@ -1,15 +1,25 @@
 /**
  * PUBG API Module
- * API Pública da PUBG
+ * API Oficial da PUBG Developer Platform
  * https://developer.pubg.com
+ * Requer API Key
  */
 
 import axios from 'axios';
 import { getApiKey as dbGetApiKey } from '../utils/database.js';
 
-// URLs das APIs
+// URL da API Oficial da PUBG
 const PUBG_API_URL = 'https://api.pubg.com';
-const SHROUD_API_URL = 'https://api.pubg.sh';
+
+// Shards disponíveis (plataformas)
+const SHARDS = {
+  steam: 'steam',
+  console: 'console', 
+  kakao: 'kakao',
+  pc: 'steam', // alias
+  xbox: 'console',
+  psn: 'console'
+};
 
 // Cache para armazenar respostas (5 minutos)
 const cache = new Map();
@@ -56,12 +66,39 @@ const isApiConfigured = () => {
 // Normalizar nome do jogador
 const normalizeName = (name) => {
   if (!name) return '';
-  return name.trim().replace(/\s+/g, '%20');
+  return name.trim();
 };
 
-// Obter estatísticas do jogador via API pública (shrouds)
-const getPlayerStats = async (playerName) => {
-  const cacheKey = `pubg_${playerName.toLowerCase()}`;
+// Obter shard padrão (steam para PC)
+const getDefaultShard = () => 'steam';
+
+// Buscar temporadas disponíveis
+const getSeasons = async (shard = 'steam') => {
+  try {
+    const apiKey = getApiKey();
+    const response = await axios.get(`${PUBG_API_URL}/shards/${shard}/seasons`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/vnd.api+json'
+      },
+      timeout: 15000
+    });
+    
+    const seasons = response.data?.data || [];
+    // Buscar temporada atual (normalmente a última ou que não seja 'preseason')
+    const currentSeason = seasons.find(s => 
+      s.id.includes('pc-2018') || s.id.includes('division')
+    );
+    return currentSeason?.id || seasons[0]?.id || null;
+  } catch (error) {
+    console.error('Erro ao buscar temporadas:', error.message);
+    return null;
+  }
+};
+
+// Obter estatísticas do jogador via API oficial
+const getPlayerStats = async (playerName, shard = 'steam') => {
+  const cacheKey = `pubg_${shard}_${playerName.toLowerCase()}`;
   
   const cached = getCache(cacheKey);
   if (cached) {
@@ -69,126 +106,139 @@ const getPlayerStats = async (playerName) => {
   }
 
   if (!isApiConfigured()) {
-    return { ok: false, msg: '❌ API Key não configurada. Use !keypubg <api_key>' };
+    return { 
+      ok: false, 
+      msg: '❌ API Key não configurada. Use !keypubg <api_key>\n\nObtenha sua key em: https://developer.pubg.com' 
+    };
   }
 
   try {
     const apiKey = getApiKey();
     
-    // Usar API oficial com headers necessários
-    const response = await axios.get(`${PUBG_API_URL}/shards/steam/players?filter[playerNames]=${normalizeName(playerName)}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/vnd.api+json'
-      },
-      timeout: 15000
-    });
-
-    if (!response.data?.data || response.data.data.length === 0) {
-      return { ok: false, msg: '❌ Jogador não encontrado.' };
-    }
-
-    const playerData = response.data.data[0];
-    const playerId = playerData.id;
-    
-    // Buscar estatísticas de temporada
-    const seasonId = 'division.bro.official.pc-2018-01'; // Temporada padrão (pode variar)
-    
-    try {
-      const statsResponse = await axios.get(`${PUBG_API_URL}/shards/steam/players/${playerId}/seasons/${seasonId}/ranked`, {
+    // BUSCAR JOGADOR - API OFICIAL
+    const response = await axios.get(
+      `${PUBG_API_URL}/shards/${shard}/players?filter[playerNames]=${encodeURIComponent(normalizeName(playerName))}`,
+      {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Accept': 'application/vnd.api+json'
         },
         timeout: 15000
-      });
+      }
+    );
 
-      const rankedStats = statsResponse.data?.data?.attributes?.rankedGameModeStats;
-
-      const data = {
-        id: playerId,
-        name: playerData.attributes.stats?.name || playerName,
-        shardId: playerData.attributes.shardId,
-        stats: playerData.attributes.stats ? {
-          level: playerData.attributes.stats.level || 0,
-          kills: playerData.attributes.stats.kills || 0,
-          deaths: playerData.attributes.stats.deaths || 0,
-          kd: playerData.attributes.stats.kills && playerData.attributes.stats.deaths 
-            ? (playerData.attributes.stats.kills / playerData.attributes.stats.deaths).toFixed(2) 
-            : '0.00',
-          wins: playerData.attributes.stats.wins || 0,
-          losses: playerData.attributes.stats.losses || 0,
-          winRate: playerData.attributes.stats.wins && playerData.attributes.stats.games > 0
-            ? ((playerData.attributes.stats.wins / playerData.attributes.stats.games) * 100).toFixed(1)
-            : '0',
-          gamesPlayed: playerData.attributes.stats.games || 0,
-          headshots: playerData.attributes.stats.headshotKills || 0,
-          headshotRate: playerData.attributes.stats.headshotKills && playerData.attributes.stats.kills > 0
-            ? ((playerData.attributes.stats.headshotKills / playerData.attributes.stats.kills) * 100).toFixed(1)
-            : '0',
-          roadKills: playerData.attributes.stats.roadKills || 0,
-          vehicleKills: playerData.attributes.stats.vehicleKills || 0,
-          longestKill: playerData.attributes.stats.longestKill?.toFixed(0) || 0,
-          damageDealt: playerData.attributes.stats.damageDealt?.toFixed(0) || 0,
-          heals: playerData.attributes.stats.heals || 0,
-          revives: playerData.attributes.stats.revives || 0,
-          walkDistance: ((playerData.attributes.stats.walkDistance || 0) / 1000).toFixed(1),
-          rideDistance: ((playerData.attributes.stats.rideDistance || 0) / 1000).toFixed(1),
-          avgSurvivalTime: playerData.attributes.stats.averageSurvivalTime 
-            ? (playerData.attributes.stats.averageSurvivalTime / 60).toFixed(1) 
-            : '0'
-        } : null,
-        raw: playerData
-      };
-
-      setCache(cacheKey, data);
-      return { ok: true, data };
-      
-    } catch (statsError) {
-      // Se não conseguir estatísticas detalhadas, retorna dados básicos
-      const data = {
-        id: playerId,
-        name: playerData.attributes.stats?.name || playerName,
-        shardId: playerData.attributes.shardId,
-        stats: playerData.attributes.stats ? {
-          kills: playerData.attributes.stats.kills || 0,
-          deaths: playerData.attributes.stats.deaths || 0,
-          wins: playerData.attributes.stats.wins || 0,
-          gamesPlayed: playerData.attributes.stats.games || 0
-        } : null,
-        message: 'Estatísticas detalhadas não disponíveis para esta temporada'
-      };
-
-      setCache(cacheKey, data);
-      return { ok: true, data };
+    if (!response.data?.data || response.data.data.length === 0) {
+      return { ok: false, msg: '❌ Jogador não encontrado. Verifique o nome e a plataforma (steam).' };
     }
+
+    const playerData = response.data.data[0];
+    const playerId = playerData.id;
+    
+    // Obter temporada atual
+    const seasonId = await getSeasons(shard);
+    if (!seasonId) {
+      return { ok: false, msg: '❌ Não foi possível obter informações da temporada.' };
+    }
+    
+    // BUSCAR ESTATÍSTICAS DE TEMPORADA - API OFICIAL
+    let statsData = null;
+    try {
+      const seasonResponse = await axios.get(
+        `${PUBG_API_URL}/shards/${shard}/players/${playerId}/seasons/${seasonId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Accept': 'application/vnd.api+json'
+          },
+          timeout: 15000
+        }
+      );
+
+      const seasonStats = seasonResponse.data?.data?.attributes?.stats;
+      if (seasonStats) {
+        statsData = {
+          level: seasonStats.level || 0,
+          kills: seasonStats.kills || 0,
+          deaths: seasonStats.deaths || 0,
+          kd: seasonStats.kills && seasonStats.deaths 
+            ? (seasonStats.kills / seasonStats.deaths).toFixed(2) 
+            : '0.00',
+          wins: seasonStats.wins || 0,
+          losses: seasonStats.losses || 0,
+          winRate: seasonStats.wins && seasonStats.games > 0
+            ? ((seasonStats.wins / seasonStats.games) * 100).toFixed(1)
+            : '0',
+          gamesPlayed: seasonStats.roundsPlayed || seasonStats.games || 0,
+          headshots: seasonStats.headshotKills || 0,
+          headshotRate: seasonStats.headshotKills && seasonStats.kills > 0
+            ? ((seasonStats.headshotKills / seasonStats.kills) * 100).toFixed(1)
+            : '0',
+          roadKills: seasonStats.roadKills || 0,
+          vehicleKills: seasonStats.vehicleKills || 0,
+          longestKill: seasonStats.longestKill?.toFixed(0) || 0,
+          damageDealt: seasonStats.damageDealt?.toFixed(0) || 0,
+          heals: seasonStats.heals || 0,
+          revives: seasonStats.revives || 0,
+          walkDistance: ((seasonStats.walkDistance || 0) / 1000).toFixed(1),
+          rideDistance: ((seasonStats.rideDistance || 0) / 1000).toFixed(1),
+          swimDistance: ((seasonStats.swimDistance || 0) / 1000).toFixed(1),
+          avgSurvivalTime: seasonStats.averageSurvivalTime 
+            ? (seasonStats.averageSurvivalTime / 60).toFixed(1) 
+            : '0',
+          assists: seasonStats.assists || 0,
+          boosts: seasonStats.boosts || 0,
+          dBNOs: seasonStats.dBNOs || 0,
+          killStreaks: seasonStats.killStreaks || 0,
+          longestTimeSurvived: seasonStats.longestTimeSurvived 
+            ? (seasonStats.longestTimeSurvived / 60).toFixed(1) 
+            : '0'
+        };
+      }
+    } catch (seasonError) {
+      console.log('Estatísticas de temporada não disponíveis:', seasonError.message);
+    }
+
+    const data = {
+      id: playerId,
+      name: playerData.attributes?.name || playerName,
+      shardId: shard,
+      seasonId: seasonId,
+      stats: statsData,
+      matches: playerData.relationships?.matches?.data?.length || 0,
+      raw: playerData
+    };
+
+    setCache(cacheKey, data);
+    return { ok: true, data };
 
   } catch (error) {
     if (error.response?.status === 404) {
-      return { ok: false, msg: '❌ Jogador não encontrado. Verifique o nome.' };
+      return { ok: false, msg: '❌ Jogador não encontrado. Verifique o nome e a plataforma (steam).' };
     }
     if (error.response?.status === 401 || error.response?.status === 403) {
-      return { ok: false, msg: '❌ API Key inválida ou sem permissão.' };
+      return { ok: false, msg: '❌ API Key inválida ou sem permissão. Obtenha uma key em: https://developer.pubg.com' };
     }
     if (error.response?.status === 429) {
-      return { ok: false, msg: '❌ Limite de requisições excedido.' };
+      return { ok: false, msg: '❌ Limite de requisições excedido. Tente novamente em alguns minutos.' };
     }
     console.error('Erro ao buscar jogador PUBG:', error.message);
-    return { ok: false, msg: '❌ Erro ao buscar dados do jogador.' };
+    return { ok: false, msg: '❌ Erro ao buscar dados do jogador. Tente novamente.' };
   }
 };
 
 // Obter perfil do jogador
-const getPlayer = async (playerName) => {
+const getPlayer = async (playerName, platform = 'steam') => {
   if (!playerName) {
-    return { ok: false, msg: '❌ Nome do jogador é obrigatório.' };
+    return { ok: false, msg: '❌ Nome do jogador é obrigatório.\n\nExemplo: !pubgperfil Nickname\n\n📌 Plataformas: steam (PC), console (Xbox/PS4)' };
   }
-  return getPlayerStats(playerName);
+  
+  const shard = SHARDS[platform.toLowerCase()] || 'steam';
+  return getPlayerStats(playerName, shard);
 };
 
 // Obter matches recentes
-const getRecentMatches = async (playerName) => {
-  const cacheKey = `pubg_matches_${playerName.toLowerCase()}`;
+const getRecentMatches = async (playerName, shard = 'steam') => {
+  const cacheKey = `pubg_matches_${shard}_${playerName.toLowerCase()}`;
   
   const cached = getCache(cacheKey);
   if (cached) {
@@ -202,13 +252,16 @@ const getRecentMatches = async (playerName) => {
   try {
     const apiKey = getApiKey();
     
-    const response = await axios.get(`${PUBG_API_URL}/shards/steam/players?filter[playerNames]=${normalizeName(playerName)}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/vnd.api+json'
-      },
-      timeout: 15000
-    });
+    const response = await axios.get(
+      `${PUBG_API_URL}/shards/${shard}/players?filter[playerNames]=${encodeURIComponent(normalizeName(playerName))}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/vnd.api+json'
+        },
+        timeout: 15000
+      }
+    );
 
     if (!response.data?.data || response.data.data.length === 0) {
       return { ok: false, msg: '❌ Jogador não encontrado.' };
@@ -232,8 +285,8 @@ const getRecentMatches = async (playerName) => {
 };
 
 // Obter informações de um match específico
-const getMatchInfo = async (matchId) => {
-  const cacheKey = `pubg_match_${matchId}`;
+const getMatchInfo = async (matchId, shard = 'steam') => {
+  const cacheKey = `pubg_match_${shard}_${matchId}`;
   
   const cached = getCache(cacheKey);
   if (cached) {
@@ -247,13 +300,16 @@ const getMatchInfo = async (matchId) => {
   try {
     const apiKey = getApiKey();
     
-    const response = await axios.get(`${PUBG_API_URL}/shards/steam/matches/${matchId}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Accept': 'application/vnd.api+json'
-      },
-      timeout: 15000
-    });
+    const response = await axios.get(
+      `${PUBG_API_URL}/shards/${shard}/matches/${matchId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/vnd.api+json'
+        },
+        timeout: 15000
+      }
+    );
 
     const matchData = response.data;
     
@@ -264,7 +320,8 @@ const getMatchInfo = async (matchId) => {
       duration: Math.floor((matchData.data?.attributes?.duration || 0) / 60),
       createdAt: matchData.data?.attributes?.createdAt,
       matchType: matchData.data?.attributes?.matchType,
-      telemetryUrl: matchData.data?.relationships?.assets?.data?.[0]?.id
+      telemetryUrl: matchData.data?.relationships?.assets?.data?.[0]?.id,
+      rosterCount: matchData.data?.relationships?.rosters?.data?.length || 0
     };
 
     setCache(cacheKey, data);
@@ -284,5 +341,6 @@ export {
   getPlayer,
   getPlayerStats,
   getRecentMatches,
-  getMatchInfo
+  getMatchInfo,
+  SHARDS
 };
