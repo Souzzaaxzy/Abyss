@@ -61,6 +61,20 @@ import {
   searchUsers as robloxSearch
 } from './apis/roblox.js';
 
+// Valorant API (Riot Games)
+import {
+  getPlayer as valorantGetPlayer,
+  getMatchHistory as valorantGetMatches,
+  getLeaderboard as valorantGetLeaderboard
+} from './apis/valorant.js';
+
+// League of Legends API (Riot Games)
+import {
+  getPlayer as lolGetPlayer,
+  getChallengerPlayers as lolGetChallenger,
+  getMasterPlayers as lolGetMaster
+} from './apis/lol.js';
+
 import { 
   setApiKey, 
   deleteApiKey, 
@@ -25606,6 +25620,219 @@ ${groupPrefix}reacao toggle - Ativar/Desativar
           console.error('Erro no comando rbxjogos:', e);
           await react('❌', nazu, info.key, from);
           reply("❌ Ocorreu um erro ao buscar os jogos.");
+        }
+        break;
+
+      // ============ VALORANT ============
+      case 'vaperfil':
+      case 'valoperfil':
+      case 'valorant':
+        try {
+          const playerName = q.trim();
+          if (!playerName) {
+            return reply(`❌ Uso: ${prefix}vaperfil Nome#TAG\n\nExemplo: ${prefix}vaperfil Ronaldo#br1\n\n💡 Formato: Nome#Região (br1, na1, euw1, etc)`);
+          }
+
+          await react('🎯', nazu, info.key, from);
+          
+          const result = await valorantGetPlayer(playerName);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const p = result.data;
+          
+          const perfilMsg = `🎯 *VALORANT - PERFIL*\n\n` +
+            `📛 Nome: ${p.name}\n` +
+            `🏷️ Tag: #${p.tag}\n` +
+            `📊 Nível: ${p.level}\n` +
+            `🎖️ Rank Atual: ${p.currentRank}\n` +
+            `⭐ Rank Máximo: ${p.peakRank}\n` +
+            `📈 Vitórias: ${p.wins}\n` +
+            `📉 Derrotas: ${p.losses}\n` +
+            `📊 Taxa de Vitória: ${p.winRate}%\n` +
+            `🎮 K/D: ${p.kd}\n` +
+            `🎯 Headshot: ${p.headshotPct}%`;
+
+          await reply(perfilMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando vaperfil:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o perfil.");
+        }
+        break;
+
+      case 'vamatches':
+      case 'valobattles':
+        try {
+          const playerName = q.trim();
+          if (!playerName) {
+            return reply(`❌ Uso: ${prefix}vamatches Nome#TAG\n\nExemplo: ${prefix}vamatches Ronaldo#br1`);
+          }
+
+          await react('⚔️', nazu, info.key, from);
+          
+          const { name, tag } = valorantGetPlayer(playerName).name ? 
+            { name: playerName.split('#')[0], tag: playerName.split('#')[1] || 'br' } :
+            { name: '', tag: '' };
+
+          // Primeiro busca o perfil para obter o nome correto
+          const profileResult = await valorantGetPlayer(playerName);
+          if (!profileResult.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(profileResult.msg);
+          }
+
+          const matchesResult = await valorantGetMatches(profileResult.data.name, profileResult.data.tag);
+          
+          if (!matchesResult.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(matchesResult.msg);
+          }
+
+          const matches = matchesResult.data;
+          
+          let matchesMsg = `⚔️ *VALORANT - PARTIDAS*\n\n`;
+          
+          if (matches.length > 0) {
+            matches.slice(0, 5).forEach((match, i) => {
+              const emoji = match.result === 'Victory' ? '✅' : match.result === 'Defeat' ? '❌' : '🔄';
+              matchesMsg += `${emoji} ${match.mode}\n`;
+              matchesMsg += `   🗺️ ${match.map}\n`;
+              matchesMsg += `   🎯 ${match.agent} - ${match.kills}/${match.deaths}/${match.assists}\n`;
+              matchesMsg += `   📊 K/D: ${match.kd}\n\n`;
+            });
+          } else {
+            matchesMsg += `📭 Nenhuma partida encontrada.`;
+          }
+
+          await reply(matchesMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando vamatches:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar as partidas.");
+        }
+        break;
+
+      case 'varanking':
+      case 'vatop':
+        try {
+          await react('🏆', nazu, info.key, from);
+          
+          const result = await valorantGetLeaderboard(5);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const players = result.data;
+          
+          let rankingMsg = `🏆 *VALORANT - TOP JOGADORES*\n\n`;
+          
+          players.forEach((p, i) => {
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+            rankingMsg += `${medal} ${p.name}#${p.tag}\n`;
+            rankingMsg += `   🎖️ ${p.currentRank} - ${p.elo} ELO\n\n`;
+          });
+
+          await reply(rankingMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando varanking:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o ranking.");
+        }
+        break;
+
+      // ============ LEAGUE OF LEGENDS ============
+      case 'lolperfil':
+      case 'lolplayer':
+      case 'league':
+        try {
+          const summonerName = q.trim();
+          if (!summonerName) {
+            return reply(`❌ Uso: ${prefix}lolperfil <nome>\n\nExemplo: ${prefix}lolperfil Faker`);
+          }
+
+          await react('👑', nazu, info.key, from);
+          
+          const result = await lolGetPlayer(summonerName);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const p = result.data;
+          
+          let rankInfo = '';
+          if (p.soloQueue) {
+            rankInfo += `📊 *RANKED SOLO/DUO*\n`;
+            rankInfo += `${p.soloQueue.emoji} ${p.soloQueue.tier} ${p.soloQueue.rank}\n`;
+            rankInfo += `   LP: ${p.soloQueue.lp}\n`;
+            rankInfo += `   Vitórias: ${p.soloQueue.wins} | Derrotas: ${p.soloQueue.losses}\n`;
+            rankInfo += `   WR: ${p.soloQueue.winRate}%\n\n`;
+          } else {
+            rankInfo += `📊 Rank: Não classificado\n\n`;
+          }
+          
+          if (p.flexQueue) {
+            rankInfo += `📊 *RANKED FLEX*\n`;
+            rankInfo += `${p.flexQueue.emoji} ${p.flexQueue.tier} ${p.flexQueue.rank}\n`;
+            rankInfo += `   LP: ${p.flexQueue.lp}\n`;
+            rankInfo += `   WR: ${p.flexQueue.winRate}%\n`;
+          }
+
+          const perfilMsg = `👑 *LEAGUE OF LEGENDS - PERFIL*\n\n` +
+            `📛 Nome: ${p.name}\n` +
+            `📊 Nível: ${p.level}\n\n` +
+            rankInfo;
+
+          await reply(perfilMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando lolperfil:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o perfil.");
+        }
+        break;
+
+      case 'lolchallenger':
+      case 'lolmaster':
+        try {
+          await react('🏆', nazu, info.key, from);
+          
+          const isChallenger = command === 'lolchallenger';
+          const result = isChallenger ? await lolGetChallenger() : await lolGetMaster();
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const players = result.data;
+          const title = isChallenger ? '🏆 CHALLENGER' : '💜 MASTER';
+          
+          let rankingMsg = `👑 *LEAGUE OF LEGENDS*\n${title}\n\n`;
+          
+          players.forEach((p, i) => {
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+            rankingMsg += `${medal} ${p.name}\n`;
+            rankingMsg += `   LP: ${p.leaguePoints}\n`;
+            rankingMsg += `   WR: ${p.winRate}%\n\n`;
+          });
+
+          await reply(rankingMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando lolranking:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o ranking.");
         }
         break;
 

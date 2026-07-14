@@ -91,5 +91,35 @@ export default async function menugames(prefix, botName = "MeuBot", userName = "
 │
 ╰──────────────────────────────────────────────╯
 
+╭──────────────────────────────────────────────╮
+│ 🎯 VALORANT
+╰──────────────────────────────────────────────╯
+│
+│ ▸ ${prefix}vaperfil Nome#TAG
+│   Ver perfil do jogador
+│
+│ ▸ ${prefix}vamatches Nome#TAG
+│   Ver partidas recentes
+│
+│ ▸ ${prefix}varanking
+│   Ver top jogadores
+│
+╰──────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────────╮
+│ 👑 LEAGUE OF LEGENDS
+╰──────────────────────────────────────────────╯
+│
+│ ▸ ${prefix}lolperfil <nome>
+│   Ver perfil do invocador
+│
+│ ▸ ${prefix}lolchallenger
+│   Ver top challenger
+│
+│ ▸ ${prefix}lolmaster
+│   Ver top master
+│
+╰──────────────────────────────────────────────╯
+
 💡 Use ${prefix}ajuda <comando> para mais informações.`;
 }
