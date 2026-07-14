@@ -20931,24 +20931,22 @@ case 'addaluguel':
               }
 
               // =============================================
-              // 2° ETAPA - APAGAR MENSAGEM DE PESQUISA
-              // =============================================
-              if (searchMsgKey) {
-                await nazu.sendMessage(from, { delete: searchMsgKey }).catch(() => {});
-              }
-
-              // =============================================
               // 3° ETAPA - ENVIAR ÁUDIO
               // =============================================
               // Download do áudio
               youtube.mp3(videoUrl, 128)
                 .then(async (dlRes) => {
                   if (!dlRes.ok) {
-                    // Erro no download
+                    // Erro no download - NÃO apaga a mensagem de pesquisa
                     return;
                   }
 
                   try {
+                    // Apagar mensagem de pesquisa ANTES de enviar o áudio
+                    if (searchMsgKey) {
+                      await nazu.sendMessage(from, { delete: searchMsgKey }).catch(() => {});
+                    }
+
                     // Enviar o áudio
                     await nazu.sendMessage(from, {
                       audio: dlRes.buffer,
