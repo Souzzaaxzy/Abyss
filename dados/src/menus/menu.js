@@ -37,5 +37,6 @@ export default async function menu(prefix, botName = "MeuBot", userName = "Usuá
 │ ⚽ ${prefix}menufut
 │ 🎮 ${prefix}menurpg
 │ 💎 ${prefix}menuvip
+│ 🎯 ${prefix}menugames
 ╰──────────────`;
 }

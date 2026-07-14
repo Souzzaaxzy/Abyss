@@ -260,7 +260,27 @@ ${middleBorder}${menuItemIcon}${prefix}divdono send
 ${middleBorder}${menuItemIcon}${prefix}divdono time
 	${middleBorder}${menuItemIcon}${prefix}divdono status
 	${bottomBorder}
-	
+
+	${menuTopBorder}
+	│ 🎮 GERENCIAMENTO DE APIs GAMES
+	${middleBorder}
+	${middleBorder}${menuItemIcon}${prefix}keyff <api_key>
+	${middleBorder}${menuItemIcon}${prefix}keyvalorant <api_key>
+	${middleBorder}${menuItemIcon}${prefix}keycr <api_key>
+	${middleBorder}${menuItemIcon}${prefix}keybs <api_key>
+	${middleBorder}${menuItemIcon}${prefix}keyroblox <api_key>
+	${middleBorder}${menuItemIcon}${prefix}keypubg <api_key>
+	${middleBorder}
+	${middleBorder}${menuItemIcon}${prefix}delkeyff
+	${middleBorder}${menuItemIcon}${prefix}delkeyvalorant
+	${middleBorder}${menuItemIcon}${prefix}delkeycr
+	${middleBorder}${menuItemIcon}${prefix}delkeybs
+	${middleBorder}${menuItemIcon}${prefix}delkeyroblox
+	${middleBorder}${menuItemIcon}${prefix}delkeypubg
+	${middleBorder}
+	${middleBorder}${menuItemIcon}${prefix}listkeys
+	${bottomBorder}
+
 	${menuTopBorder}
 	│ ${smmMenuTitle}
 	${middleBorder}

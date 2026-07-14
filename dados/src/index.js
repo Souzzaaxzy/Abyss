@@ -1987,7 +1987,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     menuRPG,
     menuVIP,
     menuBuscas,
-    menuBrawlStars
+    menuBrawlStars,
+    menuGames
   } = menus;
   const prefix = prefixo;
   const numerodonoStr = String(numerodono);
@@ -22779,6 +22780,17 @@ break;
           await reply("❌ Ocorreu um erro ao carregar o menu de ferramentas");
         }
         break;
+      case 'menugames':
+      case 'menugame':
+      case 'gamesmenu':
+      case 'jogosmenu':
+        try {
+          await sendMenuWithMedia('games', menuGames);
+        } catch (error) {
+          console.error('Erro ao enviar menu de jogos:', error);
+          await reply("❌ Ocorreu um erro ao carregar o menu de jogos");
+        }
+        break;
             case 'blockmenugp': {
         try {
           if (!isGroup) return reply("⚠️ Este comando só funciona em grupos!");
@@ -24688,6 +24700,297 @@ ${groupPrefix}reacao toggle - Ativar/Desativar
         }
         break;
 
+      // ========== COMANDOS DE API KEYS PARA GAMES ==========
+      case 'keyff':
+      case 'keyfreefire':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keyff <api_key>\n\nExemplo: ${prefix}keyff SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('freefire', q);
+          
+          if (saved) {
+            await reply("✅ API Key do Free Fire salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeyff':
+      case 'delkeyfreefire':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('freefire');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do Free Fire configurada.");
+          }
+          
+          const deleted = deleteApiKey('freefire');
+          
+          if (deleted) {
+            await reply("✅ API Key do Free Fire removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'keyvalorant':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keyvalorant <api_key>\n\nExemplo: ${prefix}keyvalorant SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('valorant', q);
+          
+          if (saved) {
+            await reply("✅ API Key do Valorant salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeyvalorant':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('valorant');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do Valorant configurada.");
+          }
+          
+          const deleted = deleteApiKey('valorant');
+          
+          if (deleted) {
+            await reply("✅ API Key do Valorant removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'keycr':
+      case 'keyclashroyale':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keycr <api_key>\n\nExemplo: ${prefix}keycr SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('clashroyale', q);
+          
+          if (saved) {
+            await reply("✅ API Key do Clash Royale salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeycr':
+      case 'delkeyclashroyale':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('clashroyale');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do Clash Royale configurada.");
+          }
+          
+          const deleted = deleteApiKey('clashroyale');
+          
+          if (deleted) {
+            await reply("✅ API Key do Clash Royale removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'keybs':
+      case 'keybrawlstars':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keybs <api_key>\n\nExemplo: ${prefix}keybs SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('brawlstars', q);
+          
+          if (saved) {
+            await reply("✅ API Key do Brawl Stars salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeybs':
+      case 'delkeybrawlstars':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('brawlstars');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do Brawl Stars configurada.");
+          }
+          
+          const deleted = deleteApiKey('brawlstars');
+          
+          if (deleted) {
+            await reply("✅ API Key do Brawl Stars removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'keyroblox':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keyroblox <api_key>\n\nExemplo: ${prefix}keyroblox SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('roblox', q);
+          
+          if (saved) {
+            await reply("✅ API Key do Roblox salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeyroblox':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('roblox');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do Roblox configurada.");
+          }
+          
+          const deleted = deleteApiKey('roblox');
+          
+          if (deleted) {
+            await reply("✅ API Key do Roblox removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'keypubg':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          if (!q) return reply(`❌ Uso: ${prefix}keypubg <api_key>\n\nExemplo: ${prefix}keypubg SUA_API_KEY_AQUI`);
+          
+          const { setApiKey } = require('./utils/database.js');
+          const saved = setApiKey('pubg', q);
+          
+          if (saved) {
+            await reply("✅ API Key do PUBG salva com sucesso!");
+          } else {
+            await reply("❌ Erro ao salvar a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'delkeypubg':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { deleteApiKey, getApiKey } = require('./utils/database.js');
+          const currentKey = getApiKey('pubg');
+          
+          if (!currentKey) {
+            return reply("ℹ️ Não há API Key do PUBG configurada.");
+          }
+          
+          const deleted = deleteApiKey('pubg');
+          
+          if (deleted) {
+            await reply("✅ API Key do PUBG removida com sucesso!");
+          } else {
+            await reply("❌ Erro ao remover a API Key.");
+          }
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
+      case 'listkeys':
+        try {
+          if (!isOwnerOrSub) return reply("🚫 Este comando é exclusivo para o dono do bot!");
+          
+          const { getAllApiKeysStatus } = require('./utils/database.js');
+          const keysStatus = getAllApiKeysStatus();
+          
+          let msg = "🔑 *STATUS DAS APIs DE GAMES*\n\n";
+          
+          for (const key of keysStatus) {
+            if (key.configured) {
+              msg += `${key.name}: ✅ ${key.maskedKey}\n`;
+            } else {
+              msg += `${key.name}: ❌ Não configurada\n`;
+            }
+          }
+          
+          msg += "\n📝 Para configurar: !keyff <api_key>";
+          
+          await reply(msg);
+        } catch (e) {
+          console.error(e);
+          reply("🐝 Ops! Ocorreu um erro inesperado!");
+        }
+        break;
+
       case 'setgroq':
       case 'setgrok':
       case 'groqkey':
@@ -25065,6 +25368,248 @@ ${groupPrefix}setgroq sua_chave_aqui
         } catch (e) {
           console.error('Erro no comando lermais:', e);
           await reply("❌ Ocorreu um erro ao alterar a configuração 💔");
+        }
+        break;
+
+      // ========== COMANDOS FREE FIRE ==========
+      case 'ffperfil':
+      case 'ffprofile':
+        try {
+          const uid = q.trim();
+          if (!uid) {
+            return reply(`❌ Uso: ${prefix}ffperfil <UID>\n\nExemplo: ${prefix}ffperfil 123456789`);
+          }
+
+          const { getProfile, isApiConfigured } = require('./apis/freefire.js');
+          
+          if (!isApiConfigured()) {
+            return reply("❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.");
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await getProfile(uid);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const p = result.data;
+          
+          const perfilMsg = `🔥 *PERFIL FREE FIRE*\n\n` +
+            `👤 Nickname: ${p.nickname || 'Não informado'}\n` +
+            `🆔 UID: ${p.uid}\n` +
+            `📍 Região: ${p.region || 'Não informada'}\n` +
+            `⭐ Nível: ${p.level || 'Não informado'}\n` +
+            `❤️ Likes: ${p.likes?.toLocaleString('pt-BR') || 'Não informado'}\n` +
+            `🏰 Guilda: ${p.guild || 'Sem guilda'}\n` +
+            `🎖️ Patente BR: ${p.rank || 'Não informada'}\n` +
+            `🎯 Patente CS: ${p.csRank || 'Não informada'}\n` +
+            `🐾 Pet: ${p.pet || 'Não possui'}\n` +
+            `📝 Bio: ${p.bio || 'Sem bio'}`;
+
+          // Tenta enviar com avatar
+          if (p.avatar) {
+            try {
+              await nazu.sendMessage(from, {
+                image: { url: p.avatar },
+                caption: perfilMsg
+              }, { quoted: info });
+            } catch (imgErr) {
+              await reply(perfilMsg);
+            }
+          } else {
+            await reply(perfilMsg);
+          }
+          
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando ffperfil:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o perfil.");
+        }
+        break;
+
+      case 'ffstats':
+        try {
+          const uid = q.trim();
+          if (!uid) {
+            return reply(`❌ Uso: ${prefix}ffstats <UID>\n\nExemplo: ${prefix}ffstats 123456789`);
+          }
+
+          const { getStats, isApiConfigured, formatDuration } = require('./apis/freefire.js');
+          
+          if (!isApiConfigured()) {
+            return reply("❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.");
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await getStats(uid);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const s = result.data;
+          
+          const statsMsg = `📊 *ESTATÍSTICAS FREE FIRE*\n\n` +
+            `🎮 *Battle Royale:*\n` +
+            `   📋 Partidas: ${s.brMatches || 'N/A'}\n` +
+            `   🏆 Vitórias: ${s.brWins || 'N/A'}\n` +
+            `   💀 Abates: ${s.brKills || 'N/A'}\n` +
+            `   ⚔️ K/D: ${s.brKd || 'N/A'}\n` +
+            `   🎯 Headshots: ${s.brHeadshots || 'N/A'}\n` +
+            `   📈 Taxa HS: ${s.brHeadshotRate ? s.brHeadshotRate + '%' : 'N/A'}\n\n` +
+            `⏱️ Tempo de jogo: ${s.playTime || 'Não informado'}\n` +
+            `🏅 Temporada: ${s.season || 'Não informada'}`;
+
+          await reply(statsMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando ffstats:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar as estatísticas.");
+        }
+        break;
+
+      case 'ffguilda':
+      case 'ffclan':
+      case 'ffcrew':
+        try {
+          const guildId = q.trim();
+          if (!guildId) {
+            return reply(`❌ Uso: ${prefix}ffguilda <ID da guilda>\n\nExemplo: ${prefix}ffguilda 123456`);
+          }
+
+          const { getGuild, isApiConfigured } = require('./apis/freefire.js');
+          
+          if (!isApiConfigured()) {
+            return reply("❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.");
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await getGuild(guildId);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const g = result.data;
+          
+          const guildMsg = `🏰 *GUILDA FREE FIRE*\n\n` +
+            `📛 Nome: ${g.name || 'Não informado'}\n` +
+            `🆔 ID: ${g.id}\n` +
+            `👑 Líder: ${g.leader || 'Não informado'}\n` +
+            `👥 Membros: ${g.memberCount || 'N/A'}/${g.maxMembers || 50}\n` +
+            `⭐ Nível: ${g.level || 'Não informado'}\n` +
+            `📝 Slogan: ${g.slogan || 'Sem slogan'}\n` +
+            `📍 Região: ${g.region || 'Não informada'}`;
+
+          await reply(guildMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando ffguilda:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar a guilda.");
+        }
+        break;
+
+      case 'ffban':
+      case 'ffbancheck':
+        try {
+          const uid = q.trim();
+          if (!uid) {
+            return reply(`❌ Uso: ${prefix}ffban <UID>\n\nExemplo: ${prefix}ffban 123456789`);
+          }
+
+          const { checkBan, isApiConfigured, formatDate } = require('./apis/freefire.js');
+          
+          if (!isApiConfigured()) {
+            return reply("❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.");
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await checkBan(uid);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const b = result.data;
+          
+          if (b.isBanned) {
+            const banMsg = `🔴 *STATUS: BANNIDO*\n\n` +
+              `🆔 UID: ${uid}\n` +
+              `📅 Data: ${formatDate(b.bannedAt)}\n` +
+              `📝 Motivo: ${b.reason || 'Não informado'}`;
+            await reply(banMsg);
+          } else {
+            await reply(`🟢 *STATUS: ATIVO*\n\n🆔 UID: ${uid}\n\nEste jogador não está banido.`);
+          }
+          
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando ffban:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao verificar o banimento.");
+        }
+        break;
+
+      case 'ffwishlist':
+      case 'ffitens':
+        try {
+          const uid = q.trim();
+          if (!uid) {
+            return reply(`❌ Uso: ${prefix}ffwishlist <UID>\n\nExemplo: ${prefix}ffwishlist 123456789`);
+          }
+
+          const { getWishlist, isApiConfigured } = require('./apis/freefire.js');
+          
+          if (!isApiConfigured()) {
+            return reply("❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.");
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await getWishlist(uid);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const w = result.data;
+          
+          if (w.count === 0) {
+            return reply(`📦 *WISHLIST FREE FIRE*\n\n🆔 UID: ${uid}\n\nEste jogador não possui itens na wishlist ou a informação não está disponível.`);
+          }
+
+          let wishlistMsg = `📦 *WISHLIST FREE FIRE*\n\n🆔 UID: ${uid}\n\n`;
+          wishlistMsg += `📊 Total de itens: ${w.count}\n\n`;
+          
+          if (w.skins && w.skins.length > 0) {
+            wishlistMsg += `🎮 Skins: ${w.skins.slice(0, 3).join(', ')}${w.skins.length > 3 ? '...' : ''}\n`;
+          }
+          if (w.emotes && w.emotes.length > 0) {
+            wishlistMsg += `😊 Emotes: ${w.emotes.slice(0, 3).join(', ')}${w.emotes.length > 3 ? '...' : ''}\n`;
+          }
+          if (w.collections && w.collections.length > 0) {
+            wishlistMsg += `📚 Coleções: ${w.collections.slice(0, 3).join(', ')}${w.collections.length > 3 ? '...' : ''}\n`;
+          }
+
+          await reply(wishlistMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando ffwishlist:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar a wishlist.");
         }
         break;
 

@@ -61,6 +61,7 @@ const MSG_COUNTER_FILE = path.join(DATABASE_DIR, 'msgcounter.json');
 const PREFIX_MEDIA_FILE = path.join(DONO_DIR, 'prefixMedia.json');
 const MENU_MEDIA_GROUPS_FILE = path.join(DATABASE_DIR, 'menuMediaGroups.json');
 const MENU_GROUPS_MEDIA_DIR = path.join(ROOT_DIR, 'midias', 'menu', 'groups');
+const API_KEYS_FILE = path.join(DONO_DIR, 'apiKeys.json');
 
 // Detecta se é sub-bot e ajusta o caminho do config
 const CONFIG_FILE = process.env.CONFIG_PATH || path.join(SRC_DIR, 'config.json');
@@ -120,6 +121,7 @@ export {
   PREFIX_MEDIA_FILE,
   MENU_MEDIA_GROUPS_FILE,
   MENU_GROUPS_MEDIA_DIR,
+  API_KEYS_FILE,
   CONFIG_FILE,
   PACKAGE_JSON_PATH
 };

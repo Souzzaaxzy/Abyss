@@ -3615,6 +3615,13 @@ export {
   getGroupMenuMedia,
   setGroupMenuMedia,
   removeGroupMenuMedia,
+  // Sistema de API Keys para Games
+  loadApiKeys,
+  saveApiKeys,
+  getApiKey,
+  setApiKey,
+  deleteApiKey,
+  getAllApiKeysStatus,
 };
 
 // ===== Sistema de Mídia de Menu por Grupo =====
@@ -3695,6 +3702,81 @@ const removeGroupMenuMedia = (groupId) => {
     console.error('❌ Erro ao remover mídia de menu do grupo:', error);
     return false;
   }
+};
+
+// ===== Sistema de API Keys para Games =====
+const loadApiKeys = () => {
+  ensureJsonFileExists(API_KEYS_FILE, {});
+  return loadJsonFile(API_KEYS_FILE, {});
+};
+
+const saveApiKeys = (data) => {
+  try {
+    ensureDirectoryExists(DONO_DIR);
+    fs.writeFileSync(API_KEYS_FILE, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao salvar API Keys:', error);
+    return false;
+  }
+};
+
+const getApiKey = (service) => {
+  const data = loadApiKeys();
+  return data[service] || null;
+};
+
+const setApiKey = (service, apiKey) => {
+  try {
+    const data = loadApiKeys();
+    data[service] = {
+      key: apiKey,
+      updatedAt: Date.now()
+    };
+    saveApiKeys(data);
+    return true;
+  } catch (error) {
+    console.error('❌ Erro ao salvar API Key:', error);
+    return false;
+  }
+};
+
+const deleteApiKey = (service) => {
+  try {
+    const data = loadApiKeys();
+    if (data[service]) {
+      delete data[service];
+      saveApiKeys(data);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('❌ Erro ao deletar API Key:', error);
+    return false;
+  }
+};
+
+const getAllApiKeysStatus = () => {
+  const data = loadApiKeys();
+  const services = {
+    freefire: 'Free Fire',
+    valorant: 'Valorant',
+    clashroyale: 'Clash Royale',
+    brawlstars: 'Brawl Stars',
+    roblox: 'Roblox',
+    pubg: 'PUBG'
+  };
+
+  const status = [];
+  for (const [key, name] of Object.entries(services)) {
+    if (data[key]) {
+      const maskedKey = data[key].key.substring(0, 3) + 'xxxxxxxxx' + data[key].key.slice(-2);
+      status.push({ name, key, configured: true, maskedKey });
+    } else {
+      status.push({ name, key, configured: false });
+    }
+  }
+  return status;
 };
 
 // ===== Sistema de Momentos (Salvamento de mensagens) =====
