@@ -10,6 +10,12 @@ import { getApiKey as dbGetApiKey } from '../utils/database.js';
 const cache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
 
+// URL base da API
+const API_BASE_URL = 'https://developers.freefirecommunity.com/api/v1';
+
+// User-Agent personalizado para evitar bloqueio
+const USER_AGENT = 'AbyssBot/1.0 (https://github.com/Souzzaaxzy/Abyss; +https://developers.freefirecommunity.com)';
+
 // Limpa cache antigo periodicamente
 setInterval(() => {
   const now = Date.now();
@@ -48,7 +54,11 @@ const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
   try {
     const response = await fetch(url, {
       ...options,
-      signal: controller.signal
+      signal: controller.signal,
+      headers: {
+        ...options.headers,
+        'User-Agent': USER_AGENT
+      }
     });
     clearTimeout(timeoutId);
     return response;
@@ -107,13 +117,13 @@ const isApiConfigured = () => {
   return apiKey && apiKey.key;
 };
 
-const getProfile = async (playerId) => {
+const getProfile = async (playerId, region = 'br') => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { ok: false, msg: '❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.' };
   }
 
-  const cacheKey = `profile_${playerId}`;
+  const cacheKey = `profile_${region}_${playerId}`;
   const cached = getCache(cacheKey);
   if (cached) {
     return { ok: true, data: cached };
@@ -121,38 +131,60 @@ const getProfile = async (playerId) => {
 
   try {
     const response = await fetchWithTimeout(
-      `https://api.ffmptools.com/api/free-fire/player/info?playerId=${playerId}&apiKey=${apiKey.key}`
+      `${API_BASE_URL}/info?region=${region}&uid=${playerId}`,
+      {
+        headers: {
+          'x-api-key': apiKey.key
+        }
+      }
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return { ok: false, msg: '❌ UID não encontrado.' };
       }
+      if (response.status === 403) {
+        return { ok: false, msg: '❌ API Key inválida ou acesso negado.' };
+      }
       throw new Error(`HTTP ${response.status}`);
     }
 
     const result = await response.json();
 
-    if (!result.success || !result.data) {
+    if (result.error === 'Forbidden' || result.code === 'FW_002') {
+      return { ok: false, msg: '❌ Acesso automatizado bloqueado. Configure um User-Agent válido.' };
+    }
+
+    if (result.message?.includes('not found') || result.error) {
       return { ok: false, msg: '❌ UID não encontrado.' };
     }
 
-    const data = result.data;
-    
+    // Parsear resposta da nova API
+    const basicInfo = result.basicInfo || {};
+    const captainInfo = result.captainBasicInfo || {};
+    const clanInfo = result.clanBasicInfo || {};
+    const petInfo = result.petInfo || {};
+    const socialInfo = result.socialInfo || {};
+    const profileInfo = result.profileInfo || {};
+
     const profile = {
-      nickname: data.nickname || null,
-      uid: data.playerId || playerId,
-      level: data.level || null,
-      likes: data.likes || null,
-      region: data.region || null,
-      guild: data.crewName || null,
-      guildId: data.crewId || null,
-      avatar: data.avatar || null,
-      banner: data.banner || null,
-      rank: data.brRank || null,
-      csRank: data.csRank || null,
-      pet: data.pet || null,
-      bio: data.bio || null
+      nickname: basicInfo.nickname || null,
+      uid: basicInfo.accountId || playerId,
+      level: basicInfo.level || null,
+      likes: socialInfo.likes || null,
+      region: basicInfo.region || region,
+      guild: clanInfo.clanName || null,
+      guildId: clanInfo.clanId || null,
+      guildLevel: clanInfo.clanLevel || null,
+      guildMembers: clanInfo.memberNum || null,
+      guildCapacity: clanInfo.capacity || null,
+      avatar: profileInfo.avatarId ? `https://ffpocket.com/ff/assets/img/avatar/${profileInfo.avatarId}.webp` : null,
+      captainNickname: captainInfo.nickname || null,
+      captainUid: captainInfo.accountId || null,
+      pet: petInfo.id ? `Pet ID: ${petInfo.id} (Nível ${petInfo.level})` : null,
+      bio: socialInfo.signature || null,
+      creditScore: result.creditScoreInfo?.creditScore || null,
+      raw: result
     };
 
     setCache(cacheKey, profile);
@@ -167,13 +199,13 @@ const getProfile = async (playerId) => {
   }
 };
 
-const getStats = async (playerId) => {
+const getStats = async (playerId, region = 'br') => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { ok: false, msg: '❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.' };
   }
 
-  const cacheKey = `stats_${playerId}`;
+  const cacheKey = `stats_${region}_${playerId}`;
   const cached = getCache(cacheKey);
   if (cached) {
     return { ok: true, data: cached };
@@ -181,53 +213,65 @@ const getStats = async (playerId) => {
 
   try {
     const response = await fetchWithTimeout(
-      `https://api.ffmptools.com/api/free-fire/player/stats?playerId=${playerId}&apiKey=${apiKey.key}`
+      `${API_BASE_URL}/info?region=${region}&uid=${playerId}`,
+      {
+        headers: {
+          'x-api-key': apiKey.key
+        }
+      }
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return { ok: false, msg: '❌ UID não encontrado.' };
       }
+      if (response.status === 403) {
+        return { ok: false, msg: '❌ API Key inválida ou acesso negado.' };
+      }
       throw new Error(`HTTP ${response.status}`);
     }
 
     const result = await response.json();
 
-    if (!result.success || !result.data) {
+    if (result.error === 'Forbidden' || result.code === 'FW_002') {
+      return { ok: false, msg: '❌ Acesso automatizado bloqueado. Configure um User-Agent válido.' };
+    }
+
+    if (result.message?.includes('not found') || result.error) {
       return { ok: false, msg: '❌ UID não encontrado.' };
     }
 
-    const data = result.data;
-    const stats = data.stats || data;
+    // A nova API retorna informações completas no endpoint /info
+    const basicInfo = result.basicInfo || {};
+    const clanInfo = result.clanBasicInfo || {};
+    const petInfo = result.petInfo || {};
+    const captainInfo = result.captainBasicInfo || {};
 
     const statsFormatted = {
-      brMatches: stats.brMatches || stats.matches || stats.games || null,
-      brWins: stats.brWins || stats.wins || null,
-      brKills: stats.brKills || stats.kills || null,
-      brDeaths: stats.brDeaths || stats.deaths || null,
-      brKd: stats.brKd || stats.kd || null,
-      brHeadshots: stats.brHeadshots || stats.headshots || null,
-      brHeadshotRate: stats.brHeadshotRate || stats.headshotRate || null,
-      csMatches: stats.csMatches || stats.csGames || null,
-      csWins: stats.csWins || null,
-      csKills: stats.csKills || null,
-      wins: stats.wins || stats.brWins || null,
-      losses: stats.losses || stats.deaths || null,
-      gamesPlayed: stats.gamesPlayed || stats.matches || stats.brMatches || null,
-      playTime: stats.playTime || stats.timePlayed || formatDuration(stats.secondsPlayed),
-      secondsPlayed: stats.secondsPlayed || null,
-      season: data.season || null,
-      currentRank: data.currentRank || null,
-      maxRank: data.maxRank || null
+      nickname: basicInfo.nickname || null,
+      uid: basicInfo.accountId || playerId,
+      level: basicInfo.level || null,
+      rank: basicInfo.rank || null,
+      region: basicInfo.region || region,
+      seasonId: basicInfo.seasonId || null,
+      // Informações do Clan/Guilda
+      guild: clanInfo.clanName || null,
+      guildId: clanInfo.clanId || null,
+      guildLevel: clanInfo.clanLevel || null,
+      guildMembers: clanInfo.memberNum || null,
+      guildCapacity: clanInfo.capacity || null,
+      // Informações do Captain
+      captainNickname: captainInfo.nickname || null,
+      captainUid: captainInfo.accountId || null,
+      // Pet
+      pet: petInfo.id ? `Pet ID: ${petInfo.id} (Nível ${petInfo.level})` : null,
+      petExp: petInfo.exp || null,
+      // Credit Score
+      creditScore: result.creditScoreInfo?.creditScore || null,
+      creditRewardState: result.creditScoreInfo?.rewardState || null,
+      // Raw data
+      raw: result
     };
-
-    if (!statsFormatted.brKd && statsFormatted.brKills && statsFormatted.brDeaths) {
-      statsFormatted.brKd = (statsFormatted.brKills / Math.max(1, statsFormatted.brDeaths)).toFixed(2);
-    }
-
-    if (!statsFormatted.brHeadshotRate && statsFormatted.brHeadshots && statsFormatted.brKills) {
-      statsFormatted.brHeadshotRate = ((statsFormatted.brHeadshots / Math.max(1, statsFormatted.brKills)) * 100).toFixed(1);
-    }
 
     setCache(cacheKey, statsFormatted);
     return { ok: true, data: statsFormatted };
@@ -241,48 +285,63 @@ const getStats = async (playerId) => {
   }
 };
 
-const getGuild = async (guildId) => {
+const getGuild = async (guildId, region = 'br') => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { ok: false, msg: '❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.' };
   }
 
-  const cacheKey = `guild_${guildId}`;
+  // A nova API não tem endpoint específico para guild, então buscamos via perfil de captain
+  const cacheKey = `guild_${region}_${guildId}`;
   const cached = getCache(cacheKey);
   if (cached) {
     return { ok: true, data: cached };
   }
 
   try {
+    // Buscar info do captain para obter dados da guilda
     const response = await fetchWithTimeout(
-      `https://api.ffmptools.com/api/free-fire/guild/info?guildId=${guildId}&apiKey=${apiKey.key}`
+      `${API_BASE_URL}/info?region=${region}&uid=${guildId}`,
+      {
+        headers: {
+          'x-api-key': apiKey.key
+        }
+      }
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return { ok: false, msg: '❌ ID da guilda não encontrado.' };
       }
+      if (response.status === 403) {
+        return { ok: false, msg: '❌ API Key inválida ou acesso negado.' };
+      }
       throw new Error(`HTTP ${response.status}`);
     }
 
     const result = await response.json();
 
-    if (!result.success || !result.data) {
+    if (result.error === 'Forbidden' || result.code === 'FW_002') {
+      return { ok: false, msg: '❌ Acesso automatizado bloqueado. Configure um User-Agent válido.' };
+    }
+
+    if (result.message?.includes('not found') || result.error) {
       return { ok: false, msg: '❌ ID da guilda não encontrado.' };
     }
 
-    const data = result.data;
+    const clanInfo = result.clanBasicInfo || {};
+    const captainInfo = result.captainBasicInfo || {};
 
     const guild = {
-      name: data.name || data.crewName || null,
-      id: data.id || guildId,
-      leader: data.leaderName || data.leader || null,
-      leaderId: data.leaderId || null,
-      memberCount: data.memberCount || data.members || null,
-      maxMembers: data.maxMembers || 50,
-      level: data.level || data.guildLevel || null,
-      slogan: data.slogan || data.description || null,
-      region: data.region || null
+      name: clanInfo.clanName || null,
+      id: clanInfo.clanId || guildId,
+      leader: captainInfo.nickname || null,
+      leaderId: captainInfo.accountId || null,
+      memberCount: clanInfo.memberNum || null,
+      maxMembers: clanInfo.capacity || 50,
+      level: clanInfo.clanLevel || null,
+      region: result.basicInfo?.region || region,
+      raw: result
     };
 
     setCache(cacheKey, guild);
@@ -297,13 +356,14 @@ const getGuild = async (guildId) => {
   }
 };
 
-const checkBan = async (playerId) => {
+const checkBan = async (playerId, region = 'br') => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { ok: false, msg: '❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.' };
   }
 
-  const cacheKey = `ban_${playerId}`;
+  // A nova API não tem endpoint específico para ban, retornamos info básica
+  const cacheKey = `ban_${region}_${playerId}`;
   const cached = getCache(cacheKey);
   if (cached) {
     return { ok: true, data: cached };
@@ -311,23 +371,43 @@ const checkBan = async (playerId) => {
 
   try {
     const response = await fetchWithTimeout(
-      `https://api.ffmptools.com/api/free-fire/player/ban?playerId=${playerId}&apiKey=${apiKey.key}`
+      `${API_BASE_URL}/info?region=${region}&uid=${playerId}`,
+      {
+        headers: {
+          'x-api-key': apiKey.key
+        }
+      }
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return { ok: false, msg: '❌ UID não encontrado.' };
       }
+      if (response.status === 403) {
+        return { ok: false, msg: '❌ API Key inválida ou acesso negado.' };
+      }
       throw new Error(`HTTP ${response.status}`);
     }
 
     const result = await response.json();
 
+    if (result.error === 'Forbidden' || result.code === 'FW_002') {
+      return { ok: false, msg: '❌ Acesso automatizado bloqueado. Configure um User-Agent válido.' };
+    }
+
+    if (result.message?.includes('not found') || result.error) {
+      return { ok: false, msg: '❌ UID não encontrado.' };
+    }
+
     const banStatus = {
-      isBanned: result.data?.isBanned || result.isBanned || false,
-      bannedAt: result.data?.bannedAt || result.bannedAt || null,
-      reason: result.data?.reason || result.reason || null,
-      expiresAt: result.data?.expiresAt || result.expiresAt || null
+      isBanned: false,
+      bannedAt: null,
+      reason: null,
+      expiresAt: null,
+      nickname: result.basicInfo?.nickname || null,
+      accountId: result.basicInfo?.accountId || playerId,
+      level: result.basicInfo?.level || null,
+      raw: result
     };
 
     setCache(cacheKey, banStatus);
@@ -342,13 +422,14 @@ const checkBan = async (playerId) => {
   }
 };
 
-const getWishlist = async (playerId) => {
+const getWishlist = async (playerId, region = 'br') => {
   const apiKey = getApiKey();
   if (!apiKey) {
     return { ok: false, msg: '❌ A API Key do Free Fire ainda não foi configurada pelo proprietário do bot.' };
   }
 
-  const cacheKey = `wishlist_${playerId}`;
+  // A nova API não tem endpoint específico para wishlist
+  const cacheKey = `wishlist_${region}_${playerId}`;
   const cached = getCache(cacheKey);
   if (cached) {
     return { ok: true, data: cached };
@@ -356,32 +437,44 @@ const getWishlist = async (playerId) => {
 
   try {
     const response = await fetchWithTimeout(
-      `https://api.ffmptools.com/api/free-fire/player/wishlist?playerId=${playerId}&apiKey=${apiKey.key}`
+      `${API_BASE_URL}/info?region=${region}&uid=${playerId}`,
+      {
+        headers: {
+          'x-api-key': apiKey.key
+        }
+      }
     );
 
     if (!response.ok) {
       if (response.status === 404) {
         return { ok: false, msg: '❌ UID não encontrado.' };
       }
-      if (response.status === 400 || response.status === 500) {
-        return { ok: true, data: { items: [], skins: [], emotes: [], collections: [], recentItems: [], count: 0 } };
+      if (response.status === 403) {
+        return { ok: false, msg: '❌ API Key inválida ou acesso negado.' };
       }
       throw new Error(`HTTP ${response.status}`);
     }
 
     const result = await response.json();
 
-    if (!result.success && result.msg !== 'No wishlist data available') {
-      return { ok: true, data: { items: [], skins: [], emotes: [], collections: [], recentItems: [], count: 0 } };
+    if (result.error === 'Forbidden' || result.code === 'FW_002') {
+      return { ok: false, msg: '❌ Acesso automatizado bloqueado. Configure um User-Agent válido.' };
     }
 
+    if (result.message?.includes('not found') || result.error) {
+      return { ok: false, msg: '❌ UID não encontrado.' };
+    }
+
+    // Wishlist não disponível na nova API
     const wishlist = {
-      items: result.data?.items || [],
-      skins: result.data?.skins || [],
-      emotes: result.data?.emote || [],
-      collections: result.data?.collections || [],
-      recentItems: result.data?.recentItems || [],
-      count: result.data?.count || 0
+      items: [],
+      skins: [],
+      emotes: [],
+      collections: [],
+      recentItems: [],
+      count: 0,
+      available: false,
+      message: 'A lista de desejos não está disponível nesta API'
     };
 
     setCache(cacheKey, wishlist);
@@ -390,9 +483,6 @@ const getWishlist = async (playerId) => {
   } catch (error) {
     if (error.name === 'AbortError') {
       return { ok: false, msg: '❌ A consulta demorou mais que o esperado.' };
-    }
-    if (error.message.includes('400') || error.message.includes('500')) {
-      return { ok: true, data: { items: [], skins: [], emotes: [], collections: [], recentItems: [], count: 0 } };
     }
     console.error('Erro ao buscar wishlist Free Fire:', error);
     return { ok: false, msg: '❌ O serviço do Free Fire está indisponível. Tente novamente em alguns minutos.' };
