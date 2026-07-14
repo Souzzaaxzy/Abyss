@@ -31618,6 +31618,7 @@ break;
           if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
 
           // Verificar se o alvo é moderador ou alpha
+          const isTargetModerator = groupData.moderators?.includes(menc_os2);
           const isTargetAlpha = groupData.alphas?.includes(menc_os2);
           const isSenderModerator = groupData.moderators?.includes(sender);
           const isSenderAlpha = groupData.alphas?.includes(sender);
