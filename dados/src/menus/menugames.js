@@ -58,5 +58,23 @@ export default async function menugames(prefix, botName = "MeuBot", userName = "
 │
 ╰──────────────────────────────────────────────╯
 
+╭──────────────────────────────────────────────╮
+│ 🏰 CLASH OF CLANS
+╰──────────────────────────────────────────────╯
+│
+│ ▸ ${prefix}cocperfil <#TAG>
+│   Ver perfil do jogador
+│
+│ ▸ ${prefix}cocclan <#TAG>
+│   Ver informações do clã
+│
+│ ▸ ${prefix}cocguerra <#TAG>
+│   Ver status da guerra
+│
+│ ▸ ${prefix}cocranking
+│   Ver top jogadores/clãs
+│
+╰──────────────────────────────────────────────╯
+
 💡 Use ${prefix}ajuda <comando> para mais informações.`;
 }

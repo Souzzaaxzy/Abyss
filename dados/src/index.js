@@ -44,6 +44,15 @@ import {
   getBrawler as bsGetBrawler
 } from './apis/brawlstars.js';
 
+// Clash of Clans API
+import {
+  getPlayer as cocGetPlayer,
+  getClan as cocGetClan,
+  getClanWar as cocGetClanWar,
+  getTopPlayers as cocGetTopPlayers,
+  getTopClans as cocGetTopClans
+} from './apis/clashofclans.js';
+
 import { 
   setApiKey, 
   deleteApiKey, 
@@ -25241,6 +25250,179 @@ ${groupPrefix}reacao toggle - Ativar/Desativar
           await react('✅', nazu, info.key, from);
         } catch (e) {
           console.error('Erro no comando bsranking:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o ranking.");
+        }
+        break;
+
+      // ============ CLASH OF CLANS ============
+      case 'cocperfil':
+      case 'cocplayer':
+        try {
+          const playerTag = q.trim().replace(/^#/, '');
+          if (!playerTag) {
+            return reply(`❌ Uso: ${prefix}cocperfil <#TAG>\n\nExemplo: ${prefix}cocperfil 8GJJJOJQ\n\n💡 Não precisa do # no início!`);
+          }
+
+          await react('🔍', nazu, info.key, from);
+          
+          const result = await cocGetPlayer(playerTag);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const p = result.data;
+          
+          const perfilMsg = `🏰 *CLASH OF CLANS - PERFIL*\n\n` +
+            `🏷️ Tag: ${p.tag}\n` +
+            `📛 Nome: ${p.name}\n` +
+            `🏠 Prefeitura: Nível ${p.townHallLevel}\n` +
+            `📊 Nível: ${p.expLevel}\n` +
+            `🏆 Troféus: ${p.trophies?.toLocaleString('pt-BR')}\n` +
+            `⭐ Melhor: ${p.bestTrophies?.toLocaleString('pt-BR')}\n` +
+            `⭐ Estrelas de Guerra: ${p.warStars?.toLocaleString('pt-BR')}\n` +
+            `⚔️ Ataques: ${p.attackWins?.toLocaleString('pt-BR')}\n` +
+            `🛡️ Defesas: ${p.defenseWins?.toLocaleString('pt-BR')}\n` +
+            `🔨 Prefeitura Builder: Nível ${p.builderHallLevel}\n` +
+            `📤 Doações: ${p.donations?.toLocaleString('pt-BR')}\n` +
+            `📥 Recebidas: ${p.donationsReceived?.toLocaleString('pt-BR')}\n` +
+            `🛡️ Clã: ${p.clan?.name || 'Sem clã'}`;
+
+          await reply(perfilMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando cocperfil:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o perfil.");
+        }
+        break;
+
+      case 'cocclan':
+      case 'cocclube':
+        try {
+          const clanTag = q.trim().replace(/^#/, '');
+          if (!clanTag) {
+            return reply(`❌ Uso: ${prefix}cocclan <#TAG>\n\nExemplo: ${prefix}cocclan 8GJJJOJQ\n\n💡 Não precisa do # no início!`);
+          }
+
+          await react('🏰', nazu, info.key, from);
+          
+          const result = await cocGetClan(clanTag);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const c = result.data;
+          
+          const clanMsg = `🏰 *CLASH OF CLANS - CLÃ*\n\n` +
+            `🏷️ Tag: ${c.tag}\n` +
+            `📛 Nome: ${c.name}\n` +
+            `📝 ${c.description}\n` +
+            `🏆 Nível: ${c.clanLevel}\n` +
+            `📊 Pontos: ${c.points?.toLocaleString('pt-BR')}\n` +
+            `⚔️ Pontos Versus: ${c.versusPoints?.toLocaleString('pt-BR')}\n` +
+            `🎯 Troféus Necessários: ${c.requiredTrophies?.toLocaleString('pt-BR')}\n` +
+            `⚔️ Vitórias de Guerra: ${c.warWins} (${c.warWinStreak} sequenciais)\n` +
+            `🏅 Liga: ${c.warLeague}\n` +
+            `👥 Membros: ${c.members}`;
+
+          await reply(clanMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando cocclan:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar o clã.");
+        }
+        break;
+
+      case 'cocguerra':
+      case 'cocwar':
+        try {
+          const clanTag = q.trim().replace(/^#/, '');
+          if (!clanTag) {
+            return reply(`❌ Uso: ${prefix}cocguerra <#TAG>\n\nExemplo: ${prefix}cocguerra 8GJJJOJQ\n\n💡 Não precisa do # no início!`);
+          }
+
+          await react('⚔️', nazu, info.key, from);
+          
+          const result = await cocGetClanWar(clanTag);
+          
+          if (!result.ok) {
+            await react('❌', nazu, info.key, from);
+            return reply(result.msg);
+          }
+
+          const w = result.data;
+          
+          let status = '🔴 Desconhecido';
+          if (w.status === 'inWar') status = '⚔️ Em Guerra';
+          else if (w.status === 'preparation') status = '⏳ Preparação';
+          else if (w.status === 'won') status = '✅ Vitória';
+          else if (w.status === 'lost') status = '❌ Derrota';
+          else if (w.status === 'tie') status = '🔄 Empate';
+          else if (w.status === 'notInWar') status = '🚫 Sem Guerra';
+          
+          const warMsg = `⚔️ *CLASH OF CLANS - GUERRA*\n\n` +
+            `📊 Status: ${status}\n` +
+            `👥 Tamanho do Time: ${w.teamSize}vs${w.teamSize}\n\n` +
+            `🏰 *${w.clan?.name || 'Seu Clã'}*\n` +
+            `⭐ Estrelas: ${w.clan?.stars}\n` +
+            `💥 Destruição: ${w.clan?.destructionPercentage}%\n` +
+            `⚔️ Ataques: ${w.clan?.attacks}\n\n` +
+            `🏴 *${w.opponent?.name || 'Oponente'}*\n` +
+            `⭐ Estrelas: ${w.opponent?.stars}\n` +
+            `💥 Destruição: ${w.opponent?.destructionPercentage}%\n` +
+            `⚔️ Ataques: ${w.opponent?.attacks}`;
+
+          await reply(warMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando cocguerra:', e);
+          await react('❌', nazu, info.key, from);
+          reply("❌ Ocorreu um erro ao buscar a guerra.");
+        }
+        break;
+
+      case 'cocranking':
+      case 'coctop':
+        try {
+          await react('🏆', nazu, info.key, from);
+          
+          const [playersResult, clansResult] = await Promise.all([
+            cocGetTopPlayers(5),
+            cocGetTopClans(5)
+          ]);
+          
+          let rankingMsg = `🏆 *CLASH OF CLANS - RANKINGS*\n\n`;
+          
+          rankingMsg += `🏰 *TOP 5 JOGADORES*\n`;
+          if (playersResult.ok && playersResult.data.length > 0) {
+            playersResult.data.forEach((p, i) => {
+              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+              rankingMsg += `${medal} ${p.name} - ${p.trophies?.toLocaleString('pt-BR')} troféus\n`;
+            });
+          } else {
+            rankingMsg += `❌ Não foi possível carregar o ranking.\n`;
+          }
+          
+          rankingMsg += `\n⚔️ *TOP 5 CLÃS*\n`;
+          if (clansResult.ok && clansResult.data.length > 0) {
+            clansResult.data.forEach((c, i) => {
+              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+              rankingMsg += `${medal} ${c.name} - ${c.points?.toLocaleString('pt-BR')} pontos\n`;
+            });
+          } else {
+            rankingMsg += `❌ Não foi possível carregar o ranking.\n`;
+          }
+          
+          await reply(rankingMsg);
+          await react('✅', nazu, info.key, from);
+        } catch (e) {
+          console.error('Erro no comando cocranking:', e);
           await react('❌', nazu, info.key, from);
           reply("❌ Ocorreu um erro ao buscar o ranking.");
         }
