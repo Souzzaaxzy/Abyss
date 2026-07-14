@@ -179,10 +179,23 @@ async function checkPrerequisites() {
   }
 }
 
-function startBot(codeMode = false) {
+async function getServerIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json', { timeout: 5000 });
+    const data = await response.json();
+    return data.ip;
+  } catch {
+    return 'Não foi possível obter';
+  }
+}
+
+async function startBot(codeMode = false) {
   const args = ['--expose-gc', CONNECT_FILE];
   if (codeMode) args.push('--code');
 
+  // Mostrar IP do servidor
+  const serverIP = await getServerIP();
+  info(`🌐 IP do Servidor: ${colors.yellow}${serverIP}${colors.reset}`);
   info(`📷 Iniciando com ${codeMode ? 'código de pareamento' : 'QR Code'}`);
 
   botProcess = spawn('node', args, {
