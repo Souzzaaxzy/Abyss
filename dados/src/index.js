@@ -20940,11 +20940,6 @@ case 'addaluguel':
               // =============================================
               // 3° ETAPA - ENVIAR ÁUDIO
               // =============================================
-              const audioMsg = await nazu.sendMessage(from, {
-                audio: Buffer.alloc(1), // Placeholder - será substituído
-                mimetype: 'audio/mpeg'
-              }, { quoted: info });
-
               // Download do áudio
               youtube.mp3(videoUrl, 128)
                 .then(async (dlRes) => {
@@ -20954,7 +20949,7 @@ case 'addaluguel':
                   }
 
                   try {
-                    // Enviar o áudio real (substitui o placeholder ou envia novo)
+                    // Enviar o áudio
                     await nazu.sendMessage(from, {
                       audio: dlRes.buffer,
                       mimetype: 'audio/mpeg'
@@ -20982,12 +20977,13 @@ case 'addaluguel':
                       `⏱️ Duração: ${formatDuration(musicInfo.duration)}\n\n` +
                       `🔗 YouTube:\n${musicInfo.url}\n\n` +
                       `────────────────────────\n\n` +
-                      `✨ Aproveite sua música! 💜`;
+                      `✨ Aproveite a música @${pushname}! 💜`;
 
                     // Envia a thumbnail como resposta ao áudio
                     await nazu.sendMessage(from, {
                       image: { url: thumbnailUrl },
-                      caption: musicCaption
+                      caption: musicCaption,
+                      mentions: [sender]
                     }, { quoted: info }).catch(async (thumbErr) => {
                       // Se falhar a thumbnail, tenta com qualidade menor
                       console.log('Tentando thumbnail com qualidade menor...');
@@ -21003,7 +20999,8 @@ case 'addaluguel':
                           try {
                             await nazu.sendMessage(from, {
                               image: { url },
-                              caption: musicCaption
+                              caption: musicCaption,
+                              mentions: [sender]
                             }, { quoted: info });
                             break;
                           } catch (e) {
