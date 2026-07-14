@@ -1,16 +1,13 @@
 /**
  * Valorant API Module
- * API da Riot Games
- * https://developer.riotgames.com
- * (Mesma API Key do League of Legends)
+ * Usa API pública henrikdev.xyz (não requer API Key)
+ * https://api.henrikdev.xyz
  */
 
 import axios from 'axios';
-import { getApiKey as dbGetApiKey } from '../utils/database.js';
 
-// URLs das APIs
-const VALORANT_API_URL = 'https://val.kyr.re';
-const RAIO_API_URL = 'https://api.raio.io';
+// URL da API pública
+const VALORANT_API_URL = 'https://api.henrikdev.xyz/v1';
 
 // Cache para armazenar respostas (5 minutos)
 const cache = new Map();
@@ -39,19 +36,9 @@ const getCache = (key) => {
   return null;
 };
 
-// Obter API Key do banco de dados
-const getApiKey = () => {
-  try {
-    const keyData = dbGetApiKey('valorant');
-    return keyData?.key || null;
-  } catch (e) {
-    return null;
-  }
-};
-
-// Verificar se a API está configurada
+// API pública não requer configuração
 const isApiConfigured = () => {
-  return !!getApiKey();
+  return true;
 };
 
 // Normalizar nome de jogador (tag#region)
@@ -75,45 +62,34 @@ const getPlayerStats = async (playerName, playerTag) => {
     return { ok: true, data: cached };
   }
 
-  if (!isApiConfigured()) {
-    return { ok: false, msg: '❌ API Key não configurada. Use !keyvalorant <api_key>' };
-  }
-
   try {
-    const apiKey = getApiKey();
-    
-    // Usar API proxy pública para evitar CORS
-    const response = await axios.get(`${VALORANT_API_URL}/player/${encodeURIComponent(playerName)}/${playerTag}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      },
+    // API pública henrikdev.xyz - não requer API key
+    const response = await axios.get(`${VALORANT_API_URL}/account/${encodeURIComponent(playerName)}/${playerTag}`, {
       timeout: 15000
     });
 
     const data = response.data;
+    
+    // Verificar se a resposta tem dados válidos
+    if (!data.data) {
+      return { ok: false, msg: '❌ Jogador não encontrado.' };
+    }
 
+    const account = data.data;
     const result = {
-      name: data.name || playerName,
-      tag: data.tag || playerTag,
-      level: data.level || 0,
-      currentRank: data.currenttierpatched || 'Unranked',
-      rank: data.ranking_in_tier || 0,
-      elo: data.elo || 0,
-      wins: data.wins || 0,
-      losses: data.losses || 0,
-      winRate: data.wins && data.games_played 
-        ? ((data.wins / data.games_played) * 100).toFixed(1) 
-        : '0',
-      gamesPlayed: data.games_played || 0,
-      kd: data.kd || 0,
-      headshotPct: data.headshot_pct || 0,
-      kills: data.kills || 0,
-      deaths: data.deaths || 0,
-      agent: data.agent || null,
-      card: data.card || null,
-      peakRank: data.peakrank || 'Unranked',
-      lastUpdate: data.last_update || null,
-      raw: data
+      name: account.name || playerName,
+      tag: account.tag || playerTag,
+      level: account.account_level || 0,
+      currentRank: account.currenttierpatched || 'Unranked',
+      rank: account.ranking_in_tier || 0,
+      elo: account.elo || 0,
+      wins: account.wins || 0,
+      losses: account.losses || 0,
+      winRate: account.winrate || '0',
+      gamesPlayed: account.games_played || 0,
+      card: account.card || null,
+      peakRank: account.peakrank || account.currenttierpatched || 'Unranked',
+      raw: account
     };
 
     setCache(cacheKey, result);
@@ -121,16 +97,13 @@ const getPlayerStats = async (playerName, playerTag) => {
 
   } catch (error) {
     if (error.response?.status === 404 || error.message?.includes('Not Found')) {
-      return { ok: false, msg: '❌ Jogador não encontrado. Verifique o nome e a tag.' };
-    }
-    if (error.response?.status === 403) {
-      return { ok: false, msg: '❌ API Key inválida ou sem permissão.' };
+      return { ok: false, msg: '❌ Jogador não encontrado. Verifique o nome e a tag (ex: Nome#br1)' };
     }
     if (error.response?.status === 429) {
-      return { ok: false, msg: '❌ Limite de requisições excedido. Tente novamente.' };
+      return { ok: false, msg: '❌ Limite de requisições excedido. Tente novamente em alguns minutos.' };
     }
     console.error('Erro ao buscar jogador Valorant:', error.message);
-    return { ok: false, msg: '❌ Erro ao buscar dados do jogador.' };
+    return { ok: false, msg: '❌ Erro ao buscar dados do jogador. Tente novamente.' };
   }
 };
 
@@ -154,41 +127,39 @@ const getMatchHistory = async (playerName, playerTag) => {
     return { ok: true, data: cached };
   }
 
-  if (!isApiConfigured()) {
-    return { ok: false, msg: '❌ API Key não configurada.' };
-  }
-
   try {
-    const apiKey = getApiKey();
-    
-    const response = await axios.get(`${VALORANT_API_URL}/matches/${encodeURIComponent(playerName)}/${playerTag}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      },
+    const response = await axios.get(`${VALORANT_API_URL}/match-history/br/${encodeURIComponent(playerName)}?filter=competitive`, {
       timeout: 15000
     });
 
-    const matches = response.data?.matches?.slice(0, 5).map(match => ({
-      id: match.id,
-      mode: match.mode || 'Unknown',
-      map: match.map || 'Unknown',
-      result: match.result || 'Unknown',
-      score: match.score || '0-0',
-      agent: match.agent || 'Unknown',
-      kills: match.kills || 0,
-      deaths: match.deaths || 0,
-      assists: match.assists || 0,
-      kd: match.kd || 0,
-      headshotPct: match.headshot_pct || 0,
-      timestamp: match.timestamp || null
-    })) || [];
+    const matches = response.data?.data?.slice(0, 5).map(match => {
+      const player = match.players?.all_players?.find(p => 
+        p.name.toLowerCase() === playerName.toLowerCase()
+      ) || {};
+      
+      return {
+        id: match.metadata?.matchid || '',
+        mode: match.metadata?.mode || 'Unknown',
+        map: match.metadata?.map || 'Unknown',
+        result: match.metadata?.mode || 'Unknown',
+        agent: player.character || 'Unknown',
+        kills: player.stats?.kills || 0,
+        deaths: player.stats?.deaths || 0,
+        assists: player.stats?.assists || 0,
+        kd: player.stats?.kills && player.stats?.deaths 
+          ? (player.stats.kills / player.stats.deaths).toFixed(2) 
+          : '0',
+        headshotPct: player.stats?.headshot_pct || 0,
+        timestamp: match.metadata?.game_start || null
+      };
+    }) || [];
 
     setCache(cacheKey, matches);
     return { ok: true, data: matches };
 
   } catch (error) {
-    if (error.response?.status === 404) {
-      return { ok: false, msg: '❌ Jogador não encontrado ou sem partidas.' };
+    if (error.response?.status === 404 || error.message?.includes('Not Found')) {
+      return { ok: false, msg: '❌ Nenhuma partida competitiva encontrada.' };
     }
     console.error('Erro ao buscar partidas:', error.message);
     return { ok: false, msg: '❌ Erro ao buscar partidas.' };
@@ -204,27 +175,18 @@ const getLeaderboard = async (limit = 10) => {
     return { ok: true, data: cached };
   }
 
-  if (!isApiConfigured()) {
-    return { ok: false, msg: '❌ API Key não configurada.' };
-  }
-
   try {
-    const apiKey = getApiKey();
-    
-    const response = await axios.get(`${VALORANT_API_URL}/leaderboard?size=${limit}`, {
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      },
+    const response = await axios.get(`${VALORANT_API_URL}/leaderboard/br?size=${limit}`, {
       timeout: 15000
     });
 
-    const leaderboard = response.data?.slice(0, limit).map((player, index) => ({
+    const leaderboard = response.data?.data?.slice(0, limit).map((player, index) => ({
       rank: index + 1,
-      name: player.name || 'Unknown',
-      tag: player.tag || '',
+      name: player.gameName || 'Unknown',
+      tag: player.tagLine || '',
       currentRank: player.currenttierpatched || 'Unranked',
-      elo: player.elo || 0,
-      wins: player.wins || 0,
+      elo: player.ranking_in_tier || 0,
+      wins: player.number_of_wins || 0,
       gamesPlayed: player.games_played || 0
     })) || [];
 

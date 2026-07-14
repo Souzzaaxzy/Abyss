@@ -51,13 +51,13 @@ const createClient = (baseURL) => {
   });
 };
 
-// Buscar usuário por nome de usuário
+// Buscar usuário por nome de usuário (novo endpoint)
 const getUserByUsername = async (username) => {
   if (!username) return null;
   
   try {
     const client = createClient(API_BASE_URL);
-    const response = await client.post('/users/get-by-username', {
+    const response = await client.post('/usernames/users', {
       usernames: [username],
       excludeBannedUsers: false
     });
@@ -239,7 +239,7 @@ const searchUsers = async (query) => {
 
   try {
     const client = createClient(API_BASE_URL);
-    const response = await client.post('/users/get-by-username', {
+    const response = await client.post('/usernames/users', {
       usernames: [query],
       excludeBannedUsers: false
     });
