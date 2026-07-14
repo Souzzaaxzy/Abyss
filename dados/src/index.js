@@ -31615,6 +31615,22 @@ break;
           if (!menc_os2) return reply("Marque alguém 🙄");
           if (menc_os2 === nmrdn) return reply("❌ Não posso banir o dono do bot.");
           if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
+          if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
+
+          // Verificar se o alvo é moderador ou alpha
+          const isTargetAlpha = groupData.alphas?.includes(menc_os2);
+          const isSenderModerator = groupData.moderators?.includes(sender);
+          const isSenderAlpha = groupData.alphas?.includes(sender);
+
+          // Moderadores e alphas não podem banir outros mods/alphas (a menos que sejam admins do grupo)
+          if ((isTargetModerator || isTargetAlpha) && !isAdminMatch && !isOwner) {
+            if (isSenderModerator && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+            if (isSenderAlpha && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+          }
           await nazu.groupParticipantsUpdate(from, [menc_os2], 'remove');
 
           // Notificação X9 para banimento
@@ -31642,6 +31658,22 @@ break;
           if (!menc_os2) return reply("Marque alguém 🙄");
           if (menc_os2 === nmrdn) return reply("❌ Não posso banir o dono do bot.");
           if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
+
+          // Verificar se o alvo é moderador ou alpha
+          const isTargetModerator = groupData.moderators?.includes(menc_os2);
+          const isTargetAlpha = groupData.alphas?.includes(menc_os2);
+          const isSenderModerator = groupData.moderators?.includes(sender);
+          const isSenderAlpha = groupData.alphas?.includes(sender);
+
+          // Moderadores e alphas não podem banir outros mods/alphas (a menos que sejam admins do grupo)
+          if ((isTargetModerator || isTargetAlpha) && !isAdminMatch && !isOwner) {
+            if (isSenderModerator && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+            if (isSenderAlpha && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+          }
 
           // Aviso com contagem regressiva
           await nazu.sendMessage(from, {
@@ -31885,6 +31917,23 @@ break;
         if (!menc_os2) return reply("Marque alguém 🙄");
         if (menc_os2 === nmrdn) return reply("❌ Não posso banir o dono do bot.");
         if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
+          if (menc_os2 === botNumber) return reply("❌ Ops! Eu faço parte da bagunça, não dá pra me remover 💔");
+
+          // Verificar se o alvo é moderador ou alpha
+          const isTargetModerator = groupData.moderators?.includes(menc_os2);
+          const isTargetAlpha = groupData.alphas?.includes(menc_os2);
+          const isSenderModerator = groupData.moderators?.includes(sender);
+          const isSenderAlpha = groupData.alphas?.includes(sender);
+
+          // Moderadores e alphas não podem banir outros mods/alphas (a menos que sejam admins do grupo)
+          if ((isTargetModerator || isTargetAlpha) && !isAdminMatch && !isOwner) {
+            if (isSenderModerator && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+            if (isSenderAlpha && !isAdminMatch) {
+              return reply("❌ Você não pode banir outros Moderadores ou Alphas. 💔");
+            }
+          }
 
         try {
           await nazu.sendMessage(from, {
@@ -34751,6 +34800,22 @@ case 'set-bannerbv':
           if (!isGroupAdmin) return reply("Você precisa ser administrador 💔");
           if (!menc_os2) return reply("Marque um usuário 🙄");
           if (menc_os2 === botNumber) return reply("❌ Não posso advertir a mim mesma!");
+          
+          // Verificar se o alvo é moderador ou alpha
+          const isTargetModeratorAdv = groupData.moderators?.includes(menc_os2);
+          const isTargetAlphaAdv = groupData.alphas?.includes(menc_os2);
+          const isSenderModeratorAdv = groupData.moderators?.includes(sender);
+          const isSenderAlphaAdv = groupData.alphas?.includes(sender);
+          
+          // Moderadores e alphas não podem advertar outros mods/alphas (a menos que sejam admins do grupo)
+          if ((isTargetModeratorAdv || isTargetAlphaAdv) && !isAdminMatch && !isOwner) {
+            if (isSenderModeratorAdv && !isAdminMatch) {
+              return reply("❌ Você não pode advertar outros Moderadores ou Alphas. 💔");
+            }
+            if (isSenderAlphaAdv && !isAdminMatch) {
+              return reply("❌ Você não pode advertar outros Moderadores ou Alphas. 💔");
+            }
+          }
           const reason = q ? (q.includes('@') || !menc_os2) ? (args.length > 1 ? args.slice(1).join(' ') : 'Motivo não informado') : q.trim() : 'Motivo não informado';
           const groupFilePath = buildGroupFilePath(from);
           let groupData = fs.existsSync(groupFilePath) ? JSON.parse(fs.readFileSync(groupFilePath)) : {
