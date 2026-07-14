@@ -20975,7 +20975,7 @@ case 'addaluguel':
                       `⏱️ Duração: ${formatDuration(musicInfo.duration)}\n\n` +
                       `🔗 YouTube:\n${musicInfo.url}\n\n` +
                       `────────────────────────\n\n` +
-                      `✨ Aproveite a música @${pushname}! 💜`;
+                      `✨ Aproveite a música @${pushname}!`;
 
                     // Envia a thumbnail como resposta ao áudio
                     await nazu.sendMessage(from, {
