@@ -38310,19 +38310,15 @@ break;
           if (!isModoBn) return reply('O modo brincadeira nao esta ativo no grupo');
           if (!q) return reply(`Eita, coloque o número de pessoas após o comando.`);
           if (Number(q) > 15) return reply("Coloque um número menor, ou seja, abaixo de *15*.");
-          
-          // Carregar gamesData para usar a mídia do comando sexo
-          let gamesData = fs.existsSync(__dirname + '/funcs/json/games.json') ? JSON.parse(fs.readFileSync(__dirname + '/funcs/json/games.json')) : { games2: {} };
           var emojiskk;
           emojiskk = ["🥵", "😈", "🫣", "😏"];
           var emojis2;
           emojis2 = emojiskk[Math.floor(Math.random() * emojiskk.length)];
           var frasekk;
           frasekk = [`tá querendo relações sexuais a ${q}, topa?`, `quer que *${q}* pessoas venham de *chicote, algema e corda de alpinista*.`, `quer que ${q} pessoas der tapa na cara, lhe chame de cachorra e fud3r bem gostosinho...`];
-          let path = buildGroupFilePath(from);
-          // Otimização: Usar cache para leitura de arquivo
-          let data = await optimizer.loadJsonWithCache(path, { mark: {} });
-          let membros = AllgroupMembers.filter(m => !['0', 'marca'].includes(data.mark[m]));
+          let groupPath = buildGroupFilePath(from);
+          let groupDataSurubao = await optimizer.loadJsonWithCache(groupPath, { mark: {} });
+          let membrosSurubao = AllgroupMembers.filter(m => !['0', 'marca'].includes(groupDataSurubao.mark[m]));
           var context;
           context = frasekk[Math.floor(Math.random() * frasekk.length)];
           var ABC;
@@ -38331,72 +38327,25 @@ break;
           mencts = [sender];
           for (var i = 0; i < q; i++) {
             var menb;
-            menb = membros[Math.floor(Math.random() * membros.length)];
+            menb = membrosSurubao[Math.floor(Math.random() * membrosSurubao.length)];
             var ABC;
             ABC += `@${menb.split("@")[0]}\n`;
             mencts.push(menb);
           }
           
-          // Usar a GIF do comando sexo (mesma mídia)
-          const surubaoMedia = gamesData.games2['sexo'];
+          // Carregar gamesData para usar a mídia do comando sexo
+          let gamesDataSurubao = fs.existsSync(__dirname + '/funcs/json/games.json') ? JSON.parse(fs.readFileSync(__dirname + '/funcs/json/games.json')) : { games2: {} };
+          const surubaoMedia = gamesDataSurubao.games2['sexo'];
           if (surubaoMedia?.video) {
             const videoPath = surubaoMedia.video.url;
-            const needsOptimization = surubaoMedia.video?.optimize === true;
             
             if (videoPath.startsWith('http')) {
-              if (needsOptimization) {
-                try {
-                  const mediaResponse = await axios.get(videoPath, { responseType: 'arraybuffer', timeout: 60000 });
-                  let mediaBuffer = Buffer.from(mediaResponse.data);
-                  const maxSize = 15 * 1024 * 1024;
-                  
-                  if (mediaBuffer.length > maxSize) {
-                    const tempPath = `/tmp/gif_optimize_${Date.now()}.gif`;
-                    fs.writeFileSync(tempPath, mediaBuffer);
-                    const outputPath = `/tmp/gif_optimized_${Date.now()}.mp4`;
-                    const ffmpegCommand = `ffmpeg -i "${tempPath}" -vf "scale='min(720,iw)':min'(720,ih)':force_original_aspect_ratio=decrease,fps=15" -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "${outputPath}" -y`;
-                    
-                    await new Promise((resolve, reject) => {
-                      exec(ffmpegCommand, (error) => {
-                        if (error) {
-                          console.error('Erro ao otimizar GIF:', error.message);
-                          reject(error);
-                        } else {
-                          resolve();
-                        }
-                      });
-                    });
-                    
-                    if (fs.existsSync(outputPath)) {
-                      mediaBuffer = fs.readFileSync(outputPath);
-                      fs.unlinkSync(tempPath);
-                      fs.unlinkSync(outputPath);
-                    }
-                  }
-                  
-                  await nazu.sendMessage(from, {
-                    video: mediaBuffer,
-                    caption: ABC,
-                    mentions: mencts,
-                    gifPlayback: true
-                  });
-                } catch (optimizeError) {
-                  console.error('Erro ao otimizar mídia:', optimizeError.message);
-                  await nazu.sendMessage(from, {
-                    video: { url: videoPath },
-                    caption: ABC,
-                    mentions: mencts,
-                    gifPlayback: true
-                  });
-                }
-              } else {
-                await nazu.sendMessage(from, {
-                  video: { url: videoPath },
-                  caption: ABC,
-                  mentions: mencts,
-                  gifPlayback: true
-                });
-              }
+              await nazu.sendMessage(from, {
+                video: { url: videoPath },
+                caption: ABC,
+                mentions: mencts,
+                gifPlayback: true
+              });
             } else if (fs.existsSync(path.join(__dirname, '../' + videoPath.replace('./', '')))) {
               const videoBuffer = fs.readFileSync(path.join(__dirname, '../' + videoPath.replace('./', '')));
               await nazu.sendMessage(from, {
@@ -39002,73 +38951,13 @@ break;
             }
           } else if (media?.video) {
             const videoPath = resolveMediaPath(typeof media.video === 'object' ? media.video.url : media.video);
-            const needsOptimization = media.video?.optimize === true;
-            
             if (videoPath.startsWith('http')) {
-              // Para GIFs grandes que precisam de otimização
-              if (needsOptimization) {
-                try {
-                  // Baixar a mídia primeiro
-                  const mediaResponse = await axios.get(videoPath, { responseType: 'arraybuffer', timeout: 60000 });
-                  let mediaBuffer = Buffer.from(mediaResponse.data);
-                  
-                  // Verificar tamanho - WhatsApp tem limite de ~16MB
-                  const maxSize = 15 * 1024 * 1024; // 15MB
-                  
-                  if (mediaBuffer.length > maxSize) {
-                    // Salvar temporariamente para otimizar
-                    const tempPath = `/tmp/gif_optimize_${Date.now()}.gif`;
-                    fs.writeFileSync(tempPath, mediaBuffer);
-                    
-                    // Otimizar com ffmpeg (converter para mp4 com compressão)
-                    const outputPath = `/tmp/gif_optimized_${Date.now()}.mp4`;
-                    const ffmpegCommand = `ffmpeg -i "${tempPath}" -vf "scale='min(720,iw)':min'(720,ih)':force_original_aspect_ratio=decrease,fps=15" -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart "${outputPath}" -y`;
-                    
-                    await new Promise((resolve, reject) => {
-                      exec(ffmpegCommand, (error) => {
-                        if (error) {
-                          console.error('Erro ao otimizar GIF:', error.message);
-                          reject(error);
-                        } else {
-                          resolve();
-                        }
-                      });
-                    });
-                    
-                    // Ler o arquivo otimizado
-                    if (fs.existsSync(outputPath)) {
-                      mediaBuffer = fs.readFileSync(outputPath);
-                      // Limpar arquivos temporários
-                      fs.unlinkSync(tempPath);
-                      fs.unlinkSync(outputPath);
-                    }
-                  }
-                  
-                  await nazu.sendMessage(from, {
-                    video: mediaBuffer,
-                    caption: responseText,
-                    mentions: [targetUser],
-                    gifPlayback: videoPath.endsWith('.gif')
-                  });
-                } catch (optimizeError) {
-                  console.error('Erro ao otimizar mídia:', optimizeError.message);
-                  // Tentar enviar original se a otimização falhar
-                  await nazu.sendMessage(from, {
-                    video: { url: videoPath },
-                    caption: responseText,
-                    mentions: [targetUser],
-                    gifPlayback: videoPath.endsWith('.gif')
-                  });
-                }
-              } else {
-                // URL externa - enviar diretamente
-                await nazu.sendMessage(from, {
-                  video: { url: videoPath },
-                  caption: responseText,
-                  mentions: [targetUser],
-                  gifPlayback: true
-                });
-              }
+              await nazu.sendMessage(from, {
+                video: { url: videoPath },
+                caption: responseText,
+                mentions: [targetUser],
+                gifPlayback: true
+              });
             } else if (fs.existsSync(videoPath)) {
               const videoBuffer = fs.readFileSync(videoPath);
               await nazu.sendMessage(from, {
