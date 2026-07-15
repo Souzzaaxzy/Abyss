@@ -2140,6 +2140,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     const isGroup = from?.endsWith('@g.us') || false;
     if (!info.key.participant && !info.key.remoteJid) return;
     let sender;
+    let senderJidOriginal = null; // Salvar JID original para usar em groupParticipantsUpdate
+    
     if (isGroup) {
       // Prioriza participant, depois busca por LID, com fallback para JID
       sender = info.key.participant || info.message?.participant;
@@ -2156,15 +2158,17 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         sender = info.message.extendedTextMessage.contextInfo.participant;
       }
 
-      // Se for JID, converte para LID usando cache
+      // Salvar JID original antes da conversão para LID
       if (sender && isValidJid(sender)) {
+        senderJidOriginal = sender;
         sender = await getLidFromJidCached(nazu, sender);
       }
     } else {
       sender = info.key.remoteJid;
 
-      // Se for JID no PV, converte para LID usando cache
+      // Salvar JID original antes da conversão para LID
       if (sender && isValidJid(sender)) {
+        senderJidOriginal = sender;
         sender = await getLidFromJidCached(nazu, sender);
       }
     }
@@ -2967,7 +2971,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
           await nazu.sendMessage(from, { delete: info.key });
           if (groupData.minMessage.action === 'ban') {
             if (isBotAdmin) {
-              const senderJidMinMsg = formatToJid(sender.split('@')[0]);
+              const senderJidMinMsg = senderJidOriginal || formatToJid(sender.split('@')[0]);
               await nazu.groupParticipantsUpdate(from, [senderJidMinMsg], 'remove').catch(e => console.error('Erro ao remover (minMessage):', e));
               await reply(`🚫 Usuário removido por enviar mídia sem legenda suficiente (mínimo: ${groupData.minMessage.minDigits} caracteres).`);
             } else {
@@ -2992,7 +2996,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
             participant: sender
           }
         });
-        const senderJidAntiStatus = formatToJid(sender.split('@')[0]);
+        const senderJidAntiStatus = senderJidOriginal || formatToJid(sender.split('@')[0]);
         await nazu.groupParticipantsUpdate(from, [senderJidAntiStatus], 'remove').catch(e => console.error('Erro ao remover (antistatus):', e));
       } else {
         await reply("⚠️ Não posso remover o usuário porque não sou administrador.");
@@ -3016,7 +3020,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
             text: `🚨 *SISTEMA ANTI-ATAQUE*\n\nO membro @${sender.split('@')[0]} tentou postar um status/canal no grupo e foi removido para proteger o grupo.`,
             mentions: [sender]
           });
-          const senderJidAntiStts = formatToJid(sender.split('@')[0]);
+          const senderJidAntiStts = senderJidOriginal || formatToJid(sender.split('@')[0]);
           await nazu.groupParticipantsUpdate(from, [senderJidAntiStts], 'remove').catch(e => console.error('Erro ao remover (antistts):', e));
         }
         return;
@@ -3032,7 +3036,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
           try {
              if (isBotAdmin) {
                await nazu.sendMessage(from, { delete: info.key }).catch(() => {});
-               const senderJidAntiStts2 = formatToJid(sender.split('@')[0]);
+               const senderJidAntiStts2 = senderJidOriginal || formatToJid(sender.split('@')[0]);
                await nazu.groupParticipantsUpdate(from, [senderJidAntiStts2], 'remove').catch(e => console.error('Erro ao remover (antistts2):', e));
                await nazu.sendMessage(from, { 
                   text: `🚨 *ANTI-STATUS:* @${sender.split('@')[0]} removido por encaminhar conteúdo de canais.`, 
@@ -3059,7 +3063,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         await nazu.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender } }).catch(() => {});
       }, 1500);
 
-      const senderJidPagto = formatToJid(sender.split('@')[0]);
+      const senderJidPagto = senderJidOriginal || formatToJid(sender.split('@')[0]);
       await nazu.groupParticipantsUpdate(from, [senderJidPagto], 'remove').catch(e => console.error('Erro ao remover por pagamento:', e));
       return;
     }
@@ -3074,7 +3078,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
               participant: sender
             }
           });
-          const senderJidAntiBtn = formatToJid(sender.split('@')[0]);
+          const senderJidAntiBtn = senderJidOriginal || formatToJid(sender.split('@')[0]);
           await nazu.groupParticipantsUpdate(from, [senderJidAntiBtn], 'remove').catch(e => console.error('Erro ao remover (antibtn):', e));
         } else {
           await reply("⚠️ Não posso remover o usuário porque não sou administrador.");
@@ -3294,7 +3298,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
           }
         });
         if (isBotAdmin) {
-          const senderJidMute = formatToJid(sender.split('@')[0]);
+          const senderJidMute = senderJidOriginal || formatToJid(sender.split('@')[0]);
           await nazu.groupParticipantsUpdate(from, [senderJidMute], 'remove').catch(e => console.error('Erro ao remover (mute):', e));
         } else {
           await reply("⚠️ Não posso remover o usuário porque não sou administrador.");
@@ -4611,7 +4615,7 @@ Código: *${roleCode}*`,
                     await nazu.sendMessage(from, {
                       delete: info.key
                     });
-                    const senderJidAntiPorn = formatToJid(sender.split('@')[0]);
+                    const senderJidAntiPorn = senderJidOriginal || formatToJid(sender.split('@')[0]);
                     await nazu.groupParticipantsUpdate(from, [senderJidAntiPorn], 'remove').catch(e => console.error('Erro ao remover (antiporn):', e));
                     await reply(`🔞 @${getUserName(sender)}, conteúdo impróprio detectado. Você foi removido do grupo.`, {
                       mentions: [sender]
@@ -4647,7 +4651,7 @@ Código: *${roleCode}*`,
             participant: sender
           }
         });
-        const senderJidAntiLoc = formatToJid(sender.split('@')[0]);
+        const senderJidAntiLoc = senderJidOriginal || formatToJid(sender.split('@')[0]);
         await nazu.groupParticipantsUpdate(from, [senderJidAntiLoc], 'remove').catch(e => console.error('Erro ao remover (antiloc):', e));
         await reply(`🗺️ @${getUserName(sender)}, localização não permitida. Você foi removido do grupo.`, {
           mentions: [sender]
@@ -4678,7 +4682,7 @@ Código: *${roleCode}*`,
             participant: sender
           }
         });
-        const senderJidAntiDoc = formatToJid(sender.split('@')[0]);
+        const senderJidAntiDoc = senderJidOriginal || formatToJid(sender.split('@')[0]);
         await nazu.groupParticipantsUpdate(from, [senderJidAntiDoc], 'remove').catch(e => console.error('Erro ao remover (antidoc):', e));
         await reply(`📄 @${getUserName(sender)}, documentos não são permitidos. Você foi removido do grupo.`, {
           mentions: [sender]
@@ -4829,7 +4833,7 @@ packname: `${nomebot}`,            type: isVideo ? 'video' : 'image',
             if (isOwnerOrSub) return;
             if (!AllgroupMembers.includes(sender)) return;
             if (isBotAdmin) {
-              const senderJidAntiLink = formatToJid(sender.split('@')[0]);
+              const senderJidAntiLink = senderJidOriginal || formatToJid(sender.split('@')[0]);
               await nazu.groupParticipantsUpdate(from, [senderJidAntiLink], 'remove').catch(e => console.error('Erro ao remover (antilink):', e));
               await nazu.sendMessage(from, {
                 delete: {
@@ -4879,7 +4883,7 @@ packname: `${nomebot}`,            type: isVideo ? 'video' : 'image',
             if (isOwnerOrSub) return;
             if (!AllgroupMembers.includes(sender)) return;
             if (isBotAdmin) {
-              const senderJidAntiCanal = formatToJid(sender.split('@')[0]);
+              const senderJidAntiCanal = senderJidOriginal || formatToJid(sender.split('@')[0]);
               await nazu.groupParticipantsUpdate(from, [senderJidAntiCanal], 'remove').catch(e => console.error('Erro ao remover (antilinkcanal):', e));
               await nazu.sendMessage(from, {
                 delete: {
@@ -4937,7 +4941,7 @@ packname: `${nomebot}`,            type: isVideo ? 'video' : 'image',
       if (hasLink && !isUserWhitelisted(sender, 'antilinkhard')) {
         try {
           if (isBotAdmin) {
-            const senderJidAntiLinkHard = formatToJid(sender.split('@')[0]);
+            const senderJidAntiLinkHard = senderJidOriginal || formatToJid(sender.split('@')[0]);
             await nazu.groupParticipantsUpdate(from, [senderJidAntiLinkHard], 'remove').catch(e => console.error('Erro ao remover (antilinkhard):', e));
             await nazu.sendMessage(from, {
               delete: {
@@ -5008,7 +5012,7 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
       }
 
       if (groupData.antistickerplus_remover && isBotAdmin) {
-        const senderJidAntiSticker = formatToJid(sender.split('@')[0]);
+        const senderJidAntiSticker = senderJidOriginal || formatToJid(sender.split('@')[0]);
         await nazu.groupParticipantsUpdate(from, [senderJidAntiSticker], 'remove').catch(e => console.error('Erro ao remover (antistickerplus):', e));
       }
 
@@ -5287,7 +5291,7 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
                   console.error('[ANTIPALAVRA] Erro ao deletar mensagem:', err.message)
                 );
 
-                const senderJidAntiPalavra = formatToJid(sender.split('@')[0]);
+                const senderJidAntiPalavra = senderJidOriginal || formatToJid(sender.split('@')[0]);
                 await nazu.groupParticipantsUpdate(from, [senderJidAntiPalavra], 'remove').catch(err =>
                   console.error('[ANTIPALAVRA] Erro ao remover usuário:', err.message)
                 );
@@ -5820,7 +5824,7 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
         groupData.messageLimit.users[sender] = userData;
         if (userData.count > groupData.messageLimit.limit) {
           if (groupData.messageLimit.action === 'ban' && isBotAdmin) {
-            const senderJidMsgLimit1 = formatToJid(sender.split('@')[0]);
+            const senderJidMsgLimit1 = senderJidOriginal || formatToJid(sender.split('@')[0]);
             await nazu.groupParticipantsUpdate(from, [senderJidMsgLimit1], 'remove').catch(e => console.error('Erro ao remover (msglimit1):', e));
             await reply(`🚨 @${getUserName(sender)} foi banido por exceder o limite de ${groupData.messageLimit.limit} mensagens em ${groupData.messageLimit.interval}s!`, {
               mentions: [sender]
@@ -5830,7 +5834,7 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
             groupData.messageLimit.warnings[sender] = (groupData.messageLimit.warnings[sender] || 0) + 1;
             const warnings = groupData.messageLimit.warnings[sender];
             if (warnings >= 3 && isBotAdmin) {
-              const senderJidMsgLimit2 = formatToJid(sender.split('@')[0]);
+              const senderJidMsgLimit2 = senderJidOriginal || formatToJid(sender.split('@')[0]);
               await nazu.groupParticipantsUpdate(from, [senderJidMsgLimit2], 'remove').catch(e => console.error('Erro ao remover (msglimit2):', e));
               await reply(`🚨 @${getUserName(sender)} foi banido por exceder o limite de mensagens (${groupData.messageLimit.limit} em ${groupData.messageLimit.interval}s) 3 vezes!`, {
                 mentions: [sender]
@@ -5901,7 +5905,7 @@ if (isGroup && groupData.antistickerplus && !isGroupAdmin && !isOwner && !isParc
           let warnMessage = `🚫 @${getUserName(sender)}, figurinhas não são permitidas neste grupo! Advertência ${warnCount}/${warnLimit}.`;
           if (warnCount >= warnLimit && isBotAdmin) {
             warnMessage += `\n⚠️ Você atingiu o limite de advertências e será removido.`;
-            const senderJidAntiFig = formatToJid(sender.split('@')[0]);
+            const senderJidAntiFig = senderJidOriginal || formatToJid(sender.split('@')[0]);
             await nazu.groupParticipantsUpdate(from, [senderJidAntiFig], 'remove').catch(e => console.error('Erro ao remover (antifig):', e));
             delete groupData.warnings[sender];
           }
@@ -24544,7 +24548,7 @@ case 'addcmd-subdono':
       case 'seradm':
         try {
           if (!isOwnerOrSub) return reply("Este comando é apenas para o meu dono");
-          const senderJidPromote = formatToJid(sender.split('@')[0]);
+          const senderJidPromote = senderJidOriginal || formatToJid(sender.split('@')[0]);
           await nazu.groupParticipantsUpdate(from, [senderJidPromote], "promote").catch(e => console.error('Erro ao promover:', e));
         } catch (e) {
           console.error(e);
@@ -24554,7 +24558,7 @@ case 'addcmd-subdono':
       case 'sermembro':
         try {
           if (!isOwnerOrSub) return reply("Este comando é apenas para o meu dono");
-          const senderJidDemote = formatToJid(sender.split('@')[0]);
+          const senderJidDemote = senderJidOriginal || formatToJid(sender.split('@')[0]);
           await nazu.groupParticipantsUpdate(from, [senderJidDemote], "demote").catch(e => console.error('Erro ao rebaixar:', e));
         } catch (e) {
           console.error(e);
@@ -34863,12 +34867,11 @@ case 'set-bannerbv':
           const warningCount = groupData.warnings[menc_os2].length;
           fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
           
-          // Converter menc_os2 para JID se necessário (pode ser LID)
-          const targetNumber = menc_os2.split('@')[0];
-          const targetJid = formatToJid(targetNumber);
+          // Obter o JID original do usuário marcado (não usar LID convertido)
+          const targetJid = menc_jid2 && menc_jid2[0] ? menc_jid2[0] : formatToJid(menc_os2.split('@')[0]);
           
           if (warningCount >= 3) {
-            await nazu.groupParticipantsUpdate(from, [targetJid], 'remove').catch(e => console.error('Erro ao banir usuário:', e));
+            await nazu.groupParticipantsUpdate(from, [targetJid], 'remove').catch(e => console.error('Erro ao banir usuário (adv):', e));
             delete groupData.warnings[menc_os2];
             fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
             reply(`🚫 @${getUserName(menc_os2)} recebeu 3 advertências e foi banido!\nÚltima advertência: ${reason}`, {
@@ -38409,7 +38412,7 @@ break;
         if (!isBotAdmin) return reply("❌ Preciso ser admin para fazer isso.");
         reply(`*É uma pena que tenha tomado essa decisão ${pushname}, vamos sentir saudades... 😕*`).then(() => {
           setTimeout(() => {
-            const senderJidSuicidio = formatToJid(sender.split('@')[0]);
+            const senderJidSuicidio = senderJidOriginal || formatToJid(sender.split('@')[0]);
             nazu.groupParticipantsUpdate(from, [senderJidSuicidio], "remove").then(() => {
               setTimeout(() => {
                 reply(`*Ainda bem que morreu, não aguentava mais essa praga kkkkkk*`);
