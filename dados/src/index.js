@@ -38922,7 +38922,7 @@ break;
           const resolveMediaPath = (url) => {
             if (typeof url === 'string' && url.startsWith('./')) {
               // './midias/...' -> '/data/.../dados/src/midias/...'
-              return path.join(__dirname, '../' + url.substring(2));
+              return path.join(__dirname, url.substring(1));
             }
             return url;
           };
