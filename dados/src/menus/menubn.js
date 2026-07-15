@@ -1,40 +1,4 @@
 export default async function menubn(prefix, botName = "MeuBot", userName = "Usuário", isLiteMode = false) {
-    // Comandos condicionais
-    const comandosNsfw = !isLiteMode ? `
-│ 🇧🇷 ${prefix}bolsonarista
-│ 🟢 ${prefix}petista
-│ 🔴 ${prefix}comunista
-│ 🟠 ${prefix}lulista
-│ 💔 ${prefix}traidor
-│ 💔 ${prefix}traidora
-│ 🤠 ${prefix}bandido
-│ 🤠 ${prefix}bandida
-│ 🐕 ${prefix}cachorro
-│ 🐕 ${prefix}cachorra
-│ 😩 ${prefix}vagabundo
-│ 😩 ${prefix}vagabunda
-│ 🕵 ${prefix}pilantra
-│ 🍆 ${prefix}bucetuda
-│ 👅 ${prefix}talarica
-│ 💀 ${prefix}suicidio
-│ 🐂 ${prefix}corno
-│ 🐄 ${prefix}corna
-│ 🏳️ ${prefix}gay
-│ ⚫ ${prefix}nazista
-│ 🦹 ${prefix}ladrao
-│ 🦹 ${prefix}ladra
-│ 🚫 ${prefix}homofobico
-│ 🚫 ${prefix}homofobica
-│ ⚫ ${prefix}racista
-│ 🍆 ${prefix}pirocudo
-│ 🧠 ${prefix}psicopata` : `
-│ 👅 ${prefix}talarico`;
-
-    const comandosLiteOcultos = !isLiteMode ? '' : `
-│ 🏳️ ${prefix}gay
-│ 🐂 ${prefix}corno
-│ 🍆 ${prefix}pirocudo`;
-
     return `╭━━━〔 🎮 ${botName} • 𝐁𝐑𝐈𝐍𝐂𝐀𝐃𝐄𝐈𝐑𝐀𝐒 〕━━━╮
 ┃ 👋 Olá, @${userName}
 ┃ 🎮 Modo Brincadeira Ativo
@@ -56,7 +20,6 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 🎭 ${prefix}forca
 │ ⌨️ ${prefix}digitar
 │ 🚢 ${prefix}batalhanaval
-│ 🛑 ${prefix}stop
 │ 🔀 ${prefix}anagrama
 │ ⚔️ ${prefix}dueloquiz
 │ 🔤 ${prefix}cacapalavras
@@ -70,6 +33,8 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 💘 ${prefix}shipo
 │ 👀 ${prefix}sn
 │ ✋ ${prefix}ppt
+│ 🛑 ${prefix}stop
+${isLiteMode ? '' : '│ 💀 ${prefix}suicidio'}
 ╰──────────────
 
 
@@ -110,7 +75,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 ╰──────────────
 
 
-╭─❖ 🔞 INTERAÇÕES "PICANTES"
+${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 🔥 ${prefix}surubao
 │ 🍑 ${prefix}siririca
 │ 🔥 ${prefix}sexo
@@ -125,14 +90,17 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 ╰──────────────
 
 
-╭─❖ 😆 BRINCADEIRAS MASCULINAS
-│ 📏 ${prefix}medirpau${comandosLiteOcultos}
+`}╭─❖ 😆 BRINCADEIRAS MASCULINAS
+│ 📏 ${prefix}medirpau
+${isLiteMode ? '' : '│ 🏳️ ${prefix}gay\n'}
 │ 🧠 ${prefix}burro
 │ 🧠 ${prefix}burra
 │ 🧠 ${prefix}inteligente
 │ 🥷 ${prefix}otaku
+│ 🥷 ${prefix}otaria
 │ 💍 ${prefix}fiel
 │ 💔 ${prefix}infiel
+${isLiteMode ? '' : '│ 🐂 ${prefix}corno\n│ 🐄 ${prefix}corna\n'}
 │ 🐂 ${prefix}gado
 │ 🐄 ${prefix}gada
 │ 😎 ${prefix}gostoso
@@ -142,13 +110,14 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 💰 ${prefix}rico
 │ 💰 ${prefix}rica
 │ 💸 ${prefix}pobre
+${isLiteMode ? '' : '│ 🍆 ${prefix}pirocudo\n│ 🍆 ${prefix}bucetuda\n│ ⚫ ${prefix}nazista\n│ 🦹 ${prefix}ladrao\n│ 🦹 ${prefix}ladra\n│ 🚫 ${prefix}homofobico\n│ 🚫 ${prefix}homofobica\n│ ⚫ ${prefix}racista\n'}
 │ 😈 ${prefix}safado
 │ 😈 ${prefix}safada
 │ 👁️ ${prefix}vesgo
 │ 👁️ ${prefix}vesga
 │ 🍺 ${prefix}bebado
 │ 🍺 ${prefix}bebada
-│ 😤 ${prefix}machista
+${isLiteMode ? '' : '│ 😤 ${prefix}machista\n'}
 │ 😴 ${prefix}chato
 │ 😴 ${prefix}chata
 │ 🍀 ${prefix}sortudo
@@ -156,6 +125,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 😱 ${prefix}azarado
 │ 😱 ${prefix}azarada
 │ 💪 ${prefix}forte
+│ 💪 ${prefix}fortona
 │ 💪 ${prefix}fortao
 │ 😩 ${prefix}fraco
 │ 😩 ${prefix}fraca
@@ -165,6 +135,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 🤡 ${prefix}otaria
 │ 😤 ${prefix}macho
 │ 👑 ${prefix}maduro
+│ 👩 ${prefix}madura
 │ 😵 ${prefix}bobo
 │ 😵 ${prefix}boba
 │ 🤓 ${prefix}nerd
@@ -189,13 +160,14 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 🥰 ${prefix}carinhosa
 │ 😤 ${prefix}ciumento
 │ 😤 ${prefix}ciumenta
-│ 😢 ${prefix}chorona
 │ 😢 ${prefix}chorao
-│ 😜 ${prefix}brincalhona
+│ 😢 ${prefix}chorona
 │ 😜 ${prefix}brincalhao
+│ 😜 ${prefix}brincalhona
 │ 🌟 ${prefix}mito
 │ 👑 ${prefix}padrao
 │ 😂 ${prefix}comedia
+${isLiteMode ? '' : '│ 🧠 ${prefix}psicopata\n'}
 │ 🔥 ${prefix}ateia
 │ 🗺️ ${prefix}aventureira
 │ 🤪 ${prefix}bagunceira
@@ -213,12 +185,19 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 🤒 ${prefix}doente
 │ 💰 ${prefix}economica
 │ 😂 ${prefix}engracado
+│ ✨ ${prefix}charmoso
+│ ✨ ${prefix}charmosa
+│ ✨ ${prefix}rankcharmosa
 │ 😂 ${prefix}engracada
 │ 📚 ${prefix}estudiosa
 │ 🗣️ ${prefix}extrovertida
 │ 🗣️ ${prefix}fofoqueira
+│ 💪 ${prefix}fortona
 │ 💸 ${prefix}gastadora
 │ 🌍 ${prefix}global
+│ 😊 ${prefix}humilde
+│ 💪 ${prefix}independente
+│ 👶 ${prefix}infantil
 │ 😟 ${prefix}inseguro
 │ 😟 ${prefix}insegura
 │ 🤫 ${prefix}introvertido
@@ -278,7 +257,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 🔭 ${prefix}visionaria
 │ 🤪 ${prefix}zueira
 │ 🤪 ${prefix}zueiro
-│ 💎 ${prefix}bilionario
+│ 💎 ${prefix}billionario
 │ 💎 ${prefix}bilionaria
 │ 🎮 ${prefix}gamer
 │ 💪 ${prefix}poderoso
@@ -286,7 +265,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 👨 ${prefix}senhor
 │ 👸 ${prefix}senhora
 │ 💼 ${prefix}responsavel
-│ 👅 ${prefix}talarico${comandosNsfw}
+${isLiteMode ? '' : '│ 👅 ${prefix}talarico\n│ 👅 ${prefix}talarica\n│ 🇧🇷 ${prefix}bolsonarista\n│ 🟢 ${prefix}petista\n│ 🔴 ${prefix}comunista\n│ 🟠 ${prefix}lulista\n│ 💔 ${prefix}traidor\n│ 💔 ${prefix}traidora\n│ 🤠 ${prefix}bandido\n│ 🤠 ${prefix}bandida\n│ 🐕 ${prefix}cachorro\n│ 🐕 ${prefix}cachorra\n│ 😩 ${prefix}vagabundo\n│ 😩 ${prefix}vagabunda\n│ 🕵 ${prefix}pilantra\n'}
 ╰──────────────
 
 
@@ -309,39 +288,53 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 ╭─❖ 🏆 RANKINGS MASCULINOS
 │ 🏳️ ${prefix}rankgay
 │ 🧠 ${prefix}rankburro
-│ 🧠 ${prefix}rankinteligente
-│ 🥷 ${prefix}rankotaku
-│ 💍 ${prefix}rankfiel
-│ 💔 ${prefix}rankinfiel
-│ 🐂 ${prefix}rankcorno
-│ 🐂 ${prefix}rankgado
-│ 😎 ${prefix}rankgostoso
-│ 💰 ${prefix}rankrico
-│ 💸 ${prefix}rankpobre
-│ 💪 ${prefix}rankforte
-│ 😏 ${prefix}rankpegador
-│ 😤 ${prefix}rankmacho
-│ 🤓 ${prefix}ranknerd
-│ ⚡ ${prefix}ranktrabalhador
-│ 🦁 ${prefix}rankbrabo
-│ 😍 ${prefix}ranklindo
-│ 🦊 ${prefix}rankmalandro
-│ 😂 ${prefix}rankengracado
-│ ✨ ${prefix}rankcharmoso
-│ 🔭 ${prefix}rankvisionario
-│ 💪 ${prefix}rankpoderoso
-│ 🏆 ${prefix}rankvencedor
-╰──────────────
-
-
-╭─❖ 🏆 RANKINGS FEMININOS
-│ 🏳️ ${prefix}ranklesbica
 │ 🧠 ${prefix}rankburra
 │ 🧠 ${prefix}rankinteligente
 │ 🥷 ${prefix}rankotaku
 │ 💍 ${prefix}rankfiel
 │ 💔 ${prefix}rankinfiel
+│ 🐂 ${prefix}rankcorno
 │ 🐄 ${prefix}rankcorna
+│ 🐂 ${prefix}rankgado
+│ 🐄 ${prefix}rankgada
+│ 😎 ${prefix}rankgostoso
+│ 😍 ${prefix}rankgostosa
+│ 💰 ${prefix}rankrico
+│ 💰 ${prefix}rankrica
+│ 💸 ${prefix}rankpobre
+│ 💪 ${prefix}rankforte
+│ 😏 ${prefix}rankpegador
+│ 😏 ${prefix}rankpegadora
+│ 😤 ${prefix}rankmacho
+│ 🤓 ${prefix}ranknerd
+│ ⚡ ${prefix}ranktrabalhador
+│ ⚡ ${prefix}ranktrabalhadora
+│ 🦁 ${prefix}rankbrabo
+│ 🦁 ${prefix}rankbraba
+│ 😍 ${prefix}ranklindo
+│ 😍 ${prefix}ranklinda
+│ 🦊 ${prefix}rankmalandro
+│ 🦊 ${prefix}rankmalandra
+│ 😂 ${prefix}rankengracado
+│ ✨ ${prefix}rankcharmoso
+│ 😂 ${prefix}rankengracada
+│ ✨ ${prefix}rankcharmoso
+│ ✨ ${prefix}rankcharmosa
+│ 🔭 ${prefix}rankvisionario
+│ 🔭 ${prefix}rankvisionaria
+│ 💪 ${prefix}rankpoderoso
+│ 💪 ${prefix}rankpoderosa
+│ 🏆 ${prefix}rankvencedor
+│ 🏆 ${prefix}rankvencedora
+╰──────────────
+
+
+╭─❖ 🏆 RANKINGS FEMININOS
+│ 🏳️ ${prefix}ranklesbica
+│ 🧠 ${prefix}rankinteligente
+│ 🥷 ${prefix}rankotaku
+│ 💍 ${prefix}rankfiel
+│ 💔 ${prefix}rankinfiel
 │ 🐄 ${prefix}rankgada
 │ 😍 ${prefix}rankgostosa
 │ 💰 ${prefix}rankrica
