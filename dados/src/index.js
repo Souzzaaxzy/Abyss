@@ -38919,6 +38919,15 @@ break;
           if (command === 'punheta' && Array.isArray(GamezinData[command])) {
             const randomMsg = GamezinData[command][Math.floor(Math.random() * GamezinData[command].length)];
             responseText = randomMsg.replaceAll('@{nome}', `@${getUserName(targetUser)}`);
+          } else if (command === 'siririca') {
+            // Frases pré-definidas para siririca
+            const frasesSiririca = [
+              `🎉 @${getUserName(targetUser)} acaba de conquistar o prêmio de "menos discreto(a) do grupo".`,
+              `👀 Todo mundo olhando enquanto @${getUserName(targetUser)} tenta disfarçar.`,
+              `🫠 @${getUserName(targetUser)} foi aliviar o estresse.`,
+              `✋ @${getUserName(targetUser)} resolveu tirar um tempo para si... 😂`
+            ];
+            responseText = frasesSiririca[Math.floor(Math.random() * frasesSiririca.length)];
           } else {
             responseText = GamezinData[command]?.replaceAll('#nome#', `@${getUserName(targetUser)}`) || `Voce acabou de dar um(a) ${command} no(a) @${getUserName(targetUser)}`;
           }
