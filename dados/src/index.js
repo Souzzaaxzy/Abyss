@@ -33162,8 +33162,8 @@ A mensagem será enviada todos os dias às ${normalizedTime} (horário de São P
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Converter sorteado para JID se necessário
-    const roletaTargetJid = formatToJid(sorteado.split('@')[0]);
+    // Obter JID - usar diretamente já que pode ser LID válido
+    const roletaTargetJid = sorteado;
     await nazu.groupParticipantsUpdate(
       from,
       [roletaTargetJid],
