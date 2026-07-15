@@ -1,41 +1,31 @@
-async function menuSticker(prefix, botName = "MeuBot", userName = "Usuário", {
-    header = `╔══════════════════════════════════════════════╗\n║              🤖 ${botName}              ║\n║              Olá, ${userName}!              ║\n╚══════════════════════════════════════════════╝`,
-    menuTopBorder = "╭──────────────────────────────────────────────╮",
-    bottomBorder = "╰──────────────────────────────────────────────╯",
-    menuTitleIcon = "◈",
-    menuItemIcon = "▸",
-    separatorIcon = "❁",
-    middleBorder = "│",
-    createStickerMenuTitle = "🎨 CRIAÇÃO DE FIGURINHAS",
-    managementMenuTitle = "⚙️ GERENCIAMENTO DE FIGURINHAS"
-} = {}) {
-    return `${header}
+export default async function menuFig(prefix, botName = "MeuBot", userName = "Usuário") {
+    return `╭━━━〔 🖼️ ${botName} • 𝐅𝐈𝐆𝐔𝐑𝐈𝐍𝐇𝐀𝐒 〕━━━╮
+┃ 👋 Olá, @${userName}
+┃ 🎨 Crie, edite e personalize stickers
+┃ ✨ Todas as ferramentas em um só menu
+╰━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
-${menuTopBorder}
-│ ${createStickerMenuTitle}
-${middleBorder}
-${middleBorder} ${menuItemIcon}${prefix}emojimix
-${middleBorder} ${menuItemIcon}${prefix}ttp
-${middleBorder} ${menuItemIcon}${prefix}attp
-${middleBorder} ${menuItemIcon}${prefix}sticker
-${middleBorder} ${menuItemIcon}${prefix}sticker2
-${middleBorder} ${menuItemIcon}${prefix}sbg
-${middleBorder} ${menuItemIcon}${prefix}sfundo
-${middleBorder} ${menuItemIcon}${prefix}qc
-${bottomBorder}
 
-${menuTopBorder}
-│ ${managementMenuTitle}
-${middleBorder}
-${middleBorder} ${menuItemIcon}${prefix}figualeatoria
-${middleBorder} ${menuItemIcon}${prefix}figurinhas
-${middleBorder} ${menuItemIcon}${prefix}rename
-${middleBorder} ${menuItemIcon}${prefix}rgtake
-${middleBorder} ${menuItemIcon}${prefix}take
-${middleBorder} ${menuItemIcon}${prefix}toimg
-${middleBorder} ${menuItemIcon}${prefix}brat
-${middleBorder} ${menuItemIcon}${prefix}bratvid
-${bottomBorder}
-`;
+╭─❖ 🎨 CRIAÇÃO DE FIGURINHAS
+│ 😀 ${prefix}emojimix
+│ 📝 ${prefix}ttp
+│ ✨ ${prefix}attp
+│ 🖼️ ${prefix}sticker
+│ 📸 ${prefix}sticker2
+│ 🌄 ${prefix}sbg
+│ 🪄 ${prefix}sfundo
+│ 💬 ${prefix}qc
+╰──────────────
+
+
+╭─❖ ⚙️ GERENCIAMENTO DE FIGURINHAS
+│ 🎲 ${prefix}figualeatoria
+│ 📚 ${prefix}figurinhas
+│ ✏️ ${prefix}rename
+│ 🏷️ ${prefix}rgtake
+│ 📌 ${prefix}take
+│ 🖼️ ${prefix}toimg
+│ 😎 ${prefix}brat
+│ 🎥 ${prefix}bratvid
+╰──────────────`;
 }
-export default menuSticker;
