@@ -185,6 +185,10 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 😨 ${prefix}covarde
 │ 🧠 ${prefix}esperto
 │ 🧠 ${prefix}esperta
+│ 🥰 ${prefix}carinhoso
+│ 🥰 ${prefix}carinhosa
+│ 😤 ${prefix}ciumento
+│ 😤 ${prefix}ciumenta
 │ 😢 ${prefix}chorona
 │ 😢 ${prefix}chorao
 │ 😜 ${prefix}brincalhona
@@ -323,6 +327,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 😍 ${prefix}ranklindo
 │ 🦊 ${prefix}rankmalandro
 │ 😂 ${prefix}rankengracado
+│ ✨ ${prefix}rankcharmoso
 │ 🔭 ${prefix}rankvisionario
 │ 💪 ${prefix}rankpoderoso
 │ 🏆 ${prefix}rankvencedor
