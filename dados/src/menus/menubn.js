@@ -1,4 +1,40 @@
 export default async function menubn(prefix, botName = "MeuBot", userName = "Usuário", isLiteMode = false) {
+    // Comandos condicionais
+    const comandosNsfw = !isLiteMode ? `
+│ 🇧🇷 ${prefix}bolsonarista
+│ 🟢 ${prefix}petista
+│ 🔴 ${prefix}comunista
+│ 🟠 ${prefix}lulista
+│ 💔 ${prefix}traidor
+│ 💔 ${prefix}traidora
+│ 🤠 ${prefix}bandido
+│ 🤠 ${prefix}bandida
+│ 🐕 ${prefix}cachorro
+│ 🐕 ${prefix}cachorra
+│ 😩 ${prefix}vagabundo
+│ 😩 ${prefix}vagabunda
+│ 🕵 ${prefix}pilantra
+│ 🍆 ${prefix}bucetuda
+│ 👅 ${prefix}talarica
+│ 💀 ${prefix}suicidio
+│ 🐂 ${prefix}corno
+│ 🐄 ${prefix}corna
+│ 🏳️ ${prefix}gay
+│ ⚫ ${prefix}nazista
+│ 🦹 ${prefix}ladrao
+│ 🦹 ${prefix}ladra
+│ 🚫 ${prefix}homofobico
+│ 🚫 ${prefix}homofobica
+│ ⚫ ${prefix}racista
+│ 🍆 ${prefix}pirocudo
+│ 🧠 ${prefix}psicopata` : `
+│ 👅 ${prefix}talarico`;
+
+    const comandosLiteOcultos = !isLiteMode ? '' : `
+│ 🏳️ ${prefix}gay
+│ 🐂 ${prefix}corno
+│ 🍆 ${prefix}pirocudo`;
+
     return `╭━━━〔 🎮 ${botName} • 𝐁𝐑𝐈𝐍𝐂𝐀𝐃𝐄𝐈𝐑𝐀𝐒 〕━━━╮
 ┃ 👋 Olá, @${userName}
 ┃ 🎮 Modo Brincadeira Ativo
@@ -34,7 +70,6 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 │ 💘 ${prefix}shipo
 │ 👀 ${prefix}sn
 │ ✋ ${prefix}ppt
-│ ${isLiteMode ? '' : `💀 ${prefix}suicidio`}
 ╰──────────────
 
 
@@ -75,7 +110,7 @@ export default async function menubn(prefix, botName = "MeuBot", userName = "Usu
 ╰──────────────
 
 
-${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
+╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 🔥 ${prefix}surubao
 │ 🍑 ${prefix}siririca
 │ 🔥 ${prefix}sexo
@@ -90,14 +125,14 @@ ${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 ╰──────────────
 
 
-`}╭─❖ 😆 BRINCADEIRAS MASCULINAS
-│ 📏 ${prefix}medirpau
-│ ${isLiteMode ? '' : `🏳️ ${prefix}gay\n│ `}🧠 ${prefix}burro
+╭─❖ 😆 BRINCADEIRAS MASCULINAS
+│ 📏 ${prefix}medirpau${comandosLiteOcultos}
+│ 🧠 ${prefix}burro
 │ 🧠 ${prefix}burra
 │ 🧠 ${prefix}inteligente
 │ 🥷 ${prefix}otaku
 │ 💍 ${prefix}fiel
-│ 💔 ${prefix}infiel${isLiteMode ? '' : `\n│ 🐂 ${prefix}corno\n│ 🐄 ${prefix}corna`}
+│ 💔 ${prefix}infiel
 │ 🐂 ${prefix}gado
 │ 🐄 ${prefix}gada
 │ 😎 ${prefix}gostoso
@@ -111,10 +146,9 @@ ${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 😈 ${prefix}safada
 │ 👁️ ${prefix}vesgo
 │ 👁️ ${prefix}vesga
-│ 🍆 ${prefix}pirocudo${isLiteMode ? '' : `\n│ ⚫ ${prefix}nazista`}${isLiteMode ? '' : `\n│ 🦹 ${prefix}ladrao\n│ 🦹 ${prefix}ladra`}
 │ 🍺 ${prefix}bebado
 │ 🍺 ${prefix}bebada
-│ 😤 ${prefix}machista${isLiteMode ? '' : `\n│ 🚫 ${prefix}homofobico\n│ 🚫 ${prefix}homofobica`}${isLiteMode ? '' : `\n│ ⚫ ${prefix}racista`}
+│ 😤 ${prefix}machista
 │ 😴 ${prefix}chato
 │ 😴 ${prefix}chata
 │ 🍀 ${prefix}sortudo
@@ -157,8 +191,7 @@ ${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 😜 ${prefix}brincalhao
 │ 🌟 ${prefix}mito
 │ 👑 ${prefix}padrao
-│ 👑 ${prefix}padrao
-│ 😂 ${prefix}comedia${isLiteMode ? '' : `\n│ 🧠 ${prefix}psicopata`}
+│ 😂 ${prefix}comedia
 │ 🔥 ${prefix}ateia
 │ 🗺️ ${prefix}aventureira
 │ 🤪 ${prefix}bagunceira
@@ -249,8 +282,7 @@ ${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 👨 ${prefix}senhor
 │ 👸 ${prefix}senhora
 │ 💼 ${prefix}responsavel
-│ 🇧🇷 ${prefix}bolsonarista${isLiteMode ? '' : `\n│ 🟢 ${prefix}petista${isLiteMode ? '' : `\n│ 🔴 ${prefix}comunista${isLiteMode ? '' : `\n│ 🟠 ${prefix}lulista${isLiteMode ? '' : `\n│ 💔 ${prefix}traidor${isLiteMode ? '' : `\n│ 💔 ${prefix}traidora${isLiteMode ? '' : `\n│ 🤠 ${prefix}bandido${isLiteMode ? '' : `\n│ 🤠 ${prefix}bandida${isLiteMode ? '' : `\n│ 🐕 ${prefix}cachorro${isLiteMode ? '' : `\n│ 🐕 ${prefix}cachorra${isLiteMode ? '' : `\n│ 😩 ${prefix}vagabundo${isLiteMode ? '' : `\n│ 😩 ${prefix}vagabunda${isLiteMode ? '' : `\n│ 🕵 ${prefix}pilantra${isLiteMode ? '' : `\n│ 🍆 ${prefix}bucetuda`}`}`}`}`}`}`}`}`}`}`}
-│ 👅 ${prefix}talarico${isLiteMode ? '' : `\n│ 👅 ${prefix}talarica`}
+│ 👅 ${prefix}talarico${comandosNsfw}
 ╰──────────────
 
 
@@ -267,7 +299,6 @@ ${isLiteMode ? '' : `╭─❖ 🔞 INTERAÇÕES "PICANTES"
 │ 🤥 ${prefix}trair
 │ 📜 ${prefix}historicotraicao
 │ 🏳️ ${prefix}lesbica
-│ 🏳️ ${prefix}gay
 ╰──────────────
 
 
