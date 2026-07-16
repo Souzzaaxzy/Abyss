@@ -827,8 +827,6 @@ const loadDonoDivulgacao = () => {
   return loadJsonFile(DONO_DIVULGACAO_FILE, {
     groups: [],
     message: '',
-    mediaPath: null,
-    mediaType: null,
     schedule: {
       enabled: false,
       time: null,
