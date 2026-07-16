@@ -11,13 +11,13 @@ const PROJECT_ROOT = path.join(__dirname, '..', '..');
 const RESTORE_DIRS = ['dados/database', 'dados/midias'];
 const RESTORE_FILES = ['dados/src/config.json'];
 
-export async function handleRestaurar(sock, msg, body, prefix, sender, isOwner, reply, downloadContentFromMessage) {
+export async function handleRestaurar(sock, info, body, prefix, sender, isOwner, reply, downloadContentFromMessage) {
   if (!isOwner) {
     return reply('⚠️ Apenas o Dono pode usar este comando!');
   }
 
   // Verifica se há arquivo anexado
-  const messageContent = msg.message;
+  const messageContent = info.message;
   const hasDocument = messageContent?.documentMessage;
   const hasImage = messageContent?.imageMessage;
   const hasVideo = messageContent?.videoMessage;
@@ -56,13 +56,13 @@ export async function handleRestaurar(sock, msg, body, prefix, sender, isOwner, 
     // Download
     let stream;
     if (hasDocument) {
-      stream = await downloadContentFromMessage(msg.message.documentMessage, 'document');
+      stream = await downloadContentFromMessage(info.message.documentMessage, 'document');
     } else if (hasImage) {
-      stream = await downloadContentFromMessage(msg.message.imageMessage, 'image');
+      stream = await downloadContentFromMessage(info.message.imageMessage, 'image');
     } else if (hasVideo) {
-      stream = await downloadContentFromMessage(msg.message.videoMessage, 'video');
+      stream = await downloadContentFromMessage(info.message.videoMessage, 'video');
     } else if (hasAudio) {
-      stream = await downloadContentFromMessage(msg.message.audioMessage, 'audio');
+      stream = await downloadContentFromMessage(info.message.audioMessage, 'audio');
     }
 
     const buffer = Buffer.concat(await stream.toArray());
