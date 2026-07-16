@@ -1,3 +1,6 @@
+// Import jimp first to ensure image processing library is available for baileys
+import 'jimp';
+
 import {
   downloadContentFromMessage,
   generateWAMessageFromContent,
