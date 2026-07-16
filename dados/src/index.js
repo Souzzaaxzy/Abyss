@@ -18198,7 +18198,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
 
         try {
           const { handleRestaurar } = await import('./commands/restaurar.js');
-          await handleRestaurar(sock, msg, body, prefix, senderNumber, isOwnerOrSub, reply, downloadContentFromMessage);
+          await handleRestaurar(nazu, msg, body, prefix, senderNumber, isOwnerOrSub, reply, downloadContentFromMessage);
         } catch (error) {
           console.error('Erro no comando restaurar:', error);
           await reply("❌ Ocorreu um erro ao restaurar o backup.");
