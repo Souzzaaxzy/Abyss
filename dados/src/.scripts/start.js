@@ -142,7 +142,7 @@ async function displayHeader() {
 }
 
 async function checkPrerequisites() {
-  // PASSO 1: Verificar e instalar dependências (sempre tenta instalar/atualizar)
+  // PASSO 1: Verificar e instalar dependências
   info('📦 Verificando dependências...');
   
   if (!fsSync.existsSync(PACKAGE_JSON)) {
@@ -150,37 +150,39 @@ async function checkPrerequisites() {
     process.exit(1);
   }
   
-  // Sempre tenta instalar/atualizar dependências
-  try {
-    info('⏳ Instalando/atualizando dependências (isso pode levar alguns minutos)...');
-    console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-    
-    execSync('npm install --legacy-peer-deps', { 
-      stdio: 'inherit', 
-      shell: isWindows || true,
-      cwd: PROJECT_ROOT,
-      env: { ...process.env }
-    });
-    
-    console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-    mensagem('✅ Dependências instaladas/atualizadas com sucesso!');
-  } catch (error) {
-    aviso(`❌ Erro ao instalar dependências: ${error.message}`);
-    
-    // Tentar com npm install simples
+  // Instalar/atualizar dependências
+  const installCommands = [
+    'npm install --legacy-peer-deps',
+    'npm install --force',
+    'npm install'
+  ];
+  
+  let installed = false;
+  
+  for (const cmd of installCommands) {
     try {
-      info('⏳ Tentando instalação alternativa...');
-      execSync('npm install', { 
+      info(`⏳ Executando: ${cmd}`);
+      console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
+      
+      execSync(cmd, { 
         stdio: 'inherit', 
-        shell: isWindows || true,
+        shell: true,
         cwd: PROJECT_ROOT,
         env: { ...process.env }
       });
-      mensagem('✅ Dependências instaladas (modo alternativo)!');
-    } catch (fallbackError) {
-      aviso(`❌ Falha na instalação: ${fallbackError.message}`);
-      process.exit(1);
+      
+      console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
+      mensagem(`✅ Dependências instaladas com sucesso!`);
+      installed = true;
+      break;
+    } catch (error) {
+      aviso(`⚠️ Falhou: ${cmd}`);
     }
+  }
+  
+  if (!installed) {
+    aviso('❌ Não foi possível instalar as dependências.');
+    process.exit(1);
   }
   
   // PASSO 2: Verificar config.json
