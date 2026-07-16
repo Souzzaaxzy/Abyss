@@ -38995,8 +38995,8 @@ break;
       case 'punheta':
       case 'tomate':
         try {
-          const comandosImpr├│prios = ['sexo', 'surubao', 'siririca', 'goza', 'gozar', 'mamar', 'mamada', 'beijob', 'beijarb', 'tapar'];
-          if (isModoLite && comandosImpr├│prios.includes(command)) return nazu.react('тЭМ', {
+          const comandosImproprios = ['sexo', 'surubao', 'siririca', 'goza', 'gozar', 'mamar', 'mamada', 'beijob', 'beijarb', 'tapar'];
+          if (isModoLite && comandosImproprios.includes(command)) return nazu.react('тЭМ', {
             key: info.key
           });
           if (!isGroup) return sendAbyssWarning("тЧИ Este comando ├й s├│ para grupos.");
