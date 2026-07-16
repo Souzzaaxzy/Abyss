@@ -530,27 +530,54 @@ async function installDependencies(precomputedResult) {
     return;
   }
   printMessage('📦 Instalando dependências...');
+  printDetail(`📂 Diretório de trabalho: ${process.cwd()}`);
+  
   try {
     await new Promise((resolve, reject) => {
-      const npmProcess = exec('npm run config:install', { shell: isWindows }, (error) =>
-        error ? reject(error) : resolve()
-      );
+      let stdout = '';
+      let stderr = '';
+      const npmProcess = exec('npm run config:install 2>&1', { shell: true });
+      
+      npmProcess.stdout.on('data', (data) => {
+        stdout += data;
+        process.stdout.write(data);
+      });
+      
+      npmProcess.stderr.on('data', (data) => {
+        stderr += data;
+        process.stdout.write(data);
+      });
+      
       const spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
       let i = 0;
       const interval = setInterval(() => {
         process.stdout.write(`\r${spinner[i]} Instalando dependências...`);
         i = (i + 1) % spinner.length;
       }, 100);
+      
       npmProcess.on('close', (code) => {
         clearInterval(interval);
         process.stdout.write('\r                                \r');
+        
+        // Log output for debugging
+        if (stdout) printDetail(`STDOUT: ${stdout.substring(0, 500)}`);
+        if (stderr) printDetail(`STDERR: ${stderr.substring(0, 500)}`);
+        
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error(`NPM install failed with exit code ${code}`));
+          // Check if node_modules was created anyway
+          const nodeModulesPath = path.join(process.cwd(), 'node_modules');
+          if (fsSync.existsSync(nodeModulesPath)) {
+            printMessage('⚠️ npm retornou erro mas node_modules existe, continuando...');
+            resolve();
+          } else {
+            reject(new Error(`npm install failed with exit code ${code}`));
+          }
         }
       });
     });
+    
     const nodeModulesPath = path.join(process.cwd(), 'node_modules');
     if (!fsSync.existsSync(nodeModulesPath)) {
       throw new Error('Diretório node_modules não foi criado após a instalação');
