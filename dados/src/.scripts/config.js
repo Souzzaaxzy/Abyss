@@ -209,21 +209,57 @@ async function installNodeDependencies() {
         print.warning('⚠️ Erro na limpeza automática (continuando...)');
     }
 
+    const nodeModulesPath = path.join(process.cwd(), 'node_modules');
+    
+    // Verificar se já existe node_modules
+    if (fsSync.existsSync(nodeModulesPath)) {
+        print.message('📦 node_modules já existe, verificando dependências...');
+        try {
+            await execAsync('npm ls --depth=0', { shell: true });
+            print.message('✅ Dependências já estão instaladas.');
+            return { name: 'Node Dependencies', status: `${colors.green}✅ Já instalado${colors.reset}` };
+        } catch {
+            print.message('⚠️ node_modules existe mas pode estar incompleto, reinstalando...');
+        }
+    }
+    
     try {
-        await runCommandWithSpinner('npm install --legacy-peer-deps', 'Executando npm install...');
-        print.message('✅ Dependências instaladas com sucesso via NPM.');
-        return { name: 'Node Dependencies (npm)', status: `${colors.green}✅ Instalado com sucesso${colors.reset}` };
+        print.info(`📂 Diretório atual: ${process.cwd()}`);
+        print.info('⏳ Executando npm install (isso pode levar alguns minutos)...');
+        
+        const { stdout, stderr } = await execAsync('npm install --legacy-peer-deps 2>&1', { shell: true, timeout: 300000 });
+        if (stdout) print.detail(stdout);
+        if (stderr) print.detail(stderr);
+        
+        if (fsSync.existsSync(nodeModulesPath)) {
+            print.message('✅ Dependências instaladas com sucesso via NPM.');
+            return { name: 'Node Dependencies (npm)', status: `${colors.green}✅ Instalado com sucesso${colors.reset}` };
+        } else {
+            throw new Error('npm install terminou sem erros mas node_modules não foi criado');
+        }
     } catch (npmError) {
         print.warning(`❌ Falha no NPM: ${npmError.message}`);
         print.info('ℹ️ Tentando fallback para YARN...');
         try {
             await runCommandWithSpinner('yarn install', 'Executando yarn install...');
-            print.message('✅ Dependências instaladas com sucesso via YARN.');
-            return { name: 'Node Dependencies (yarn)', status: `${colors.green}✅ Instalado com sucesso${colors.reset}` };
+            if (fsSync.existsSync(nodeModulesPath)) {
+                print.message('✅ Dependências instaladas com sucesso via YARN.');
+                return { name: 'Node Dependencies (yarn)', status: `${colors.green}✅ Instalado com sucesso${colors.reset}` };
+            }
         } catch (yarnError) {
             print.warning(`❌ Falha no YARN: ${yarnError.message}`);
-            return { name: 'Node Dependencies', status: `${colors.red}❌ Falha na instalação${colors.reset}` };
         }
+        print.warning('⚠️ Tentando npm install sem flags...');
+        try {
+            await execAsync('npm install 2>&1', { shell: true, timeout: 300000 });
+            if (fsSync.existsSync(nodeModulesPath)) {
+                print.message('✅ Dependências instaladas com sucesso (fallback).');
+                return { name: 'Node Dependencies', status: `${colors.green}✅ Instalado${colors.reset}` };
+            }
+        } catch (e) {
+            print.warning(`❌ Falha no fallback: ${e.message}`);
+        }
+        return { name: 'Node Dependencies', status: `${colors.red}❌ Falha na instalação${colors.reset}` };
     }
 }
 
