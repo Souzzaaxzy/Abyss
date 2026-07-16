@@ -7,14 +7,12 @@ import { spawn, execSync } from 'child_process';
 import readline from 'readline/promises';
 import os from 'os';
 
-// Mudar para o diretório raiz do projeto (onde está o package.json)
 const PROJECT_ROOT = process.cwd();
-process.chdir(PROJECT_ROOT);
-
 const CONFIG_PATH = path.join(PROJECT_ROOT, 'dados', 'src', 'config.json');
 const NODE_MODULES_PATH = path.join(PROJECT_ROOT, 'node_modules');
 const QR_CODE_DIR = path.join(PROJECT_ROOT, 'dados', 'database', 'qr-code');
 const CONNECT_FILE = path.join(PROJECT_ROOT, 'dados', 'src', 'connect.js');
+const PACKAGE_JSON = path.join(PROJECT_ROOT, 'package.json');
 const isWindows = os.platform() === 'win32';
 const isTermux = fsSync.existsSync('/data/data/com.termux');
 
@@ -35,7 +33,7 @@ const separador = () => console.log(`${colors.blue}=============================
 
 const getVersion = () => {
   try {
-    const packageJson = JSON.parse(fsSync.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
+    const packageJson = JSON.parse(fsSync.readFileSync(PACKAGE_JSON, 'utf8'));
     return packageJson.version || 'Desconhecida';
   } catch {
     return 'Desconhecida';
@@ -83,7 +81,7 @@ am startservice --user 0 \\
   --es com.termux.RUN_COMMAND_PATH '/data/data/com.termux/files/usr/bin/npm' \\
   --esa com.termux.RUN_COMMAND_ARGUMENTS 'start' \\
   --es com.termux.RUN_COMMAND_SESSION_NAME 'Nazuna Bot' \\
-  --es com.termux.RUN_COMMAND_WORKDIR '${path.join(process.cwd())}' \\
+  --es com.termux.RUN_COMMAND_WORKDIR '${PROJECT_ROOT}' \\
   --ez com.termux.RUN_COMMAND_BACKGROUND 'false' \\
   --es com.termux.RUN_COMMAND_SESSION_ACTION '0'
 `.trim();
@@ -144,59 +142,70 @@ async function displayHeader() {
 }
 
 async function checkPrerequisites() {
-  if (!fsSync.existsSync(CONFIG_PATH)) {
-    aviso('⚠️ Arquivo de configuração (config.json) não encontrado! Iniciando configuração automática...');
+  // PASSO 1: Verificar e instalar dependências (sempre tenta instalar/atualizar)
+  info('📦 Verificando dependências...');
+  
+  if (!fsSync.existsSync(PACKAGE_JSON)) {
+    aviso(`❌ Arquivo package.json não encontrado em: ${PROJECT_ROOT}`);
+    process.exit(1);
+  }
+  
+  // Sempre tenta instalar/atualizar dependências
+  try {
+    info('⏳ Instalando/atualizando dependências (isso pode levar alguns minutos)...');
+    console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
+    
+    execSync('npm install --legacy-peer-deps', { 
+      stdio: 'inherit', 
+      shell: isWindows || true,
+      cwd: PROJECT_ROOT,
+      env: { ...process.env }
+    });
+    
+    console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
+    mensagem('✅ Dependências instaladas/atualizadas com sucesso!');
+  } catch (error) {
+    aviso(`❌ Erro ao instalar dependências: ${error.message}`);
+    
+    // Tentar com npm install simples
     try {
-      await new Promise((resolve, reject) => {
-        const configProcess = spawn('npm', ['run', 'config'], { stdio: 'inherit', shell: isWindows });
-        configProcess.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`Configuração falhou com código ${code}`))));
-        configProcess.on('error', reject);
+      info('⏳ Tentando instalação alternativa...');
+      execSync('npm install', { 
+        stdio: 'inherit', 
+        shell: isWindows || true,
+        cwd: PROJECT_ROOT,
+        env: { ...process.env }
       });
-      mensagem('📝 Configuração concluída com sucesso!');
-    } catch (error) {
-      aviso(`❌ Falha na configuração: ${error.message}`);
-      mensagem('📝 Tente executar manualmente: npm run config');
+      mensagem('✅ Dependências instaladas (modo alternativo)!');
+    } catch (fallbackError) {
+      aviso(`❌ Falha na instalação: ${fallbackError.message}`);
       process.exit(1);
     }
   }
-
-  if (!fsSync.existsSync(NODE_MODULES_PATH)) {
-    aviso('⚠️ Módulos do Node.js não encontrados! Iniciando instalação automática...');
-    info(`📂 Diretório: ${PROJECT_ROOT}`);
-    info('⏳ Instalando dependências (isso pode levar alguns minutos)...');
-    
+  
+  // PASSO 2: Verificar config.json
+  if (!fsSync.existsSync(CONFIG_PATH)) {
+    aviso('⚠️ Arquivo de configuração (config.json) não encontrado!');
     try {
-      // Usar execSync para instalação síncrona com output
-      execSync('npm install --legacy-peer-deps', { 
+      const configProcess = spawn('npm', ['run', 'config'], { 
         stdio: 'inherit', 
         shell: true,
         cwd: PROJECT_ROOT 
       });
-      
-      mensagem('📦 Instalação dos módulos concluída com sucesso!');
+      configProcess.on('close', (code) => {
+        if (code !== 0) {
+          aviso('⚠️ Configuração não foi concluída. Você pode configurar manualmente depois.');
+        }
+      });
+      await new Promise((resolve) => configProcess.on('close', resolve));
     } catch (error) {
-      aviso(`❌ Falha na instalação: ${error.message}`);
-      
-      // Tentar novamente com npm install simples
-      try {
-        info('⏳ Tentando instalação alternativa...');
-        execSync('npm install', { 
-          stdio: 'inherit', 
-          shell: true,
-          cwd: PROJECT_ROOT 
-        });
-        mensagem('📦 Instalação alternativa concluída!');
-      } catch (fallbackError) {
-        aviso(`❌ Falha na instalação alternativa: ${fallbackError.message}`);
-        mensagem('📦 Tente executar manualmente: npm install');
-        process.exit(1);
-      }
+      aviso(`⚠️ Não foi possível executar a configuração: ${error.message}`);
     }
   }
-
+  
+  // PASSO 3: Verificar arquivo de conexão
   if (!fsSync.existsSync(CONNECT_FILE)) {
-    aviso(`⚠️ Arquivo de conexão (${CONNECT_FILE}) não encontrado!`);
-    aviso('🔍 Verifique a instalação do projeto.');
+    aviso(`❌ Arquivo de conexão não encontrado: ${CONNECT_FILE}`);
     process.exit(1);
   }
 }
