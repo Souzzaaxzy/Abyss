@@ -524,6 +524,15 @@ function satisfiesNodeVersion(currentVersion, requiredVersion) {
 }
 
 async function installDependencies(precomputedResult) {
+  const nodeModulesPath = path.join(process.cwd(), 'node_modules');
+  
+  // Se node_modules já existe, pular instalação
+  if (fsSync.existsSync(nodeModulesPath)) {
+    printMessage('📦 node_modules já existe, pulando instalação de dependências.');
+    printMessage('✅ Dependências já estão instaladas.');
+    return;
+  }
+  
   const checkResult = precomputedResult ?? await checkDependencyChanges();
   if (checkResult === 'NO_CHANGES') {
     printMessage('⚡ Dependências já estão atualizadas, pulando instalação');
@@ -567,9 +576,8 @@ async function installDependencies(precomputedResult) {
           resolve();
         } else {
           // Check if node_modules was created anyway
-          const nodeModulesPath = path.join(process.cwd(), 'node_modules');
           if (fsSync.existsSync(nodeModulesPath)) {
-            printMessage('⚠️ npm retornou erro mas node_modules existe, continuando...');
+            printMessage('⚠️ npm retornou código de saída não-zero mas node_modules existe, continuando...');
             resolve();
           } else {
             reject(new Error(`npm install failed with exit code ${code}`));
@@ -578,7 +586,6 @@ async function installDependencies(precomputedResult) {
       });
     });
     
-    const nodeModulesPath = path.join(process.cwd(), 'node_modules');
     if (!fsSync.existsSync(nodeModulesPath)) {
       throw new Error('Diretório node_modules não foi criado após a instalação');
     }
