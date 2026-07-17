@@ -320,7 +320,24 @@ const logger = pino({
 
 const AUTH_DIR = path.join(__dirname, '..', 'database', 'qr-code');
 const DATABASE_DIR = path.join(__dirname, '..', 'database');
+const GRUPOS_DIR = path.join(DATABASE_DIR, 'grupos');
 const GLOBAL_BLACKLIST_PATH = path.join(__dirname, '..', 'database', 'dono', 'globalBlacklist.json');
+
+/**
+ * Carrega dados do grupo do arquivo JSON
+ * @param {string} groupId - ID do grupo
+ * @returns {Promise<object|null>}
+ */
+async function getGroupData(groupId) {
+    const groupFilePath = path.join(GRUPOS_DIR, `${groupId}.json`);
+    try {
+        const data = await fs.readFile(groupFilePath, 'utf-8');
+        return JSON.parse(data);
+    } catch (e) {
+        // Arquivo não existe ou erro de leitura - retorna null
+        return null;
+    }
+}
 
  /*
  CORREÇÃO: Cache em memória para a blacklist global.
@@ -1027,6 +1044,8 @@ async function createBotSocket(authDir) {
         AbyssSock.ev.on('groups.update', async (updates) => {
             if (!Array.isArray(updates) || updates.length === 0) return;
 
+            console.log(`\n🔔 [GROUPS UPDATE] Recebido evento com ${updates.length} atualização(ões)`);
+
             if (DEBUG_MODE) {
                 console.log('\n🐛 ========== GROUPS UPDATE ==========');
                 console.log('📅 Timestamp:', new Date().toISOString());
@@ -1048,8 +1067,12 @@ async function createBotSocket(authDir) {
 
                     // 🔹 Buscar config do grupo
                     const groupData = await getGroupData(groupId).catch(() => null);
-                    if (!groupData?.x9) return; // X9 desligado
+                    if (!groupData?.x9) {
+                        console.log(`[GROUPS UPDATE] X9 desativado para ${groupId} - ignorando evento`);
+                        return;
+                    }
 
+                    console.log(`[GROUPS UPDATE] X9 ativado para ${groupId} - processando evento`);
                     let mensagem = null;
                     let mention = [];
 
