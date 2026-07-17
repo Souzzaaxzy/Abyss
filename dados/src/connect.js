@@ -1071,15 +1071,19 @@ async function createBotSocket(authDir) {
                     }
 
                     // 📜 DESCRIÇÃO ALTERADA
-                    else if (ev.desc) {
-                        const descText = ev.desc.substring(0, 200) + (ev.desc.length > 200 ? '...' : '');
-                        mensagem = `📜 *X9 Report:* Descrição do grupo alterada!${authorText ? ` por ${authorText}` : ''}\n📝 Nova descrição: ${descText}`;
+                    else if (ev.desc !== undefined) {
+                        if (ev.desc === null) {
+                            mensagem = `📜 *X9 Report:* A descrição do grupo foi *removida*!${authorText ? ` por ${authorText}` : ''}`;
+                        } else {
+                            const descText = ev.desc.substring(0, 200) + (ev.desc.length > 200 ? '...' : '');
+                            mensagem = `📜 *X9 Report:* Descrição do grupo alterada!${authorText ? ` por ${authorText}` : ''}\n📝 Nova descrição: ${descText}`;
+                        }
                         console.log('[X9] Descrição alterada');
                     }
 
                     // 🔗 LINK DE CONVITE ALTERADO
                     else if (ev.inviteCode) {
-                        mensagem = `🔗 *X9 Report:* Link de convite do grupo foi alterado!${authorText ? ` por ${authorText}` : ''}`;
+                        mensagem = `🔗 *X9 Report:* Link de convite do grupo foi redefinido!${authorText ? ` por ${authorText}` : ''}`;
                         console.log('[X9] Link alterado');
                     }
 
@@ -1101,6 +1105,23 @@ async function createBotSocket(authDir) {
                             mensagem = `✏️ *X9 Report:* Edição do grupo foi *liberada*!${authorText ? ` por ${authorText}` : ''}\n📌 Todos os membros podem editar informações.`;
                         }
                         console.log('[X9] Restrict alterado:', ev.restrict);
+                    }
+
+                    // ⏱️ MENSAGENS TEMPORÁRIAS/DESAPARECENDO
+                    else if (ev.ephemeralDuration !== undefined) {
+                        if (ev.ephemeralDuration === 0) {
+                            mensagem = `⏱️ *X9 Report:* Mensagens temporárias foram *desativadas*!${authorText ? ` por ${authorText}` : ''}`;
+                        } else {
+                            const duration = ev.ephemeralDuration;
+                            let timeText = '';
+                            if (duration === 86400) timeText = '24 horas';
+                            else if (duration === 604800) timeText = '7 dias';
+                            else if (duration >= 3600) timeText = `${Math.floor(duration / 3600)} horas`;
+                            else if (duration >= 60) timeText = `${Math.floor(duration / 60)} minutos`;
+                            else timeText = `${duration} segundos`;
+                            mensagem = `⏱️ *X9 Report:* Mensagens temporárias foram *ativadas*!${authorText ? ` por ${authorText}` : ''}\n📌 Tempo: ${timeText}`;
+                        }
+                        console.log('[X9] Ephemeral alterado:', ev.ephemeralDuration);
                     }
 
                     // 👥 TAMANHO DO GRUPO MUDOU (membros foram adicionados/removidos)

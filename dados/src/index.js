@@ -193,6 +193,75 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                 console.log(`\x1b[32m[PARTICIPANTS UPDATE]\x1b[0m Mensagem de saída enviada.`);
             }
         }
+        
+        // 5. X9 - Lógica de PROMOÇÃO (novos admins)
+        else if (action === 'promote') {
+            if (groupSettings.x9) {
+                console.log(`\x1b[34m[PARTICIPANTS UPDATE]\x1b[0m Preparando X9 para promoção de admins`);
+                
+                const promotedIds = participants.map(p => typeof p === 'string' ? p : (p.id || p.jid || p.toString()));
+                const mentions = [...promotedIds];
+                
+                // Obter metadata do grupo para verificar quem promoveu
+                let authorText = '';
+                if (groupMetadata?.participants) {
+                    const adminList = groupMetadata.participants.filter(p => p.admin);
+                    if (adminList.length > 0) {
+                        // Último admin da lista é geralmente quem fez a ação
+                        const admin = adminList[adminList.length - 1];
+                        authorText = ` por @${admin.id.split('@')[0]}`;
+                        if (!mentions.includes(admin.id)) {
+                            mentions.push(admin.id);
+                        }
+                    }
+                }
+                
+                const msgText = `⬆️ *X9 Report:* ${promotedIds.map(p => `@${p.split('@')[0]}`).join(', ')} foi(ram) *promovido(s) a administrador*!${authorText}`;
+                
+                await nazu.sendMessage(id, {
+                    text: msgText,
+                    mentions
+                }).catch(err => {
+                    console.error(`\x1b[31m[ERRO X9]\x1b[0m Falha ao enviar promoção: ${err.message}`);
+                });
+                
+                console.log(`\x1b[32m[PARTICIPANTS UPDATE]\x1b[0m X9 de promoção enviado.`);
+            }
+        }
+        
+        // 6. X9 - Lógica de REBAIXAMENTO (remover admin)
+        else if (action === 'demote') {
+            if (groupSettings.x9) {
+                console.log(`\x1b[34m[PARTICIPANTS UPDATE]\x1b[0m Preparando X9 para rebaixamento de admins`);
+                
+                const demotedIds = participants.map(p => typeof p === 'string' ? p : (p.id || p.jid || p.toString()));
+                const mentions = [...demotedIds];
+                
+                // Obter metadata do grupo para verificar quem rebaixou
+                let authorText = '';
+                if (groupMetadata?.participants) {
+                    const adminList = groupMetadata.participants.filter(p => p.admin);
+                    if (adminList.length > 0) {
+                        const admin = adminList[adminList.length - 1];
+                        authorText = ` por @${admin.id.split('@')[0]}`;
+                        if (!mentions.includes(admin.id)) {
+                            mentions.push(admin.id);
+                        }
+                    }
+                }
+                
+                const msgText = `⬇️ *X9 Report:* ${demotedIds.map(p => `@${p.split('@')[0]}`).join(', ')} foi(ram) *rebaixado(s) de administrador*!${authorText}`;
+                
+                await nazu.sendMessage(id, {
+                    text: msgText,
+                    mentions
+                }).catch(err => {
+                    console.error(`\x1b[31m[ERRO X9]\x1b[0m Falha ao enviar rebaixamento: ${err.message}`);
+                });
+                
+                console.log(`\x1b[32m[PARTICIPANTS UPDATE]\x1b[0m X9 de rebaixamento enviado.`);
+            }
+        }
     } catch (e) {
         console.error(`\x1b[31m[ERRO PARTICIPANTS UPDATE]:\x1b[0m`, e);
     }
