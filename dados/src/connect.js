@@ -1681,16 +1681,32 @@ AbyssSock.ev.on('labels.edit', (label) => {
 });
 
 // Capturar QUALQUER evento que tenha @newsletter
+// Logar TODOS os eventos brevemente (para debug)
 const originalEmit = AbyssSock.ev.emit;
 AbyssSock.ev.emit = function(event, ...args) {
-    const eventStr = JSON.stringify(args);
-    if (eventStr.includes('@newsletter')) {
+    // Logar evento e seus args sem filtro (apenas os primeiros 100 chars)
+    const argsPreview = args.map(a => {
+        if (typeof a === 'object') {
+            const str = JSON.stringify(a);
+            return str ? str.substring(0, 150) + (str.length > 150 ? '...' : '') : String(a);
+        }
+        return String(a).substring(0, 150);
+    }).join(', ');
+    
+    if (!event.startsWith('connection') && !event.startsWith('creds')) {
+        console.log('[EVENTO] ' + event + ' -> ' + argsPreview.substring(0, 200));
+    }
+    
+    // Log detalhado apenas para eventos que parecem ser de newsletter
+    const argsStr = JSON.stringify(args) || '';
+    if (argsStr.includes('@newsletter') || event.includes('newsletter')) {
         console.log('\n' + '='.repeat(60));
         console.log('📢 NEWSLETTER EVENT: ' + event);
         console.log('='.repeat(60));
         console.log(util.inspect(args, { depth: null, showHidden: true, colors: true }));
         console.log('='.repeat(60));
     }
+    
     return originalEmit.apply(this, [event, ...args]);
 };
 // ======================================================
