@@ -2996,6 +2996,9 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     const isAntiLinkSoft = groupData.antilinksoft;
     const isAntiDel = groupData.antidel;
     const isAntiBtn = groupData.antibtn;
+    const isAntiFoton = groupData.antifoton;
+    const isAntiFotov = groupData.antifotov;
+    const isAntiAudio = groupData.antiaudio;
     const isAntiStatus = groupData.antistatus;
     const isAntiStts = isGroup && groupData && groupData.antiStts !== false;
     const isAntirequestPaymentMessage = groupData.antirequest;
@@ -3161,6 +3164,64 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
         }
       }
     }
+
+    // AntiFotoN - Apagar fotos normais
+    if (isGroup && isAntiFoton && isImage && !info.message?.viewOnceMessage && !info.message?.viewOnceMessageV2 && !info.message?.viewOnceMessageV2Extension && !isGroupAdmin && !isOwner) {
+      if (isBotAdmin) {
+        try {
+          await nazu.sendMessage(from, {
+            delete: {
+              remoteJid: from,
+              fromMe: false,
+              id: info.key.id,
+              participant: sender
+            }
+          });
+          await nazu.sendMessage(from, { text: "🖼️ Fotos normais não estão permitidas neste grupo.\nEnvie sua imagem como Visualização Única." });
+        } catch (e) {
+          console.error("Erro ao apagar mensagem (antifoton):", e);
+        }
+      }
+    }
+
+    // AntiFotoV - Apagar fotos de Visualização Única
+    if (isGroup && isAntiFotov && (info.message?.viewOnceMessage?.message?.imageMessage || info.message?.viewOnceMessageV2?.message?.imageMessage || info.message?.viewOnceMessageV2Extension?.message?.imageMessage) && !isGroupAdmin && !isOwner) {
+      if (isBotAdmin) {
+        try {
+          await nazu.sendMessage(from, {
+            delete: {
+              remoteJid: from,
+              fromMe: false,
+              id: info.key.id,
+              participant: sender
+            }
+          });
+          await nazu.sendMessage(from, { text: "👁️ Fotos de Visualização Única não estão permitidas neste grupo.\nEnvie a imagem normalmente." });
+        } catch (e) {
+          console.error("Erro ao apagar mensagem (antifotov):", e);
+        }
+      }
+    }
+
+    // AntiAudio - Apagar áudios
+    if (isGroup && isAntiAudio && type === 'audioMessage' && !isGroupAdmin && !isOwner) {
+      if (isBotAdmin) {
+        try {
+          await nazu.sendMessage(from, {
+            delete: {
+              remoteJid: from,
+              fromMe: false,
+              id: info.key.id,
+              participant: sender
+            }
+          });
+          await nazu.sendMessage(from, { text: "🎤 Áudios não estão permitidos neste chat." });
+        } catch (e) {
+          console.error("Erro ao apagar mensagem (antiaudio):", e);
+        }
+      }
+    }
+
     if (isGroup && isCmd && isOnlyAdmin && !isGroupAdmin && !soadmBypassCommands.includes(command)) {
       return;
     }
@@ -33719,6 +33780,9 @@ break;
             { key: 'antidel', name: 'Antidelete', isObject: false },
             { key: 'antirequest', name: 'Antipagamento', isObject: false },
             { key: 'antistickerplus', name: 'Antistickerplus', isObject: true },
+            { key: 'antifoton', name: 'Antifoton', isObject: false },
+            { key: 'antifotov', name: 'Antifotov', isObject: false },
+            { key: 'antiaudio', name: 'Antiaudio', isObject: false },
             { key: 'antigore', name: 'Antigore', isObject: false },
           ];
 
@@ -34165,6 +34229,49 @@ break;
           await reply("Ocorreu um erro 💔");
         }
         break;
+
+      case 'antifoton':
+        try {
+          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
+          if (!isBotAdmin) return reply("Eu preciso ser adm para isso 💔");
+          groupData.antifoton = !groupData.antifoton;
+          fs.writeFileSync(groupFile, JSON.stringify(groupData, null, 2));
+          await reply(groupData.antifoton ? "🟢 Fotos normais agora serão apagadas." : "🔴 Fotos normais não serão mais apagadas.");
+        } catch (e) {
+          console.error(e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
+
+      case 'antifotov':
+        try {
+          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
+          if (!isBotAdmin) return reply("Eu preciso ser adm para isso 💔");
+          groupData.antifotov = !groupData.antifotov;
+          fs.writeFileSync(groupFile, JSON.stringify(groupData, null, 2));
+          await reply(groupData.antifotov ? "🟢 Fotos de Visualização Única agora serão apagadas." : "🔴 Fotos de Visualização Única não serão mais apagadas.");
+        } catch (e) {
+          console.error(e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
+
+      case 'antiaudio':
+        try {
+          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
+          if (!isBotAdmin) return reply("Eu preciso ser adm para isso 💔");
+          groupData.antiaudio = !groupData.antiaudio;
+          fs.writeFileSync(groupFile, JSON.stringify(groupData, null, 2));
+          await reply(groupData.antiaudio ? "🟢 Áudios agora serão apagados." : "🔴 Áudios não serão mais apagados.");
+        } catch (e) {
+          console.error(e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
+
       case 'antistatus':
         try {
           if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");

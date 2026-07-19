@@ -150,6 +150,9 @@ export default async function menuadm(prefix, botName = "MeuBot", userName = "Us
 │ 📍 ${prefix}antiloc
 │ 🖼 ${prefix}antifig
 │ 🔘 ${prefix}antibtn
+│ 🖼 ${prefix}antifoton
+│ 👁 ${prefix}antifotov
+│ 🎤 ${prefix}antiaudio
 │ ✨ ${prefix}antistickerplus
 │ 🔗 ${prefix}antilinkgp
 │ 📢 ${prefix}antilinkcanal
