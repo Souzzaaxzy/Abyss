@@ -1303,7 +1303,7 @@ async function createBotSocket(authDir) {
 
             // Chama o handler centralizado do index.js que corrigimos
             if (typeof handleGroupParticipantsUpdate === 'function') {
-                await handleGroupParticipantsUpdate(AbyssSock, updateData);
+                await handleGroupParticipantsUpdate(AbyssSock, updateData, numerodono);
             } else {
                 console.error('\x1b[31m[ERRO CRÍTICO]\x1b[0m handleGroupParticipantsUpdate não foi importado corretamente de index.js');
             }
