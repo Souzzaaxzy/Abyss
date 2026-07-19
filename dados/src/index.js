@@ -2977,7 +2977,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
       // Usa a função idsMatch para comparação robusta
       const isAdminMatch = idInArray(sender, groupAdmins);
 
-      isGroupAdmin = isAdminMatch || isOwner || isModeratorActionAllowed || isAlphaActionAllowed;
+      // Subdono tem privilégios de admin nativamente
+      isGroupAdmin = isAdminMatch || isOwner || isSubOwner || isModeratorActionAllowed || isAlphaActionAllowed;
 
       // Debug: log das verificações de admin
       debugLog('Verificação de admin:', {
