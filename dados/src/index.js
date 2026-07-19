@@ -215,7 +215,7 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     }
                 }
                 
-                // ANTI ROUBO
+                // ANTI ROUBO - Promove
                 if (hasAntiRoubo && authorId) {
                     const botJid = nazu.user?.id || '';
                     const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
@@ -230,7 +230,12 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
                     if (!isCreator && !isAuth) {
+                        // REBAIXAR executor
                         await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(() => {});
+                        // REBAIXAR vítimas (reverter promoção)
+                        if (promotedIds.length > 0) {
+                            await nazu.groupParticipantsUpdate(id, promotedIds, 'demote').catch(() => {});
+                        }
                         const msg = `🚫 *Promoções e rebaixamentos são protegidos.*
 
 @${authorNum} não possui permissão e foi rebaixado.`;
@@ -238,8 +243,6 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     }
                 }
 
-
-                
                 if (hasX9) {
                     const msgText = `⬆️🐺 *X9 Report:* ${promotedIds.map(p => `@${p.split('@')[0]}`).join(', ')} foi(ram) *promovido(s) a administrador*!${authorText}`;
                     await nazu.sendMessage(id, { text: msgText, mentions }).catch(err => {});
@@ -268,7 +271,7 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     }
                 }
                 
-                // ANTI ROUBO
+                // ANTI ROUBO - Demote
                 if (hasAntiRoubo && authorId) {
                     const botJid = nazu.user?.id || '';
                     const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
@@ -283,7 +286,12 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
                     if (!isCreator && !isAuth) {
+                        // REBAIXAR executor
                         await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(() => {});
+                        // PROMOVER vítimas de volta (reverter rebaixamento)
+                        if (demotedIds.length > 0) {
+                            await nazu.groupParticipantsUpdate(id, demotedIds, 'promote').catch(() => {});
+                        }
                         const msg = `🚫 *Promoções e rebaixamentos são protegidos.*
 
 @${authorNum} não possui permissão e foi rebaixado.`;
