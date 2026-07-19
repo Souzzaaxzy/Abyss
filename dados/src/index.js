@@ -108,6 +108,37 @@ function formatMessageText(template, replacements) {
   return text;
 }
 
+// ============================================================
+// SISTEMA DE PROTEÇÃO ANTI-LOOP DO ANTI-ROUBO
+// Cache para evitar que o bot processe seus próprios eventos
+// ============================================================
+const antiRouboLock = new Map();
+
+/**
+ * Adiciona um lock para um grupo, evitando que eventos de participantes
+ * sejam processados durante reversões do anti-roubo.
+ * O lock expira automaticamente após o timeout.
+ */
+function addAntiRouboLock(groupId) {
+  const LOCK_TIMEOUT = 5000; // 5 segundos para expirar o lock
+  antiRouboLock.set(groupId, Date.now());
+  
+  // Limpa o lock após o timeout
+  setTimeout(() => {
+    if (antiRouboLock.get(groupId) && Date.now() - antiRouboLock.get(groupId) >= LOCK_TIMEOUT - 100) {
+      antiRouboLock.delete(groupId);
+      console.log(`\x1b[33m[ANTI-ROUBO]\x1b[0m Lock expirado para grupo ${groupId}`);
+    }
+  }, LOCK_TIMEOUT);
+}
+
+/**
+ * Verifica se um grupo está com lock ativo do anti-roubo
+ */
+function hasAntiRouboLock(groupId) {
+  return antiRouboLock.has(groupId);
+}
+
 /**
  * Função para lidar com eventos de participantes do grupo (Boas-vindas)
  * Adicionada para corrigir o problema do bot não enviar bem-vindo.
@@ -117,6 +148,52 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
     console.log(`\x1b[36m[PARTICIPANTS UPDATE]\x1b[0m Evento: \x1b[33m${action}\x1b[0m | Grupo: \x1b[32m${id}\x1b[0m | Membros: ${participants.length}${author ? ` | Autor: ${author}` : ''}`);
     
     try {
+        // ============================================================
+        // PROTEÇÃO CRÍTICA ANTI-LOOP
+        // Verificações de segurança ANTES de qualquer lógica
+        // ============================================================
+        
+        // 1. Obter ID do bot para comparação
+        const botJid = nazu.user?.id || '';
+        const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
+        
+        // 2. Normalizar author para comparação
+        let authorNum = null;
+        if (author) {
+            authorNum = typeof author === 'string' ? author : (author.id || author.jid || author.toString());
+            authorNum = authorNum.split('@')[0].replace('@s.whatsapp.net', '');
+        }
+        
+        // 3. VERIFICAÇÃO CRÍTICA: Ignorar ações do próprio bot
+        if (authorNum && authorNum === botNum) {
+            console.log(`\x1b[33m[ANTI-ROUBO]\x1b[0m Ignorando evento do próprio bot (${botNum})`);
+            return;
+        }
+        
+        // 4. VERIFICAÇÃO CRÍTICA: Ignorar eventos durante reversão (anti-loop)
+        if (hasAntiRouboLock(id)) {
+            console.log(`\x1b[33m[ANTI-ROUBO]\x1b[0m Ignorando evento durante reversão em grupo ${id}`);
+            return;
+        }
+        
+        // 5. VERIFICAÇÃO CRÍTICA: Se não há author, não podemos identificar quem fez a ação
+        // Ignorar para ações de promote/demote se não tivermos author (evita falsos positivos)
+        if (!authorNum && (action === 'promote' || action === 'demote')) {
+            console.log(`\x1b[33m[ANTI-ROUBO]\x1b[0m Ignorando ${action} sem author definido (possível ação do bot)`);
+            return;
+        }
+        
+        // 6. VERIFICAÇÃO CRÍTICA: Ignorar se author é o dono do bot
+        const ownerNum = ownerNumber ? String(ownerNumber).replace(/\D/g, '') : '';
+        if (authorNum && ownerNum && authorNum === ownerNum) {
+            console.log(`\x1b[33m[ANTI-ROUBO]\x1b[0m Ignorando evento do dono do bot (${ownerNum})`);
+            return;
+        }
+        
+        // ============================================================
+        // FIM DAS VERIFICAÇÕES DE PROTEÇÃO
+        // ============================================================
+        
         // 1. Tentar obter metadata com retry ou fallback
         let groupMetadata = await nazu.groupMetadata(id).catch(() => null);
         
@@ -216,30 +293,33 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                 }
                 
                 // ANTI ROUBO - Promove
+                // Verificações de bot/owner já feitas no início da função
                 if (hasAntiRoubo && authorId) {
-                    const botJid = nazu.user?.id || '';
-                    const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
                     const authorNum = authorId.split('@')[0];
-                    
-                    // Ignorar se for o bot ou o dono do bot
-                    const ownerNum = ownerNumber ? String(ownerNumber).replace(/\D/g, '') : '';
-                    if (botNum === authorNum || authorNum === ownerNum) return;
-                    
                     const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
                     if (!isCreator && !isAuth) {
-                        // REBAIXAR executor
-                        await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(() => {});
+                        console.log(`\x1b[31m[ANTI-ROUBO]\x1b[0m Detectada promoção não autorizada por @${authorNum}`);
+                        
+                        // ADICIONAR LOCK ANTES de executar reversões (anti-loop)
+                        addAntiRouboLock(id);
+                        
+                        // REBAIXAR executor primeiro
+                        await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao rebaixar executor: ${e.message}`));
+                        
                         // REBAIXAR vítimas (reverter promoção)
                         if (promotedIds.length > 0) {
-                            await nazu.groupParticipantsUpdate(id, promotedIds, 'demote').catch(() => {});
+                            await nazu.groupParticipantsUpdate(id, promotedIds, 'demote').catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao reverter promoção: ${e.message}`));
                         }
+                        
                         const msg = `🚫 *Promoções e rebaixamentos são protegidos.*
 
 @${authorNum} não possui permissão e foi rebaixado.`;
-                        nazu.sendMessage(id, { text: msg, mentions: [authorId] }).catch(() => {});
+                        await nazu.sendMessage(id, { text: msg, mentions: [authorId] }).catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao enviar mensagem: ${e.message}`));
+                        
+                        console.log(`\x1b[32m[ANTI-ROUBO]\x1b[0m Reversão concluída para ${action} por @${authorNum}`);
                     }
                 }
 
@@ -272,30 +352,33 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                 }
                 
                 // ANTI ROUBO - Demote
+                // Verificações de bot/owner já feitas no início da função
                 if (hasAntiRoubo && authorId) {
-                    const botJid = nazu.user?.id || '';
-                    const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
                     const authorNum = authorId.split('@')[0];
-                    
-                    // Ignorar se for o bot ou o dono do bot
-                    const ownerNum = ownerNumber ? String(ownerNumber).replace(/\D/g, '') : '';
-                    if (botNum === authorNum || authorNum === ownerNum) return;
-                    
                     const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
                     if (!isCreator && !isAuth) {
-                        // REBAIXAR executor
-                        await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(() => {});
+                        console.log(`\x1b[31m[ANTI-ROUBO]\x1b[0m Detectado rebaixamento não autorizado por @${authorNum}`);
+                        
+                        // ADICIONAR LOCK ANTES de executar reversões (anti-loop)
+                        addAntiRouboLock(id);
+                        
+                        // REBAIXAR executor (já deve estar rebaixado, mas garantimos)
+                        await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao rebaixar executor: ${e.message}`));
+                        
                         // PROMOVER vítimas de volta (reverter rebaixamento)
                         if (demotedIds.length > 0) {
-                            await nazu.groupParticipantsUpdate(id, demotedIds, 'promote').catch(() => {});
+                            await nazu.groupParticipantsUpdate(id, demotedIds, 'promote').catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao restaurar vítima: ${e.message}`));
                         }
+                        
                         const msg = `🚫 *Promoções e rebaixamentos são protegidos.*
 
 @${authorNum} não possui permissão e foi rebaixado.`;
-                        nazu.sendMessage(id, { text: msg, mentions: [authorId] }).catch(() => {});
+                        await nazu.sendMessage(id, { text: msg, mentions: [authorId] }).catch(e => console.error(`\x1b[31m[ANTI-ROUBO]\x1b[0m Erro ao enviar mensagem: ${e.message}`));
+                        
+                        console.log(`\x1b[32m[ANTI-ROUBO]\x1b[0m Reversão concluída para ${action} por @${authorNum}`);
                     }
                 }
                 if (hasX9) {
