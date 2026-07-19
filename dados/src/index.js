@@ -18724,6 +18724,67 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
         }
         break;
 
+case 'getchanneljid':
+        if (!isOwner) return reply("🚫 Apenas o Dono do Bot pode usar este comando!");
+
+        try {
+          const channelUrl = q.trim();
+
+          if (!channelUrl) {
+            return reply("❌ *Uso:* " + prefix + "getchanneljid <link do canal>\n\nExemplo:\n" + prefix + "getchanneljid https://whatsapp.com/channel/XXXXXXXXXXXX");
+          }
+
+          const urlPattern = /https?:\/\/(www\.)?whatsapp\.com\/channel\/([A-Za-z0-9_-]+)/i;
+          const match = channelUrl.match(urlPattern);
+
+          if (!match) {
+            return reply("❌ *Link de canal inválido.*\n\nUse o formato:\n" + prefix + "getchanneljid https://whatsapp.com/channel/XXXXXXXXXXXX");
+          }
+
+          const channelId = match[2];
+
+          if (typeof nazu.newsletterMetadata !== 'function') {
+            return reply("⚠️ A versão atual do Baileys não oferece suporte à API de newsletters.\n\nTente atualizar o Baileys para uma versão mais recente.");
+          }
+
+          let newsletterData;
+          try {
+            newsletterData = await nazu.newsletterMetadata(channelId);
+          } catch (err) {
+            try {
+              newsletterData = await nazu.newsletterMetadata(channelId + '@newsletter');
+            } catch (err2) {
+              return reply("❌ Não foi possível localizar esse canal.\n\nVerifique se o link está correto e se o canal existe.");
+            }
+          }
+
+          const name = newsletterData?.name || 'Não disponível';
+          const jid = newsletterData?.jid || channelId + '@newsletter';
+          const subscribers = newsletterData?.subscribers || newsletterData?.subscribersCount || '?';
+          const description = newsletterData?.description || newsletterData?.about || 'Sem descrição';
+          const inviteUrl = 'https://whatsapp.com/channel/' + channelId;
+
+          const response = '╭━━━〔 📢 DADOS DO CANAL 〕━━━╮\n' +
+            '\n' +
+            '📛 *Nome:*\n' + name + '\n' +
+            '\n' +
+            '🆔 *Newsletter JID:*\n' + jid + '\n' +
+            '\n' +
+            '👥 *Inscritos:*\n' + subscribers + '\n' +
+            '\n' +
+            '📝 *Descrição:*\n' + (description.length > 200 ? description.substring(0, 200) + '...' : description) + '\n' +
+            '\n' +
+            '🔗 *Convite:*\n' + inviteUrl + '\n' +
+            '\n' +
+            '╰━━━━━━━━━━━━━━━━━━━━━━╯';
+
+          await reply(response);
+        } catch (e) {
+          console.error('Erro no getchanneljid:', e);
+          reply("❌ Ocorreu um erro ao buscar os dados do canal.");
+        }
+        break;
+
       case 'reiniciar':
       case 'restart':
       case 'reboot':
