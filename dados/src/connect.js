@@ -1103,7 +1103,67 @@ async function createBotSocket(authDir) {
             console.log('📲 Envie este código no WhatsApp para autenticar o bot.');
         }
 
-        AbyssSock.ev.on('creds.update', saveCreds);
+        // ======================================================
+// 📢 DETECTOR DE NEWSLETTERS (Canais do WhatsApp)
+// Adaptado para Baileys v7.x
+// ======================================================
+function printNewsletter(titulo, obj) {
+    const texto = util.inspect(obj, {
+        depth: null,
+        colors: true,
+        compact: false,
+        maxArrayLength: null,
+        maxStringLength: null
+    });
+
+    if (
+        texto.includes("@newsletter") ||
+        texto.includes("newsletter") ||
+        texto.includes("Newsletter") ||
+        texto.includes("forwardedNewsletterMessageInfo")
+    ) {
+        console.log("\n==================================================");
+        console.log("📢 NEWSLETTER DETECTADA");
+        console.log("==================================================");
+        console.log("EVENTO:", titulo);
+        console.log("==================================================\n");
+        console.log(texto);
+        console.log("\n==================================================\n");
+    }
+}
+
+// Capturar TODOS os eventos processados
+AbyssSock.ev.process(async (events) => {
+    for (const [eventName, data] of Object.entries(events)) {
+        printNewsletter(eventName, data);
+    }
+});
+
+// Logar mensagens de newsletter no messages.upsert
+const originalMessagesUpsert = AbyssSock.ev.on.bind(AbyssSock.ev);
+AbyssSock.ev.on('messages.upsert', async ({ messages, type }) => {
+    for (const msg of messages) {
+        const msgStr = JSON.stringify(msg) || '';
+        if (
+            msg?.key?.remoteJid?.endsWith("@newsletter") ||
+            msgStr.includes("@newsletter") ||
+            msgStr.includes("newsletter")
+        ) {
+            console.log("\n==================================================");
+            console.log("📢📢📢 MENSAGEM DE NEWSLETTER DETECTADA 📢📢📢");
+            console.log("==================================================");
+            console.log("remoteJid:", msg?.key?.remoteJid);
+            console.log("participant:", msg?.key?.participant);
+            console.log("id:", msg?.key?.id);
+            console.log(util.inspect(msg, { depth: null, colors: true, compact: false }));
+            console.log("==================================================\n");
+        }
+    }
+});
+
+console.log("✅ Detector de Newsletters iniciado.");
+
+AbyssSock.ev.on('creds.update', saveCreds);
 
         AbyssSock.ev.on('groups.update', async (updates) => {
             if (!Array.isArray(updates) || updates.length === 0) return;
