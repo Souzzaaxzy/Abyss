@@ -13,18 +13,8 @@ const NODE_MODULES_PATH = path.join(PROJECT_ROOT, 'node_modules');
 const QR_CODE_DIR = path.join(PROJECT_ROOT, 'dados', 'database', 'qr-code');
 const CONNECT_FILE = path.join(PROJECT_ROOT, 'dados', 'src', 'connect.js');
 const PACKAGE_JSON = path.join(PROJECT_ROOT, 'package.json');
-const BACKUP_DIR = path.join(PROJECT_ROOT, '.backup_temp');
 const isWindows = os.platform() === 'win32';
 const isTermux = fsSync.existsSync('/data/data/com.termux');
-
-// Diretórios a fazer backup/restore
-const BACKUP_DIRS = [
-  'dados/database',
-  'dados/midias'
-];
-const BACKUP_FILES = [
-  'dados/src/config.json'
-];
 
 const colors = {
   reset: '\x1b[0m',
@@ -40,131 +30,6 @@ const mensagem = (text) => console.log(`${colors.green}${text}${colors.reset}`);
 const aviso = (text) => console.log(`${colors.red}${text}${colors.reset}`);
 const info = (text) => console.log(`${colors.cyan}${text}${colors.reset}`);
 const separador = () => console.log(`${colors.blue}============================================${colors.reset}`);
-
-// ============ FUNÇÕES DE BACKUP/RESTORE ============
-
-async function createBackup() {
-  info('💾 Criando backup dos dados...');
-  
-  try {
-    // Criar diretório de backup
-    await fs.mkdir(BACKUP_DIR, { recursive: true });
-    
-    // Copiar diretórios
-    for (const dir of BACKUP_DIRS) {
-      const source = path.join(PROJECT_ROOT, dir);
-      const dest = path.join(BACKUP_DIR, dir);
-      
-      if (fsSync.existsSync(source)) {
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.cp(source, dest, { recursive: true });
-        info(`  ✅ ${dir}/`);
-      }
-    }
-    
-    // Copiar arquivos
-    for (const file of BACKUP_FILES) {
-      const source = path.join(PROJECT_ROOT, file);
-      const dest = path.join(BACKUP_DIR, file);
-      
-      if (fsSync.existsSync(source)) {
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.copyFile(source, dest);
-        info(`  ✅ ${file}`);
-      }
-    }
-    
-    mensagem('💾 Backup criado com sucesso!');
-  } catch (error) {
-    aviso(`⚠️ Erro ao criar backup: ${error.message}`);
-  }
-}
-
-function findLatestBackup() {
-  // Procura diretórios de backup no formato backup_YYYY-MM-DD_THH-MM-SS
-  const entries = fsSync.readdirSync(PROJECT_ROOT, { withFileTypes: true });
-  const backupDirs = entries
-    .filter(entry => entry.isDirectory() && entry.name.startsWith('backup_'))
-    .map(entry => ({
-      name: entry.name,
-      path: path.join(PROJECT_ROOT, entry.name),
-      date: new Date(entry.name.replace('backup_', '').replace(/_/g, ':').replace(/T/, ' '))
-    }))
-    .filter(backup => !isNaN(backup.date.getTime()))
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
-  
-  if (backupDirs.length > 0) {
-    return backupDirs[0]; // Retorna o mais recente
-  }
-  return null;
-}
-
-async function restoreBackup() {
-  // Primeiro tenta restaurar do backup temporário
-  let backupPath = BACKUP_DIR;
-  let foundBackup = false;
-  
-  // Se não existe backup temporário, procura o último backup
-  if (!fsSync.existsSync(backupPath)) {
-    info('🔍 Procurando último backup...');
-    const latestBackup = findLatestBackup();
-    
-    if (latestBackup) {
-      backupPath = latestBackup.path;
-      info(`📁 Backup encontrado: ${latestBackup.name}`);
-      foundBackup = true;
-    }
-  } else {
-    foundBackup = true;
-  }
-  
-  if (!foundBackup) {
-    aviso('❌ Nenhum backup encontrado!');
-    return;
-  }
-  
-  info('📦 Restaurando dados do backup...');
-  
-  try {
-    // Restaurar diretórios
-    for (const dir of BACKUP_DIRS) {
-      const source = path.join(backupPath, dir);
-      const dest = path.join(PROJECT_ROOT, dir);
-      
-      if (fsSync.existsSync(source)) {
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.cp(source, dest, { recursive: true });
-        info(`  ✅ ${dir}/`);
-      }
-    }
-    
-    // Restaurar arquivos
-    for (const file of BACKUP_FILES) {
-      const source = path.join(backupPath, file);
-      const dest = path.join(PROJECT_ROOT, file);
-      
-      if (fsSync.existsSync(source)) {
-        await fs.mkdir(path.dirname(dest), { recursive: true });
-        await fs.copyFile(source, dest);
-        info(`  ✅ ${file}`);
-      }
-    }
-    
-    mensagem('📦 Backup restaurado com sucesso!');
-  } catch (error) {
-    aviso(`⚠️ Erro ao restaurar backup: ${error.message}`);
-  }
-}
-
-async function cleanupBackup() {
-  try {
-    if (fsSync.existsSync(BACKUP_DIR)) {
-      await fs.rm(BACKUP_DIR, { recursive: true, force: true });
-    }
-  } catch (error) {
-    // Ignora erros na limpeza
-  }
-}
 
 const getVersion = () => {
   try {
@@ -277,105 +142,26 @@ async function displayHeader() {
 }
 
 async function checkPrerequisites() {
-  // PASSO 0: Verificar se há algum backup para restaurar
-  const latestBackup = findLatestBackup();
-  if (latestBackup) {
-    info('💾 Backup encontrado! Restaurando dados...');
-    info(`📁 Backup: ${latestBackup.name}`);
-    
-    // Salvar o path do backup antes de qualquer operação
-    const restoreFromPath = latestBackup.path;
-    
-    // PASSO 1: Atualizar código do git
-    info('🔄 Atualizando projeto...');
-    
-    try {
-      console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-      info('📥 git fetch origin');
-      execSync('git fetch origin', { 
-        stdio: 'inherit', 
-        shell: true,
-        cwd: PROJECT_ROOT
-      });
-      
-      info('📦 git reset --hard origin/main');
-      execSync('git reset --hard origin/main', { 
-        stdio: 'inherit', 
-        shell: true,
-        cwd: PROJECT_ROOT
-      });
-      console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-      mensagem('✅ Projeto atualizado!');
-    } catch (error) {
-      aviso(`⚠️ Erro ao atualizar: ${error.message}`);
-    }
-    
-    // PASSO 2: Restaurar do backup encontrado
-    info('📦 Restaurando dados do backup...');
-    
-    try {
-      for (const dir of BACKUP_DIRS) {
-        const source = path.join(restoreFromPath, dir);
-        const dest = path.join(PROJECT_ROOT, dir);
-        
-        if (fsSync.existsSync(source)) {
-          await fs.mkdir(path.dirname(dest), { recursive: true });
-          await fs.cp(source, dest, { recursive: true });
-          info(`  ✅ ${dir}/`);
-        }
-      }
-      
-      for (const file of BACKUP_FILES) {
-        const source = path.join(restoreFromPath, file);
-        const dest = path.join(PROJECT_ROOT, file);
-        
-        if (fsSync.existsSync(source)) {
-          await fs.mkdir(path.dirname(dest), { recursive: true });
-          await fs.copyFile(source, dest);
-          info(`  ✅ ${file}`);
-        }
-      }
-      
-      mensagem('📦 Backup restaurado com sucesso!');
-    } catch (error) {
-      aviso(`⚠️ Erro ao restaurar backup: ${error.message}`);
-    }
-  } else {
-    // PASSO 1: Fazer backup se não existir nenhum
-    info('💾 Nenhum backup encontrado. Fazendo backup primeiro...');
-    await createBackup();
-    
-    // PASSO 2: Atualizar código do git
-    info('🔄 Atualizando projeto...');
-    
-    try {
-      console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-      info('📥 git fetch origin');
-      execSync('git fetch origin', { 
-        stdio: 'inherit', 
-        shell: true,
-        cwd: PROJECT_ROOT
-      });
-      
-      info('📦 git reset --hard origin/main');
-      execSync('git reset --hard origin/main', { 
-        stdio: 'inherit', 
-        shell: true,
-        cwd: PROJECT_ROOT
-      });
-      console.log(`${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
-      mensagem('✅ Projeto atualizado!');
-    } catch (error) {
-      aviso(`⚠️ Erro ao atualizar: ${error.message}`);
-    }
-    
-    // PASSO 3: Restaurar backup DEPOIS do git reset
-    info('📦 Restaurando dados...');
-    await restoreBackup();
-    await cleanupBackup();
+  // Apenas verifica se os arquivos básicos existem
+  // Sem backup/restore automático na inicialização
+  
+  info('📦 Verificando dependências...');
+  
+  // PASSO 1: Verificar package.json
+  if (!fsSync.existsSync(PACKAGE_JSON)) {
+    aviso(`❌ Arquivo package.json não encontrado em: ${PROJECT_ROOT}`);
+    process.exit(1);
   }
   
-  // PASSO 3/4: Instalar/atualizar dependências
+  // PASSO 2: Verificar arquivo de conexão
+  if (!fsSync.existsSync(CONNECT_FILE)) {
+    aviso(`❌ Arquivo de conexão não encontrado: ${CONNECT_FILE}`);
+    process.exit(1);
+  }
+  
+  info('✅ Verificação concluída!');
+  
+  // PASSO 3: Instalar/atualizar dependências
   info('📦 Instalando dependências...');
   
   if (!fsSync.existsSync(PACKAGE_JSON)) {
@@ -417,7 +203,7 @@ async function checkPrerequisites() {
     process.exit(1);
   }
   
-  // PASSO 5: Verificar config.json
+  // PASSO 4: Verificar config.json
   if (!fsSync.existsSync(CONFIG_PATH)) {
     aviso('⚠️ Arquivo de configuração (config.json) não encontrado!');
     try {
@@ -435,12 +221,6 @@ async function checkPrerequisites() {
     } catch (error) {
       aviso(`⚠️ Não foi possível executar a configuração: ${error.message}`);
     }
-  }
-  
-  // PASSO 6: Verificar arquivo de conexão
-  if (!fsSync.existsSync(CONNECT_FILE)) {
-    aviso(`❌ Arquivo de conexão não encontrado: ${CONNECT_FILE}`);
-    process.exit(1);
   }
 }
 
