@@ -377,6 +377,9 @@ import {
   revokeSubOwnerCmd,
   getSubOwnerCmds,
   hasSubOwnerCmdPerm,
+  addSubOwnerBaseCmd,
+  removeSubOwnerBaseCmd,
+  loadSubOwnerBaseCommands,
   loadRentalData,
   saveRentalData,
   isRentalModeActive,
@@ -6515,18 +6518,16 @@ if (isCmd && command && !isOwner) {
     if (fs.existsSync(subOwnerFile)) {
       baseSubOwnerCommands = JSON.parse(fs.readFileSync(subOwnerFile, 'utf-8'));
     }
-    // Verificar se é um comando de subdono
+    
+    // Se comando está na lista base, subdono pode usar
     if (baseSubOwnerCommands.includes(command)) {
-      // Subdono pode usar comandos da lista base
       if (!isSubOwner) {
         return reply('🚫 Apenas o Dono pode usar este comando!');
       }
-    } else if (isSubOwner) {
-      // Subdono tentando usar comando FORA da lista base
-      // Verificar se tem permissão extra via grantsubcmd
-      if (!hasSubOwnerCmdPerm(sender, command)) {
-        return reply(`🚫 Você não tem permissão para usar: ${prefix}${command}`);
-}
+    }
+    // Se NÃO está na lista base e é subdono, bloquear
+    else if (isSubOwner) {
+      return reply(`🚫 Este comando não está disponível para subdonos: ${prefix}${command}`);
     }
   } catch (e) {
     console.error('Erro ao verificar lista de comandos de subdonos:', e);
@@ -39949,28 +39950,25 @@ ${groupData.rules.length}. ${q}`);
       // ─── Permissões de Subdono ───
       case 'grantsubcmd':
         try {
-          if (!isOwner) return reply("Apenas o dono do bot pode gerenciar permissões de subdono.");
-          if (!q) return reply(`📝 *Uso:* ${prefix}grantsubcmd <comando> @usuário`);
+          if (!isOwner) return reply("Apenas o Dono pode gerenciar comandos de subdonos.");
+          if (!q) return reply(`📝 *Uso:* ${prefix}grantsubcmd <comando>
+
+Ex: ${prefix}grantsubcmd listagp`);
           
-          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-          if (mentionedUsers.length === 0) return reply("❌ Marque o usuário que receberá a permissão.");
+          const cmdToAdd = q.replace(prefix, '').trim().toLowerCase().split(' ')[0];
+          if (!cmdToAdd) return reply("❌ Especifique o comando.");
           
-          const parts = q.split('@').map(p => p.trim());
-          const cmdToAllow = parts[0].replace(prefix, '').trim().toLowerCase();
-          const targetUser = mentionedUsers[0];
-          
-          if (!isSubdono(targetUser)) return reply("❌ Este usuário não é um subdono.");
-          if (!cmdToAllow) return reply("❌ Especifique o comando.");
-          
-          if (hasSubOwnerCmdPerm(targetUser, cmdToAllow)) {
-            return reply(`⚠️ O subdono já tem permissão para: ${prefix}${cmdToAllow}`);
+          const baseCmds = loadSubOwnerBaseCommands();
+          if (baseCmds.includes(cmdToAdd)) {
+            return reply(`⚠️ O comando ${prefix}${cmdToAdd} já está na lista base.`);
           }
           
-          grantSubOwnerCmd(targetUser, cmdToAllow);
-          const targetName = targetUser.split('@')[0];
-          await reply(`✅ Permissão concedida!
+          addSubOwnerBaseCmd(cmdToAdd);
+          await reply(`✅ Comando adicionado à lista base!
 
-👤 @${targetName} agora pode usar: ${prefix}${cmdToAllow}`, { contextInfo: { mentionedJid: [targetUser] } });
+📋 ${prefix}${cmdToAdd} agora pode ser usado por todos os subdonos.
+
+📦 Comandos na lista base: ${baseCmds.length + 1}`);
         } catch (e) {
           console.error('Erro no grantsubcmd:', e);
           await reply("Ocorreu um erro 💔");
@@ -39979,55 +39977,44 @@ ${groupData.rules.length}. ${q}`);
 
       case 'delsubcmd':
         try {
-          if (!isOwner) return reply("Apenas o dono do bot pode gerenciar permissões de subdono.");
-          if (!q) return reply(`📝 *Uso:* ${prefix}revokesubcmd <comando> @usuário`);
+          if (!isOwner) return reply("Apenas o Dono pode gerenciar comandos de subdonos.");
+          if (!q) return reply(`📝 *Uso:* ${prefix}delsubcmd <comando>
+
+Ex: ${prefix}delsubcmd listagp`);
           
-          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-          if (mentionedUsers.length === 0) return reply("❌ Marque o usuário que terá a permissão removida.");
+          const cmdToRemove = q.replace(prefix, '').trim().toLowerCase().split(' ')[0];
+          if (!cmdToRemove) return reply("❌ Especifique o comando.");
           
-          const parts = q.split('@').map(p => p.trim());
-          const cmdToDeny = parts[0].replace(prefix, '').trim().toLowerCase();
-          const targetUser = mentionedUsers[0];
-          
-          if (!isSubdono(targetUser)) return reply("❌ Este usuário não é um subdono.");
-          if (!cmdToDeny) return reply("❌ Especifique o comando.");
-          
-          if (!hasSubOwnerCmdPerm(targetUser, cmdToDeny)) {
-            return reply(`⚠️ O subdono não tinha permissão para: ${prefix}${cmdToDeny}`);
+          const baseCmds = loadSubOwnerBaseCommands();
+          if (!baseCmds.includes(cmdToRemove)) {
+            return reply(`⚠️ O comando ${prefix}${cmdToRemove} não está na lista base.`);
           }
           
-          revokeSubOwnerCmd(targetUser, cmdToDeny);
-          const targetName = targetUser.split('@')[0];
-          await reply(`✅ Permissão revogada!
+          removeSubOwnerBaseCmd(cmdToRemove);
+          await reply(`✅ Comando removido da lista base!
 
-👤 @${targetName} não pode mais usar: ${prefix}${cmdToDeny}`, { contextInfo: { mentionedJid: [targetUser] } });
+📋 ${prefix}${cmdToRemove} não pode mais ser usado por subdonos.
+
+📦 Comandos na lista base: ${baseCmds.length - 1}`);
         } catch (e) {
-          console.error('Erro no revokesubcmd:', e);
+          console.error('Erro no delsubcmd:', e);
           await reply("Ocorreu um erro 💔");
         }
         break;
 
       case 'listsubcmd':
         try {
-          if (!isOwner && !isSubOwner) return reply("Apenas o dono ou subdonos podem ver permissões.");
+          if (!isOwner && !isSubOwner) return reply("Apenas o Dono ou subdonos podem ver a lista.");
           
-          let targetUser = sender;
-          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-          
-          if (isOwner && mentionedUsers.length > 0) {
-            targetUser = mentionedUsers[0];
-          }
-          
-          const cmds = getSubOwnerCmds(targetUser);
-          const targetName = targetUser.split('@')[0];
+          const cmds = loadSubOwnerBaseCommands();
           
           if (cmds.length === 0) {
-            return reply(`📋 *Permissões de @${targetName}*
+            return reply(`📋 *Lista Base de Subcomandos*
 
-Nenhum comando permitido.`, { contextInfo: { mentionedJid: [targetUser] } });
+Nenhum comando na lista base.`);
           }
           
-          let msg = `📋 *Permissões de @${targetName}*
+          let msg = `📋 *Lista Base de Subcomandos*
 
 `;
           cmds.forEach(cmd => {
@@ -40035,8 +40022,8 @@ Nenhum comando permitido.`, { contextInfo: { mentionedJid: [targetUser] } });
 `;
           });
           msg += `
-Total: ${cmds.length} comando(s)`;
-          await reply(msg, { contextInfo: { mentionedJid: [targetUser] } });
+📦 Total: ${cmds.length} comando(s)`;
+          await reply(msg);
         } catch (e) {
           console.error('Erro no listsubcmd:', e);
           await reply("Ocorreu um erro 💔");

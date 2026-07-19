@@ -1017,9 +1017,50 @@ const getSubdonos = () => {
 
 // ─── Permissões de Subdono ───
 const SUBOWNER_PERMS_FILE = path.join(DONO_DIR, 'subowner_perms.json');
+const SUBCOMMANDS_FILE = path.join(DATABASE_DIR, 'subOwnerCommands.json');
 
 const loadSubOwnerPerms = () => {
   return loadJsonFile(SUBOWNER_PERMS_FILE, {});
+};
+
+// Lista base de comandos para todos os subdonos
+const loadSubOwnerBaseCommands = () => {
+  return loadJsonFile(SUBCOMMANDS_FILE, []);
+};
+
+const saveSubOwnerBaseCommands = (cmds) => {
+  try {
+    ensureDirectoryExists(DATABASE_DIR);
+    fs.writeFileSync(SUBCOMMANDS_FILE, JSON.stringify(cmds, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Erro ao salvar lista base de subcomandos:', error);
+    return false;
+  }
+};
+
+const addSubOwnerBaseCmd = (cmd) => {
+  const cmds = loadSubOwnerBaseCommands();
+  const normalizedCmd = cmd.toLowerCase().replace(/^!|\s/g, '');
+  if (!cmds.includes(normalizedCmd)) {
+    cmds.push(normalizedCmd);
+    saveSubOwnerBaseCommands(cmds);
+    return true;
+  }
+  return false;
+};
+
+const removeSubOwnerBaseCmd = (cmd) => {
+  const cmds = loadSubOwnerBaseCommands();
+  const normalizedCmd = cmd.toLowerCase().replace(/^!|\s/g, '');
+  const filtered = cmds.filter(c => c !== normalizedCmd);
+  saveSubOwnerBaseCommands(filtered);
+  return filtered.length < cmds.length;
+};
+
+const isSubOwnerBaseCmd = (cmd) => {
+  const cmds = loadSubOwnerBaseCommands();
+  return cmds.includes(cmd.toLowerCase().replace(/^!|\s/g, ''));
 };
 
 const saveSubOwnerPerms = (data) => {
@@ -3517,6 +3558,9 @@ export {
   grantSubOwnerCmd,
   revokeSubOwnerCmd,
   getSubOwnerCmds,
+  addSubOwnerBaseCmd,
+  removeSubOwnerBaseCmd,
+  loadSubOwnerBaseCommands,
   hasSubOwnerCmdPerm,
   loadRentalData,
   saveRentalData,
