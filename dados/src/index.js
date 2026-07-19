@@ -3185,7 +3185,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     }
 
     // AntiFotoV - Apagar fotos de Visualização Única
-    if (isGroup && isAntiFotov && (isVisuU || isVisuU2 || type === 'viewOnceMessageV2Extension') && !isGroupAdmin && !isOwner) {
+    const isViewOnceFotov = info.message?.viewOnceMessage || info.message?.viewOnceMessageV2 || info.message?.viewOnceMessageV2Extension;
+    if (isGroup && isAntiFotov && isViewOnceFotov && !isGroupAdmin && !isOwner) {
       if (isBotAdmin) {
         try {
           await nazu.sendMessage(from, {
