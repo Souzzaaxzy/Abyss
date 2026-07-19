@@ -118,6 +118,13 @@ export default async function menuDono(prefix, botName = "MeuBot", userName = "U
 ╰──────────────
 
 
+╭─❖ 🔐 PERMISSÕES SUBDONO
+│ ➕ ${prefix}grantsubcmd
+│ ❌ ${prefix}delsubcmd
+│ 📋 ${prefix}listsubcmd
+╰──────────────
+
+
 ╭─❖ 💰 ALUGUEL
 │ ⚙ ${prefix}modoaluguel
 │ ➕ ${prefix}addaluguel
