@@ -298,7 +298,12 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const authorNum = authorId.split('@')[0];
                     const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
-                    const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
+                    // Verificação de autorizados - normalizar números para comparação correta
+                    const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => {
+                      const authNum = (u.split('@')[0] || '').replace(/\D/g, '');
+                      const authorNormalized = (authorNum || '').replace(/\D/g, '');
+                      return authNum === authorNormalized || authNum.includes(authorNormalized) || authorNormalized.includes(authNum);
+                    });
                     
                     if (!isCreator && !isAuth) {
                         console.log(`\x1b[31m[ANTI-ROUBO]\x1b[0m Detectada promoção não autorizada por @${authorNum}`);
@@ -357,7 +362,12 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const authorNum = authorId.split('@')[0];
                     const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
-                    const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
+                    // Verificação de autorizados - normalizar números para comparação correta
+                    const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => {
+                      const authNum = (u.split('@')[0] || '').replace(/\D/g, '');
+                      const authorNormalized = (authorNum || '').replace(/\D/g, '');
+                      return authNum === authorNormalized || authNum.includes(authorNormalized) || authorNormalized.includes(authNum);
+                    });
                     
                     if (!isCreator && !isAuth) {
                         console.log(`\x1b[31m[ANTI-ROUBO]\x1b[0m Detectado rebaixamento não autorizado por @${authorNum}`);
@@ -34475,7 +34485,7 @@ break;
         break;
       case 'antiroubo':
         try {
-          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroup) return reply("Isso sÃ³ pode ser usado em grupo 😔");
           
           const args = body.trim().toLowerCase().split(' ');
           
@@ -34483,47 +34493,61 @@ break;
             // Mostrar menu do antiroubo
             const status = groupData.antiRoubo?.enabled ? '🟢 ATIVO' : '🔴 INATIVO';
             
-            // Obter dono do grupo
-            let ownerName = 'Não detectado';
+            // Obter dono do grupo (mesma lógica do !infogrupo)
+            let ownerJid = null;
+            let ownerDisplay = 'NÃ£o detectado';
             try {
               const metadata = await nazu.groupMetadata(from);
-              if (metadata?.creator) {
-                const ownerNum = metadata.creator.split('@')[0];
-                const ownerInfo = await nazu.getName(metadata.creator);
-                ownerName = ownerInfo ? `${ownerInfo} (@${ownerNum})` : `@${ownerNum}`;
+              if (metadata?.owner) {
+                ownerJid = metadata.owner;
+                const ownerNum = ownerJid.split('@')[0];
+                const ownerInfo = await nazu.getName(ownerJid);
+                ownerDisplay = ownerInfo ? ownerInfo + ' (@' + ownerNum + ')' : '@' + ownerNum;
               }
             } catch (e) {}
             
-            // Lista de autorizados
+            // Lista de autorizados com menções corretas
             const authUsers = groupData.antiRoubo?.authorizedUsers || [];
-            let authList = '*Nenhum usuário autorizado*';
+            const mentions = [];
+            let authList = '*Nenhum usuÃ¡rio autorizado*';
             if (authUsers.length > 0) {
-              authList = authUsers.map(u => `• @${u.split('@')[0]}`).join('\n');
+              authList = authUsers.map(u => {
+                if (!mentions.includes(u)) mentions.push(u);
+                return '░ @' + u.split('@')[0];
+              }).join('\n');
             }
             
-            const menuText = `╭━━━〔 🛡️ ANTI ROUBO 〕━━━╮
-│
-│ 📊 *Status:* ${status}
-│
-│ 👑 *Dono do Grupo:*
-│ ${ownerName}
-│
-│ 👥 *Usuários Permitidos:*
-│ ${authList}
-│
-━━━━━━━━━━━━━━
-│
-│ ⚙️ *Comandos*
-│
-│ 🟢 ${prefix}antiroubo on
-│ 🔴 ${prefix}antiroubo off
-│
-│ 👤 ${prefix}perm @usuário
-│ 👤 ${prefix}delp @usuário
-│
-╰━━━━━━━━━━━━━━━━━━━━╯`;
+            // Adicionar dono do grupo às menções se existir
+            if (ownerJid && !mentions.includes(ownerJid)) {
+              mentions.push(ownerJid);
+            }
             
-            await reply(menuText);
+            const menuText = '┏━━━━━━━━━━━━━━━┓\n' +
+              '┃   🛡️ ANTI ROUBO 🛡️   ┃\n' +
+              '┗━━━━━━━━━━━━━━━┛\n' +
+              '┃\n' +
+              '┃ 🟢 *Status:* ' + status + '\n' +
+              '┃\n' +
+              '┃ 👑 *Dono do Grupo:*\n' +
+              '┃ ' + ownerDisplay + '\n' +
+              '┃\n' +
+              '┃ 👤 *UsuÃ¡rios Permitidos:*\n' +
+              '┃ ' + authList + '\n' +
+              '┃\n' +
+              '━━━━━━━━━━━━━━━━━━\n' +
+              '┃\n' +
+              '┃ 🔧 *Comandos*\n' +
+              '┃\n' +
+              '┃ 🟢 ' + prefix + 'antiroubo on\n' +
+              '┃ 🔴 ' + prefix + 'antiroubo off\n' +
+              '┃\n' +
+              '┃ 👤 ' + prefix + 'perm @usuÃ¡rio\n' +
+              '┃ 👤 ' + prefix + 'delp @usuÃ¡rio\n' +
+              '┃\n' +
+              '┗━━━━━━━━━━━━━━━━━━━━━━┛';
+            
+            await reply(menuText, { mentions });
+
           } else if (args[1] === 'on') {
             if (!isGroupAdmin) return reply("Você precisa ser admin 💔");
             if (!isBotAdmin) return reply("Preciso ser admin para isso 💔");
