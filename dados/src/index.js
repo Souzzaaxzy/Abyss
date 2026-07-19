@@ -33719,7 +33719,6 @@ break;
             { key: 'antidel', name: 'Antidelete', isObject: false },
             { key: 'antirequest', name: 'Antipagamento', isObject: false },
             { key: 'antistickerplus', name: 'Antistickerplus', isObject: true },
-            { key: 'antifake', name: 'Antifake', isObject: false },
             { key: 'antigore', name: 'Antigore', isObject: false },
           ];
 
