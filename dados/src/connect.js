@@ -1642,7 +1642,60 @@ function logNewsletterEvent(msg, source) {
             });
         };
 
-        AbyssSock.ev.on('connection.update', async (update) => {
+        
+// ======================================================
+// 📢 LISTENERS PARA NEWSLETTERS/CANAIS
+// ======================================================
+AbyssSock.ev.on('chats.update', (updates) => {
+    for (const chat of updates) {
+        if (chat.jid && chat.jid.includes('@newsletter')) {
+            console.log('\n' + '='.repeat(60));
+            console.log('📢 NEWSLETTER CHAT UPDATE');
+            console.log('='.repeat(60));
+            console.log(util.inspect(chat, { depth: null, showHidden: true, colors: true }));
+            console.log('='.repeat(60));
+        }
+    }
+});
+
+AbyssSock.ev.on('contacts.update', (updates) => {
+    for (const contact of updates) {
+        if (contact.jid && contact.jid.includes('@newsletter')) {
+            console.log('\n' + '='.repeat(60));
+            console.log('📢 NEWSLETTER CONTACT UPDATE');
+            console.log('='.repeat(60));
+            console.log(util.inspect(contact, { depth: null, showHidden: true, colors: true }));
+            console.log('='.repeat(60));
+        }
+    }
+});
+
+AbyssSock.ev.on('labels.edit', (label) => {
+    if (label.jid && label.jid.includes('@newsletter')) {
+        console.log('\n' + '='.repeat(60));
+        console.log('📢 NEWSLETTER LABEL EDIT');
+        console.log('='.repeat(60));
+        console.log(util.inspect(label, { depth: null, showHidden: true, colors: true }));
+        console.log('='.repeat(60));
+    }
+});
+
+// Capturar QUALQUER evento que tenha @newsletter
+const originalEmit = AbyssSock.ev.emit;
+AbyssSock.ev.emit = function(event, ...args) {
+    const eventStr = JSON.stringify(args);
+    if (eventStr.includes('@newsletter')) {
+        console.log('\n' + '='.repeat(60));
+        console.log('📢 NEWSLETTER EVENT: ' + event);
+        console.log('='.repeat(60));
+        console.log(util.inspect(args, { depth: null, showHidden: true, colors: true }));
+        console.log('='.repeat(60));
+    }
+    return originalEmit.apply(this, [event, ...args]);
+};
+// ======================================================
+
+AbyssSock.ev.on('connection.update', async (update) => {
             const {
                 connection,
                 lastDisconnect,
