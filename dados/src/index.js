@@ -32299,7 +32299,26 @@ break;
           if (!isBotAdmin) return sendAbyssWarning("Eu preciso ser administrador para realizar esta ação.");
           var linkgc;
           linkgc = await nazu.groupInviteCode(from);
-          await reply('https://chat.whatsapp.com/' + linkgc);
+          const groupLink = 'https://chat.whatsapp.com/' + linkgc;
+          
+          let groupPic = 'https://telegra.ph/file/b5427ea4b8701bc47e751.jpg';
+          try {
+            groupPic = await nazu.profilePictureUrl(from, 'image');
+          } catch (e) {}
+          
+          await nazu.sendMessage(from, {
+            text: groupLink,
+            contextInfo: {
+              externalAdReply: {
+                title: "📬 Link do Grupo",
+                body: "👉 Toque para entrar no grupo",
+                thumbnailUrl: groupPic,
+                sourceUrl: groupLink,
+                mediaType: 1,
+                renderLargerThumbnail: false,
+              }
+            }
+          });
         } catch (e) {
           console.error(e);
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
