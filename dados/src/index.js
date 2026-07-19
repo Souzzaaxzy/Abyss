@@ -373,6 +373,10 @@ import {
   addSubdono,
   removeSubdono,
   getSubdonos,
+  grantSubOwnerCmd,
+  revokeSubOwnerCmd,
+  getSubOwnerCmds,
+  hasSubOwnerCmdPerm,
   loadRentalData,
   saveRentalData,
   isRentalModeActive,
@@ -2279,13 +2283,22 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
 
     const isOwnerOrSub = isOwner || isSubOwner;
 
+    // Verificação de permissão de subdono para comandos de dono
+    // Função para verificar se pode usar comando de dono (chamar dentro do case)
+    const canUseOwnerCmd = (cmd) => {
+      if (isOwner) return true;
+      if (isSubOwner && hasSubOwnerCmdPerm(sender, cmd)) return true;
+      return false;
+    };
+
     // Debug: log das verificações de permissão
     debugLog('Verificações de permissão:', {
       sender: sender?.substring(0, 30),
       senderBase,
       ownerBase,
       isOwner,
-      isSubOwner
+      isSubOwner,
+      canUseOwnerCmd: 'função disponível'
     });
 
     const type = getContentType(info.message);
@@ -7566,7 +7579,7 @@ if (isCmd && command && !isOwnerOrSub) {
           const mentioned = (menc_jid2 && menc_jid2[0]) || (q.includes('@') ? q.split(' ')[0].replace('@', '') : null);
 
           if (sub === 'resetrpg') {
-            if (!isOwnerOrSub) return reply('Apenas o Dono ou Subdono pode resetar usuários.');
+            if (!canUseOwnerCmd('resetrpg')) return reply('🚫 Você não tem permissão para usar este comando.');
             const target = (menc_jid2 && menc_jid2[0]) || null;
             const scope = (q || '').toLowerCase();
             if (scope.includes('all') || scope.includes('todos')) {
@@ -13032,7 +13045,7 @@ if (isCmd && command && !isOwnerOrSub) {
       // Reset global de todo o RPG
       case 'rpgresetglobal':
       case 'resetrpgglobal': {
-        if (!isOwnerOrSub) return reply('🚫 Apenas o dono ou subdono pode usar este comando!');
+        if (!canUseOwnerCmd(command)) return reply('🚫 Você não tem permissão para usar este comando!');
 
         const confirmArg = (args[0] || '').toLowerCase();
         if (confirmArg !== 'confirmar') {
@@ -17889,7 +17902,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
         break;
       case 'updates':
         try {
-          if (!isOwnerOrSub) return sendAbyssWarning("Apenas o Dono ou Subdono pode utilizar esse comando!");
+          if (!canUseOwnerCmd(command)) return sendAbyssWarning("🚫 Você não tem permissão para usar este comando!");
           if (!fs.existsSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'))) return reply('❌ Sua versão não tem suporte a esse sistema ainda.');
           const AtualCom = await axios.get('https://api.github.com/repos/Souzzaaxzy/Abyss/commits?per_page=1', {
             headers: {
@@ -17910,7 +17923,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
         }
         break;
       case 'addsubdono':
-        if (!isOwnerOrSub) return reply("🚫 Apenas o Dono principal pode adicionar subdonos!");
+        if (!canUseOwnerCmd(command)) return reply("🚫 Você não tem permissão para usar este comando!");
         // Permissão estendida para subdonos
         // if (isSubOwner && !isOwner) return reply("🚫 Subdonos não podem adicionar outros subdonos!");
         try {
@@ -17984,7 +17997,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
       case 'remsubdono':
       case 'rmsubdono':
       case 'delsubdono':
-        if (!isOwnerOrSub) return reply("🚫 Apenas o Dono principal pode remover subdonos!");
+        if (!canUseOwnerCmd(command)) return reply("🚫 Você não tem permissão para usar este comando!");
         // Permissão estendida para subdonos
         // if (isSubOwner && !isOwner) return reply("🚫 Subdonos não podem remover outros subdonos!");
         try {
@@ -18062,7 +18075,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
         break;
       case 'listasubdonos':
       case 'listsubdonos':
-        if (!isOwnerOrSub) return reply("🚫 Apenas o Dono e Subdonos podem ver a lista!");
+        if (!canUseOwnerCmd(command)) return reply("🚫 Você não tem permissão para usar este comando!");
         try {
           const subdonos = getSubdonos();
           if (subdonos.length === 0) {
@@ -18091,7 +18104,7 @@ Exemplo: ${groupPrefix}tradutor espanhol | Olá mundo! ◈`);
         break;
 
       case 'addsubbot':
-        if (!isOwnerOrSub) return reply("🚫 Apenas o Dono principal pode adicionar sub-bots!");
+        if (!canUseOwnerCmd(command)) return reply("🚫 Você não tem permissão para usar este comando!");
         try {
           const subBotManager = await import('./utils/subBotManager.js');
 
@@ -30141,10 +30154,23 @@ ${groupPrefix}togglecmdvip premium_ia off`);
       case 'dono':
         try {
           const numeroDonoFormatado = numerodono ? String(numerodono).replace(/\D/g, '') : 'Não configurado';
+          const subdonosList = getSubdonos();
+          
+          let subdonosText = '';
+          if (subdonosList && subdonosList.length > 0) {
+            subdonosText = `│
+│ 👑 *Subdonos:*`;
+            subdonosList.forEach(sub => {
+              const subNum = sub.replace(/@s\.whatsapp\.net|@lid/g, '');
+              subdonosText += `
+│    • wa.me/${subNum}`;
+            });
+          }
+          
           const TextinDonoInfo = `╭━━━⊱ 🌌 *DONO DO BOT* 🌌 ⊱━━━╮
 │
 │ 👤 *Nome:* ${nomedono}
-│ 📱 *Contato:* wa.me/${numeroDonoFormatado}
+│ 📱 *Contato:* wa.me/${numeroDonoFormatado}${subdonosText}
 │
 ╰━━━━━━━━━━━━━━━━━━━━━━━━╯`;
           await reply(TextinDonoInfo);
@@ -39891,6 +39917,103 @@ ${groupData.rules.length}. ${q}`);
         } catch (e) {
           console.error('Erro no comando listalphacmds:', e);
           await reply("Ocorreu um erro ao listar comandos de Alphas 💔");
+        }
+        break;
+
+      // ─── Permissões de Subdono ───
+      case 'grantsubcmd':
+        try {
+          if (!isOwner) return reply("Apenas o dono do bot pode gerenciar permissões de subdono.");
+          if (!q) return reply(`📝 *Uso:* ${prefix}grantsubcmd <comando> @usuário`);
+          
+          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          if (mentionedUsers.length === 0) return reply("❌ Marque o usuário que receberá a permissão.");
+          
+          const parts = q.split('@').map(p => p.trim());
+          const cmdToAllow = parts[0].replace(prefix, '').trim().toLowerCase();
+          const targetUser = mentionedUsers[0];
+          
+          if (!isSubdono(targetUser)) return reply("❌ Este usuário não é um subdono.");
+          if (!cmdToAllow) return reply("❌ Especifique o comando.");
+          
+          if (hasSubOwnerCmdPerm(targetUser, cmdToAllow)) {
+            return reply(`⚠️ O subdono já tem permissão para: ${prefix}${cmdToAllow}`);
+          }
+          
+          grantSubOwnerCmd(targetUser, cmdToAllow);
+          const targetName = targetUser.split('@')[0];
+          await reply(`✅ Permissão concedida!
+
+👤 @${targetName} agora pode usar: ${prefix}${cmdToAllow}`, { contextInfo: { mentionedJid: [targetUser] } });
+        } catch (e) {
+          console.error('Erro no grantsubcmd:', e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
+
+      case 'revokesubcmd':
+        try {
+          if (!isOwner) return reply("Apenas o dono do bot pode gerenciar permissões de subdono.");
+          if (!q) return reply(`📝 *Uso:* ${prefix}revokesubcmd <comando> @usuário`);
+          
+          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          if (mentionedUsers.length === 0) return reply("❌ Marque o usuário que terá a permissão removida.");
+          
+          const parts = q.split('@').map(p => p.trim());
+          const cmdToDeny = parts[0].replace(prefix, '').trim().toLowerCase();
+          const targetUser = mentionedUsers[0];
+          
+          if (!isSubdono(targetUser)) return reply("❌ Este usuário não é um subdono.");
+          if (!cmdToDeny) return reply("❌ Especifique o comando.");
+          
+          if (!hasSubOwnerCmdPerm(targetUser, cmdToDeny)) {
+            return reply(`⚠️ O subdono não tinha permissão para: ${prefix}${cmdToDeny}`);
+          }
+          
+          revokeSubOwnerCmd(targetUser, cmdToDeny);
+          const targetName = targetUser.split('@')[0];
+          await reply(`✅ Permissão revogada!
+
+👤 @${targetName} não pode mais usar: ${prefix}${cmdToDeny}`, { contextInfo: { mentionedJid: [targetUser] } });
+        } catch (e) {
+          console.error('Erro no revokesubcmd:', e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
+
+      case 'listsubcmd':
+        try {
+          if (!isOwner && !isSubOwner) return reply("Apenas o dono ou subdonos podem ver permissões.");
+          
+          let targetUser = sender;
+          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          
+          if (isOwner && mentionedUsers.length > 0) {
+            targetUser = mentionedUsers[0];
+          }
+          
+          const cmds = getSubOwnerCmds(targetUser);
+          const targetName = targetUser.split('@')[0];
+          
+          if (cmds.length === 0) {
+            return reply(`📋 *Permissões de @${targetName}*
+
+Nenhum comando permitido.`, { contextInfo: { mentionedJid: [targetUser] } });
+          }
+          
+          let msg = `📋 *Permissões de @${targetName}*
+
+`;
+          cmds.forEach(cmd => {
+            msg += `✓ ${prefix}${cmd}
+`;
+          });
+          msg += `
+Total: ${cmds.length} comando(s)`;
+          await reply(msg, { contextInfo: { mentionedJid: [targetUser] } });
+        } catch (e) {
+          console.error('Erro no listsubcmd:', e);
+          await reply("Ocorreu um erro 💔");
         }
         break;
 

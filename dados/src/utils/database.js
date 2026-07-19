@@ -1015,6 +1015,66 @@ const getSubdonos = () => {
   return [...loadSubdonos()];
 };
 
+// ─── Permissões de Subdono ───
+const SUBOWNER_PERMS_FILE = path.join(DONO_DIR, 'subowner_perms.json');
+
+const loadSubOwnerPerms = () => {
+  return loadJsonFile(SUBOWNER_PERMS_FILE, {});
+};
+
+const saveSubOwnerPerms = (data) => {
+  try {
+    ensureDirectoryExists(DONO_DIR);
+    fs.writeFileSync(SUBOWNER_PERMS_FILE, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Erro ao salvar permissões de subdono:', error);
+    return false;
+  }
+};
+
+const grantSubOwnerCmd = (userId, command) => {
+  const perms = loadSubOwnerPerms();
+  const userIdBase = userId.replace(/@s\.whatsapp\.net|@lid/g, '');
+  
+  if (!perms[userIdBase]) {
+    perms[userIdBase] = [];
+  }
+  
+  if (!perms[userIdBase].includes(command)) {
+    perms[userIdBase].push(command);
+    saveSubOwnerPerms(perms);
+    return true;
+  }
+  return false;
+};
+
+const revokeSubOwnerCmd = (userId, command) => {
+  const perms = loadSubOwnerPerms();
+  const userIdBase = userId.replace(/@s\.whatsapp\.net|@lid/g, '');
+  
+  if (perms[userIdBase]) {
+    const index = perms[userIdBase].indexOf(command);
+    if (index > -1) {
+      perms[userIdBase].splice(index, 1);
+      saveSubOwnerPerms(perms);
+      return true;
+    }
+  }
+  return false;
+};
+
+const getSubOwnerCmds = (userId) => {
+  const perms = loadSubOwnerPerms();
+  const userIdBase = userId.replace(/@s\.whatsapp\.net|@lid/g, '');
+  return perms[userIdBase] || [];
+};
+
+const hasSubOwnerCmdPerm = (userId, command) => {
+  const cmds = getSubOwnerCmds(userId);
+  return cmds.includes(command);
+};
+
 const loadRentalData = () => {
   return loadJsonFile(ALUGUEIS_FILE, {
     globalMode: false,
@@ -3454,6 +3514,10 @@ export {
   addSubdono,
   removeSubdono,
   getSubdonos,
+  grantSubOwnerCmd,
+  revokeSubOwnerCmd,
+  getSubOwnerCmds,
+  hasSubOwnerCmdPerm,
   loadRentalData,
   saveRentalData,
   isRentalModeActive,
