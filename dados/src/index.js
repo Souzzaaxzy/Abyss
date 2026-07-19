@@ -217,38 +217,27 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                 
                 // ANTI ROUBO
                 if (hasAntiRoubo && authorId) {
-                    // Verificar se o autor é o próprio bot
                     const botJid = nazu.user?.id || '';
                     const botNum = botJid.split(':')[0].replace('@s.whatsapp.net', '');
                     const authorNum = authorId.split('@')[0];
-                    const isBot = botNum === authorNum || authorId.includes(botJid) || botJid.includes(authorId);
                     
-                    console.log(`\x1b[33m[ANTI ROUBO DEBUG]\x1b[0m botJid=${botJid} authorId=${authorId} isBot=${isBot}`);
+                    // Ignorar se for o bot
+                    if (botNum === authorNum) return;
                     
-                    if (!isBot) {
-                        const groupCreator = groupMetadata?.creator || groupMetadata?.owner;
-                        const creatorNum = groupCreator?.split('@')[0] || '';
-                        const isGroupCreator = authorNum === creatorNum;
-                        const isAuthorized = groupSettings.antiRoubo?.authorizedUsers?.some(u => {
-                            const uNum = u.split('@')[0];
-                            return uNum === authorNum;
-                        });
-                        
-                        console.log(`\x1b[33m[ANTI ROUBO DEBUG]\x1b[0m creator=${creatorNum} author=${authorNum} isCreator=${isGroupCreator} isAuth=${!!isAuthorized}`);
-                        
-                        if (!isGroupCreator && !isAuthorized) {
-                            console.log(`\x1b[31m[ANTI ROUBO]\x1b[0m Rebaixando autor não autorizado: ${authorId}`);
-                            try {
-                                // Rebaixar APENAS o autor (não os afetados)
-                                await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(e => console.error('Erro ao rebaixar autor:', e));
-                                const alertMsg = `🚫 *Promoções e rebaixamentos são protegidos neste grupo.*\n\nO administrador @${authorNum} não possui permissão para alterar a administração e foi rebaixado automaticamente.`;
-                                await nazu.sendMessage(id, { text: alertMsg, mentions: [authorId] }).catch(e => {});
-                            } catch (e) {
-                                console.error('Erro no anti roubo:', e);
-                            }
-                        }
+                    const groupCreator = groupMetadata?.creator?.split('@')[0] || '';
+                    const isCreator = authorNum === groupCreator;
+                    const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
+                    
+                    if (!isCreator && !isAuth) {
+                        await nazu.groupParticipantsUpdate(id, [authorId], 'demote').catch(() => {});
+                        const msg = `🚫 *Promoções e rebaixamentos são protegidos.*
+
+@${authorNum} não possui permissão e foi rebaixado.`;
+                        nazu.sendMessage(id, { text: msg, mentions: [authorId] }).catch(() => {});
                     }
                 }
+
+
                 
                 if (hasX9) {
                     const msgText = `⬆️🐺 *X9 Report:* ${promotedIds.map(p => `@${p.split('@')[0]}`).join(', ')} foi(ram) *promovido(s) a administrador*!${authorText}`;
