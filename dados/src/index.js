@@ -34493,20 +34493,13 @@ break;
             // Mostrar menu do antiroubo
             const status = groupData.antiRoubo?.enabled ? '🟢 ATIVO' : '🔴 INATIVO';
             
-            // Obter dono do grupo (mesma lógica do !infogrupo)
-            let ownerJid = null;
-            let ownerDisplay = 'NÃ£o detectado';
-            try {
-              const metadata = await nazu.groupMetadata(from);
-              if (metadata?.owner) {
-                ownerJid = metadata.owner;
-                const ownerNum = ownerJid.split('@')[0];
-                const ownerInfo = await nazu.getName(ownerJid);
-                ownerDisplay = ownerInfo ? ownerInfo + ' (@' + ownerNum + ')' : '@' + ownerNum;
-              }
-            } catch (e) {}
-            
-            // Lista de autorizados com menções corretas
+            // Obter dono do grupo (EXATAMENTE a mesma logica do !infogrupo)
+            const metadata = await nazu.groupMetadata(from);
+            const owner = metadata?.owner || from.split('-')[0] + '@s.whatsapp.net';
+            const ownerNum = owner.split('@')[0];
+            const ownerInfo = await nazu.getName(owner);
+            const ownerDisplay = ownerInfo ? ownerInfo + ' (@' + ownerNum + ')' : '@' + ownerNum;
+            const ownerJid = owner;
             const authUsers = groupData.antiRoubo?.authorizedUsers || [];
             const mentions = [];
             let authList = '*Nenhum usuÃ¡rio autorizado*';
