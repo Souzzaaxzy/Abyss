@@ -225,7 +225,7 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const ownerNum = ownerNumber ? String(ownerNumber).replace(/\D/g, '') : '';
                     if (botNum === authorNum || authorNum === ownerNum) return;
                     
-                    const groupCreator = groupMetadata?.creator?.split('@')[0] || '';
+                    const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
@@ -278,7 +278,7 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
                     const ownerNum = ownerNumber ? String(ownerNumber).replace(/\D/g, '') : '';
                     if (botNum === authorNum || authorNum === ownerNum) return;
                     
-                    const groupCreator = groupMetadata?.creator?.split('@')[0] || '';
+                    const groupCreator = groupMetadata?.owner?.split('@')[0] || '';
                     const isCreator = authorNum === groupCreator;
                     const isAuth = groupSettings.antiRoubo?.authorizedUsers?.some(u => u.split('@')[0] === authorNum);
                     
