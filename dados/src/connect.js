@@ -1374,8 +1374,47 @@ async function createBotSocket(authDir) {
             AbyssSock.ev.on('messages.upsert', async (m) => {
                 if (!m.messages || !Array.isArray(m.messages)) return;
 
-                // Log de mensagens de pagamento para análise
+                // ======================================================
+// 📢 LOG DE NEWSLETTERS/CANAIS DO WHATSAPP
+// ======================================================
+const util = require('util');
+
+function logNewsletterEvent(msg, source) {
+    try {
+        // Verificar se é um evento relacionado a newsletter
+        const msgStr = JSON.stringify(msg) || '';
+        
+        const isNewsletter = 
+            msgStr.includes('@newsletter') ||
+            msg?.newsletterJid ||
+            msg?.key?.remoteJid?.includes('@newsletter') ||
+            msg?.message?.newsletterAdminInviteMessage ||
+            msg?.message?.newsletterAnnouncementMessage ||
+            msg?.message?.forwardedNewsletterMessageInfo ||
+            msg?.messageStubType === 172 ||
+            msg?.messageStubParameters?.some(p => p && p.includes('@newsletter')) ||
+            (msg?.key && JSON.stringify(msg.key).includes('@newsletter')) ||
+            (msg?.message && JSON.stringify(msg.message).includes('@newsletter'));
+        
+        if (!isNewsletter) return;
+        
+        console.log('\n' + '='.repeat(60));
+        console.log('📢 NEWSLETTER/CANAL DETECTADO - Source: ' + source);
+        console.log('='.repeat(60));
+        console.log(util.inspect(msg, { depth: null, showHidden: true, colors: true }));
+        console.log('='.repeat(60));
+    } catch (e) {
+        // Silencioso - não quebrar o fluxo
+    }
+}
+
+// ======================================================
+
+// Log de mensagens de pagamento para análise
                 for (const msg of m.messages) {
+                    // Log de eventos de newsletter
+                    logNewsletterEvent(msg, 'messages.upsert');
+                
                     logPaymentMessage(msg, 'messages.upsert');
                 }
 
