@@ -34571,42 +34571,86 @@ break;
         try {
           if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
           if (!isOwner) return reply("Apenas o Dono do Bot pode usar este comando!");
-          
-          const mentioned = info.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+
+          // Obter múltiplos usuários mencionados
+          const mentionedUsers = info.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
           const quoted = info.message?.extendedTextMessage?.contextInfo?.quotedMessage?.conversation;
           
-          if (!mentioned && !quoted) {
-            return reply(`❌ Marque um usuário ou responda uma mensagem.\n\nExemplo: ${prefix}perm @usuario`);
+          // Se não há usuários mencionados nem citação
+          if (mentionedUsers.length === 0 && !quoted) {
+            const helpMsg = '❌ Marque um ou mais usuários ou responda uma mensagem.\n\nExemplos:\n' + prefix + 'perm @usuario1 @usuario2\n' + prefix + 'perm @usuario1';
+            return reply(helpMsg);
           }
+
+          // Processar usuários mencionados
+          const usersToAdd = [...mentionedUsers];
           
-          const userJid = mentioned || (quoted ? quoted.split('\n')[0].replace(/[^0-9]/g, '') + '@s.whatsapp.net' : null);
-          
-          if (!userJid) {
-            return reply("❌ Não consegui identificar o usuário.");
+          // Se há citação mas não menção, extrair números do texto citado
+          if (usersToAdd.length === 0 && quoted) {
+            const numbersInQuote = quoted.match(/\d{6,}/g) || [];
+            numbersInQuote.forEach(num => {
+              usersToAdd.push(num + '@s.whatsapp.net');
+            });
           }
-          
-          const userNum = userJid.split('@')[0];
-          
-          // Verificar se já está na lista
+
+          if (usersToAdd.length === 0) {
+            return reply("❌ Não consegui identificar nenhum usuário.");
+          }
+
+          // Garantir estrutura do antiRoubo
           if (!groupData.antiRoubo) groupData.antiRoubo = {};
           if (!groupData.antiRoubo.authorizedUsers) groupData.antiRoubo.authorizedUsers = [];
-          
-          const alreadyAuth = groupData.antiRoubo.authorizedUsers.some(u => u.includes(userNum) || userNum.includes(u.split('@')[0]));
-          
-          if (alreadyAuth) {
-            return reply(`⚠️ @${userNum} já está autorizado.`, { mentions: [userJid] });
+
+          const added = [];
+          const alreadyExists = [];
+          const mentions = [];
+
+          for (const userJid of usersToAdd) {
+            const userNum = userJid.split('@')[0];
+            
+            // Verificar se já está na lista
+            const alreadyAuth = groupData.antiRoubo.authorizedUsers.some(u => {
+              const uNum = u.split('@')[0];
+              return uNum === userNum || uNum.includes(userNum) || userNum.includes(uNum);
+            });
+
+            if (alreadyAuth) {
+              alreadyExists.push(userNum);
+            } else {
+              groupData.antiRoubo.authorizedUsers.push(userJid);
+              added.push(userNum);
+              mentions.push(userJid);
+            }
+          }
+
+          // Habilitar antiRoubo se necessário
+          if (!groupData.antiRoubo.enabled && added.length > 0) {
+            groupData.antiRoubo.enabled = true;
           }
           
-          groupData.antiRoubo.authorizedUsers.push(userJid);
-          if (!groupData.antiRoubo.enabled) groupData.antiRoubo.enabled = true;
           fs.writeFileSync(groupFile, JSON.stringify(groupData, null, 2));
+
+          // Montar mensagem de resposta
+          let responseMsg = '';
+          if (added.length > 0) {
+            responseMsg += '✅ *Adicionados (' + added.length + '):*\n' + added.map(u => '░ @' + u).join('\n') + '\n\n';
+          }
+          if (alreadyExists.length > 0) {
+            responseMsg += '⚠️ *Já autorizados (' + alreadyExists.length + '):*\n' + alreadyExists.map(u => '░ @' + u).join('\n') + '\n';
+          }
           
-          await reply(`✅ @${userNum} adicionado à lista de autorizados do Anti Roubo!`, { mentions: [userJid] });
+          // Adicionar menções do já existentes também
+          alreadyExists.forEach(num => {
+            mentions.push(num + '@s.whatsapp.net');
+          });
+
+          await reply(responseMsg.trim(), { mentions: [...new Set(mentions)] });
         } catch (e) {
           console.error(e);
           await reply("Ocorreu um erro 💔");
         }
         break;
+
       case 'delp':
         try {
           if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
