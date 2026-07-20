@@ -274,9 +274,6 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
         const groupSettings = await loadGroupSettings(id);
         // 3. Lógica de ADICIONAR (Boas-vindas + Blacklist)
         if (action === 'add') {
-            // ============================================================
-            // VERIFICAÇÃO DE BLACKLIST - Banir usuários blacklistados
-            // ============================================================
             // Normaliza IDs dos participantes
             const participantIds = participants.map(p => normalizeParticipantId(p));
             // Verifica cada participante contra blacklists
@@ -292,26 +289,8 @@ export const handleGroupParticipantsUpdate = async (nazu, { id, participants, ac
             }
             // Banir usuários encontrados na blacklist
             if (usersToBan.length > 0) {
-                console.log(`\x1b[31m[BLACKLIST]\x1b[0m Encontrados ${usersToBan.length} usuário(s) na blacklist neste grupo`);
-                // Extrai apenas os IDs para o banimento
                 const idsToBan = usersToBan.map(u => u.id);
-                try {
-                    // Executa o banimento
-                    await nazu.groupParticipantsUpdate(id, idsToBan, 'remove');
-                    console.log(`\x1b[32m[BLACKLIST]\x1b[0m Usuários banidos automaticamente por blacklist`);
-                    // Envia mensagem informativa (opcional - não bloqueia o processo)
-                    for (const user of usersToBan) {
-                        const userNum = user.id.split('@')[0];
-                        const blacklistType = user.type === 'global' ? '🛑 GLOBAL' : '📋 LOCAL';
-                        const msg = `🚫 *USUÁRIO REMOVIDO*\n\n${blacklistType}\n@${userNum} foi removido do grupo por estar na blacklist.\n📝 Motivo: ${user.reason}${user.addedBy ? `\n👤 Adicionado por: ${user.addedBy}` : ''}`;
-                        await nazu.sendMessage(id, { 
-                            text: msg, 
-                            mentions: [user.id] 
-                        }).catch(() => {});
-                    }
-                } catch (banError) {
-                    console.error(`\x1b[31m[BLACKLIST]\x1b[0m Erro ao banir usuários: ${banError.message}`);
-                }
+                await nazu.groupParticipantsUpdate(id, idsToBan, 'remove');
             }
             // Continua com o fluxo normal de boas-vindas (se habilitado)
             // Suporte a múltiplas variações de chave usadas no JSON do grupo
