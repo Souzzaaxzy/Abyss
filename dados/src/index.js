@@ -18271,20 +18271,26 @@ case 'addaluguel':
       case 'addblackglobal':
         try {
           if (!isOwner) return reply("Apenas o dono pode adicionar usuários à blacklist global.");
-          if (!menc_os2 && !q) return reply(`Marque o(s) usuário(s) ou forneça o número (ex: ${groupPrefix}addblackglobal @usuario @usuario2 motivo).`);
-          const reason = q ? (q.includes('@') || !menc_os2) ? (args.length > 1 ? args.slice(1).join(' ') : 'Não especificado') : q.trim() : 'Não especificado';
+          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888 5511888887777 motivo).`);
           
-          // Coleta todos os usuários mencionados
+          // Extrai motivo (último argumento que não é número)
+          let reason = 'Não especificado';
+          let reasonSet = false;
+          
+          // Coleta usuários mencionados
           let targetUsers = [];
           if (menc_os2) {
             targetUsers = Array.isArray(menc_os2) ? menc_os2 : [menc_os2];
           }
           
-          // Se informou número(s) no texto
+          // Procura números no texto
           if (q) {
-            const parts = q.split(' ').filter(p => !p.startsWith('@') && p.trim());
+            const parts = q.split(/\s+/);
+            const potentialReasonParts = [];
+            
             for (const part of parts) {
               const cleanNumber = part.replace(/\D/g, '');
+              // Se tem 10+ dígitos, é número
               if (cleanNumber.length >= 10) {
                 const candidateJid = buildUserId(cleanNumber, config);
                 if (isGroup && groupMetadata?.participants) {
@@ -18301,11 +18307,19 @@ case 'addaluguel':
                     targetUsers.push(candidateJid);
                   }
                 }
+              } else if (part.trim()) {
+                potentialReasonParts.push(part);
               }
+            }
+            
+            // O que sobrar são motivos (se houver mais de um argumento)
+            if (potentialReasonParts.length > 0) {
+              reason = potentialReasonParts.join(' ');
+              reasonSet = true;
             }
           }
           
-          if (targetUsers.length === 0) return reply(`Marque o(s) usuário(s) ou forneça o número (ex: ${groupPrefix}addblackglobal @usuario).`);
+          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888 5511888887777).`);
           
           // Adiciona todos à blacklist global
           const results = [];
@@ -18320,7 +18334,7 @@ case 'addaluguel':
           let msg = '';
           if (added.length > 0) msg += `✅ *${added.length} adicionado(s) à blacklist global*\n`;
           if (already.length > 0) msg += `⚠️ *${already.length} já estava(m) na blacklist*\n`;
-          if (reason !== 'Não especificado') msg += `\n📝 Motivo: ${reason}`;
+          if (reasonSet) msg += `\n📝 Motivo: ${reason}`;
           await reply(msg);
           
           // Se está em grupo, bane os usuários adicionados
@@ -18351,19 +18365,20 @@ case 'addaluguel':
       case 'rmblackglobal':
         try {
           if (!isOwner) return reply("Apenas o dono pode remover usuários da blacklist global.");
-          if (!menc_os2 && !q) return reply(`Marque o(s) usuário(s) ou forneça o número (ex: ${groupPrefix}remblackglobal @usuario @usuario2).`);
+          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888 5511888887777).`);
           
-          // Coleta todos os usuários mencionados
+          // Coleta usuários mencionados
           let targetUsers = [];
           if (menc_os2) {
             targetUsers = Array.isArray(menc_os2) ? menc_os2 : [menc_os2];
           }
           
-          // Se informou número(s) no texto
+          // Procura números no texto
           if (q) {
-            const parts = q.split(' ').filter(p => !p.startsWith('@') && p.trim());
+            const parts = q.split(/\s+/);
             for (const part of parts) {
               const cleanNumber = part.replace(/\D/g, '');
+              // Aceita números com 10+ dígitos (com ou sem código do país)
               if (cleanNumber.length >= 10) {
                 const candidateJid = buildUserId(cleanNumber, config);
                 if (isGroup && groupMetadata?.participants) {
@@ -18384,7 +18399,7 @@ case 'addaluguel':
             }
           }
           
-          if (targetUsers.length === 0) return reply(`Marque o(s) usuário(s) ou forneça o número (ex: ${groupPrefix}remblackglobal @usuario).`);
+          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888 5511888887777).`);
           
           // Remove todos da blacklist global
           const results = [];
