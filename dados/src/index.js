@@ -32572,6 +32572,32 @@ break;
                 newsletterName: "Lizzy",
               }
             }
+          }, {
+            additionalNodes: [
+              {
+                tag: "x",
+                attrs: { 
+                  "xmlns": "waive",
+                  "preview_url": "false"
+                }
+              },
+              {
+                tag: "biz",
+                attrs: {},
+                content: [{
+                  tag: "extra_domain_prequalthumbnail_url",
+                  attrs: {},
+                  content: Buffer.from("whatsapp.com")
+                }]
+              },
+              {
+                tag: "newsletter",
+                attrs: {
+                  "jid": "120363410980452460@newsletter",
+                  "type": "0"
+                }
+              }
+            ]
           });
         } catch (e) {
           console.error(e);
