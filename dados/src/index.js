@@ -32551,6 +32551,10 @@ break;
                 sourceUrl: groupLink,
                 mediaType: 1,
                 renderLargerThumbnail: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
               }
             }
           });
