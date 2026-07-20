@@ -7404,7 +7404,7 @@ switch (command) {
             mimetype: 'video/mp4'
           }, {
             quoted: info,
-            contextInfo: { ...gerarContextNewsletter() }
+            contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
           });
         } catch (error) {
           console.error('Erro ao enviar menufut:', error);
@@ -23124,7 +23124,7 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: { ...gerarContextNewsletter() }
+                contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
               });
                 } else {
                   await reply(lerMaisPrefix + menuText);
@@ -23140,7 +23140,7 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: { ...gerarContextNewsletter() }
+                contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
               });
               } else {
                 await reply(lerMaisPrefix + menuText);
@@ -23156,7 +23156,7 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: { ...gerarContextNewsletter() }
+                contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
               });
             } else {
               await reply(lerMaisPrefix + menuText);
@@ -24213,7 +24213,7 @@ Precisa de ajuda? Entre em contato:
               gifPlayback: isGif
             }, {
               quoted: info,
-              contextInfo: { ...gerarContextNewsletter() }
+              contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
             });
           } else {
             await reply(lerMaisPrefix + menuText);
@@ -30193,7 +30193,7 @@ ${groupPrefix}togglecmdvip premium_ia off`);
             mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
           }, {
             quoted: info,
-            contextInfo: { ...gerarContextNewsletter() }
+            contextInfo: { forwardingScore: 999, isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } }
           });
         } catch (e) {
           console.error(e);
