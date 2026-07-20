@@ -18271,7 +18271,7 @@ case 'addaluguel':
       case 'addblackglobal':
         try {
           if (!isOwner) return reply("Apenas o dono pode adicionar usuários à blacklist global.");
-          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888 5511888887777 motivo).`);
+          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888|5511888887777 motivo).`);
           
           // Extrai motivo (último argumento que não é número)
           let reason = 'Não especificado';
@@ -18283,9 +18283,9 @@ case 'addaluguel':
             targetUsers = Array.isArray(menc_os2) ? menc_os2 : [menc_os2];
           }
           
-          // Procura números no texto
+          // Procura números no texto (separados por |)
           if (q) {
-            const parts = q.split(/\s+/);
+            const parts = q.split(/[|\s]+/);
             const potentialReasonParts = [];
             
             for (const part of parts) {
@@ -18319,7 +18319,7 @@ case 'addaluguel':
             }
           }
           
-          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888 5511888887777).`);
+          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}addblackglobal 5511999998888|5511888887777).`);
           
           // Adiciona todos à blacklist global
           const results = [];
@@ -18365,7 +18365,7 @@ case 'addaluguel':
       case 'rmblackglobal':
         try {
           if (!isOwner) return reply("Apenas o dono pode remover usuários da blacklist global.");
-          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888 5511888887777).`);
+          if (!menc_os2 && !q) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888|5511888887777).`);
           
           // Coleta usuários mencionados
           let targetUsers = [];
@@ -18373,9 +18373,9 @@ case 'addaluguel':
             targetUsers = Array.isArray(menc_os2) ? menc_os2 : [menc_os2];
           }
           
-          // Procura números no texto
+          // Procura números no texto (separados por |)
           if (q) {
-            const parts = q.split(/\s+/);
+            const parts = q.split(/[|\s]+/);
             for (const part of parts) {
               const cleanNumber = part.replace(/\D/g, '');
               // Aceita números com 10+ dígitos (com ou sem código do país)
@@ -18399,7 +18399,7 @@ case 'addaluguel':
             }
           }
           
-          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888 5511888887777).`);
+          if (targetUsers.length === 0) return reply(`Forneça número(s) (ex: ${groupPrefix}remblackglobal 5511999998888|5511888887777).`);
           
           // Remove todos da blacklist global
           const results = [];
