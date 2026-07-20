@@ -31047,6 +31047,47 @@ case 'set-bannerbv':
           reply("Ocorreu um erro 💔");
         }
         break;
+      case 'scanblacklist':
+        try {
+          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Você precisa ser administrador 💔");
+          await reply("🔍 *Escaneando membros do grupo...*");
+          const globalBlacklist = loadGlobalBlacklist();
+          const groupFilePath = buildGroupFilePath(from);
+          let groupData = fs.existsSync(groupFilePath) ? JSON.parse(fs.readFileSync(groupFilePath)) : { blacklist: {} };
+          groupData.blacklist = groupData.blacklist || {};
+          const members = groupMetadata?.participants || [];
+          const toBan = [];
+          for (const member of members) {
+            const memberId = member.id || member;
+            if (memberId === botNumber) continue;
+            // Verifica global
+            const inGlobal = Object.keys(globalBlacklist.users || {}).find(k => idsMatch(k, memberId));
+            if (inGlobal) {
+              toBan.push({ id: memberId, type: 'global', reason: globalBlacklist.users[inGlobal].reason });
+              continue;
+            }
+            // Verifica local
+            const inLocal = Object.keys(groupData.blacklist).find(k => idsMatch(k, memberId));
+            if (inLocal) {
+              toBan.push({ id: memberId, type: 'local', reason: groupData.blacklist[inLocal].reason });
+            }
+          }
+          if (toBan.length === 0) {
+            return reply("✅ Nenhum usuário na blacklist encontrado neste grupo.");
+          }
+          const idsToBan = toBan.map(u => u.id);
+          await nazu.groupParticipantsUpdate(from, idsToBan, 'remove');
+          let msg = `🚫 *${toBan.length} USUÁRIO(S) BANIDO(S)*\n\n`;
+          for (const u of toBan) {
+            msg += `👤 @${u.id.split('@')[0]}\n📋 Tipo: ${u.type === 'global' ? '🛑 GLOBAL' : '📋 LOCAL'}\n📝 Motivo: ${u.reason}\n\n`;
+          }
+          reply(msg, { mentions: idsToBan });
+        } catch (e) {
+          console.error(e);
+          reply("Ocorreu um erro 💔");
+        }
+        break;
       case 'adv':
       case 'advertir':
       case 'warning':
