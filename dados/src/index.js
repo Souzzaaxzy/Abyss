@@ -33911,7 +33911,21 @@ break;
             registerMassMentionUse(from);
           }
 
-          await nazu.sendMessage(from, DFC4, { contextInfo: { forwardingScore: 999, isForwarded: true, externalAdReply: { title: "📢 Canal Lizzy", body: "Ver canal", showAdAttribution: false }, forwardedNewsletterMessageInfo: { newsletterJid: "120363410980452460@newsletter", newsletterName: "Lizzy" } } }).catch(error => { });
+          await nazu.sendMessage(from, DFC4, {
+            contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
+          }).catch(error => { });
         } catch (e) {
           console.error(e);
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
