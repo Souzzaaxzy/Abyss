@@ -7408,11 +7408,19 @@ switch (command) {
             mimetype: 'video/mp4'
           }, {
             quoted: info,
-            contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+            contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
           });
         } catch (error) {
           console.error('Erro ao enviar menufut:', error);
@@ -23132,11 +23140,19 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+                contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
               });
                 } else {
                   await reply(lerMaisPrefix + menuText);
@@ -23152,11 +23168,19 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+                contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
               });
               } else {
                 await reply(lerMaisPrefix + menuText);
@@ -23172,11 +23196,19 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+                contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
               });
             } else {
               await reply(lerMaisPrefix + menuText);
@@ -24233,11 +24265,19 @@ Precisa de ajuda? Entre em contato:
               gifPlayback: isGif
             }, {
               quoted: info,
-              contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+              contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
             });
           } else {
             await reply(lerMaisPrefix + menuText);
@@ -30217,11 +30257,19 @@ ${groupPrefix}togglecmdvip premium_ia off`);
             mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
           }, {
             quoted: info,
-            contextInfo: gerarContextNewsletter({
-              title: "📢 Canal Lizzy",
-              body: "Ver canal",
-              showAdAttribution: false,
-            })
+            contextInfo: {
+              externalAdReply: {
+                title: "📢 Canal Lizzy",
+                body: "Ver canal",
+                showAdAttribution: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
           });
         } catch (e) {
           console.error(e);
