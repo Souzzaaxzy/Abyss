@@ -6709,7 +6709,9 @@ function gerarContextNewsletter() {
         forwardedNewsletterMessageInfo: {
             newsletterJid: "120363410980452460@newsletter",
             newsletterName: "Lizzy"
-        }
+        },
+        forwardingScore: 999,
+        isForwarded: true
     };
 }
 // ======================================================
