@@ -18325,10 +18325,30 @@ case 'addaluguel':
               return reply('❌ Número inválido! Use um número completo (ex: 5511999998888)');
             }
           }
+          // Adiciona à blacklist global
           const result = await addGlobalBlacklist(targetUser, reason, pushname, nazu);
           await reply(result.message, {
             mentions: [targetUser]
           });
+          // Se está em grupo, bane o usuário imediatamente
+          if (isGroup && targetUser && result.success) {
+            try {
+              // Tenta obter o JID completo para banir
+              let banId = targetUser;
+              if (groupMetadata?.participants) {
+                const participant = groupMetadata.participants.find(p => 
+                  idsMatch(p.id, targetUser) || idsMatch(p.lid, targetUser)
+                );
+                if (participant?.id) banId = participant.id;
+              }
+              await nazu.groupParticipantsUpdate(from, [banId], 'remove');
+              await reply(`🚫 @${getUserName(targetUser)} foi removido do grupo.`, {
+                mentions: [banId]
+              });
+            } catch (banErr) {
+              console.error('Erro ao banir usuário:', banErr.message);
+            }
+          }
         } catch (e) {
           console.error('Erro no comando addblackglobal:', e);
           await reply("Ocorreu um erro ao adicionar à blacklist global 💔");
@@ -30973,6 +30993,22 @@ case 'set-bannerbv':
           reply(`✅ @${getUserName(targetUser)} foi adicionado à blacklist.\nMotivo: ${reason}`, {
             mentions: [targetUser]
           });
+          // Bane o usuário imediatamente do grupo
+          try {
+            let banId = targetUser;
+            if (groupMetadata?.participants) {
+              const participant = groupMetadata.participants.find(p => 
+                idsMatch(p.id, targetUser) || idsMatch(p.lid, targetUser)
+              );
+              if (participant?.id) banId = participant.id;
+            }
+            await nazu.groupParticipantsUpdate(from, [banId], 'remove');
+            await reply(`🚫 @${getUserName(targetUser)} foi removido do grupo.`, {
+              mentions: [banId]
+            });
+          } catch (banErr) {
+            console.error('Erro ao banir usuário:', banErr.message);
+          }
         } catch (e) {
           console.error(e);
           reply("Ocorreu um erro 💔");
