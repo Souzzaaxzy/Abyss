@@ -2933,18 +2933,21 @@ const addGlobalBlacklist = async (userId, reason, addedBy, nazu = null) => {
   if (alreadyExistsKey) {
     return {
       success: false,
-      message: `✨ Usuário @${getUserName(userId)} já está na blacklist global!`
+      message: `✨ Usuário @${userId.split('@')[0]} já está na blacklist global!`
     };
   }
-  blacklistData.users[userId] = {
+  // Normaliza o ID para salvar (usa apenas número@domain)
+  const saveId = userId.includes(':') ? userId.split(':')[0] + (userId.includes('@lid') ? '@lid' : '@s.whatsapp.net') : userId;
+  blacklistData.users[saveId] = {
     reason: reason || 'Não especificado',
     addedBy: addedBy || 'Desconhecido',
-    addedAt: new Date().toISOString()
+    addedAt: new Date().toISOString(),
+    originalId: userId // Salva o ID original para referência
   };
   if (saveGlobalBlacklist(blacklistData)) {
     return {
       success: true,
-      message: `🎉 Usuário @${getUserName(userId)} adicionado à blacklist global com sucesso! Motivo: ${reason || 'Não especificado'}`
+      message: `🎉 Usuário @${saveId.split('@')[0]} adicionado à blacklist global com sucesso! Motivo: ${reason || 'Não especificado'}`
     };
   } else {
     return {
@@ -2972,24 +2975,32 @@ const removeGlobalBlacklist = async (userId, nazu = null) => {
   }
 
   let blacklistData = loadGlobalBlacklist();
-  // permite remover por correspondência base (JID/LID)
+  // Permite remover por correspondência base (JID/LID)
   let foundKey = Object.keys(blacklistData.users).find(k => idsMatch(k, userId));
-  if (!blacklistData.users[userId] && !foundKey) {
+  
+  // Se não encontrou, tenta procurar por qualquer chave que contenha o número
+  if (!foundKey) {
+    const userNumber = userId.split('@')[0].replace(/\D/g, '');
+    foundKey = Object.keys(blacklistData.users).find(k => {
+      const keyNumber = k.split('@')[0].replace(/\D/g, '');
+      return keyNumber === userNumber;
+    });
+  }
+  
+  if (!foundKey) {
     return {
       success: false,
-      message: `🤔 Usuário @${getUserName(userId)} não está na blacklist global.`
+      message: `🤔 Usuário @${userId.split('@')[0]} não está na blacklist global.`
     };
   }
-  // Se encontrou por correspondência, deleta a chave encontrada
-  if (foundKey) {
-    delete blacklistData.users[foundKey];
-  } else {
-    delete blacklistData.users[userId];
-  }
+  
+  // Remove o usuário encontrado
+  delete blacklistData.users[foundKey];
+  
   if (saveGlobalBlacklist(blacklistData)) {
     return {
       success: true,
-      message: `👋 Usuário @${getUserName(userId)} removido da blacklist global com sucesso!`
+      message: `👋 Usuário @${foundKey.split('@')[0]} removido da blacklist global com sucesso!`
     };
   } else {
     return {

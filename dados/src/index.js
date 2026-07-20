@@ -18383,7 +18383,8 @@ case 'addaluguel':
           }
           let message = `🛑 *Blacklist Global* 🛑\n\n`;
           for (const [userId, data] of Object.entries(blacklistData.users)) {
-            message += `➤ @${getUserName(userId)}\n   Motivo: ${data.reason}\n   Adicionado por: ${data.addedBy}\n   Data: ${new Date(data.addedAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n\n`;
+            const displayId = userId.includes('@') ? userId.split('@')[0] : userId;
+            message += `➤ @${displayId}\n   Motivo: ${data.reason}\n   Adicionado por: ${data.addedBy}\n   Data: ${new Date(data.addedAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}\n\n`;
           }
           await reply(message, {
             mentions: Object.keys(blacklistData.users)
