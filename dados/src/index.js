@@ -20362,6 +20362,14 @@ break;
             header
           });
           const lerMaisPrefix = getMenuLerMaisText();
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
           // Envia o áudio primeiro se configurado
           if (isMenuAudioEnabled()) {
             const audioPath = getMenuAudioPath();
@@ -20377,56 +20385,42 @@ break;
                 // Depois envia o menu
                 if (mediaBuffer) {
                   await nazu.sendMessage(from, {
-                [useVideo ? 'video' : 'image']: mediaBuffer,
-                caption: lerMaisPrefix + menuText,
-                gifPlayback: useVideo,
-                mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
-              }, {
-                quoted: info,
-                contextInfo: {
-              externalAdReply: {
-                title: "📢 Canal Lizzy",
-                body: "Ver canal",
-                showAdAttribution: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
-              forwardingScore: 999,
-              isForwarded: true,
-            }
-              });
+                    [useVideo ? 'video' : 'image']: mediaBuffer,
+                    caption: lerMaisPrefix + menuText,
+                    gifPlayback: useVideo,
+                    mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
+                  }, {
+                    quoted: info,
+                    contextInfo: newsletterContext
+                  });
                 } else {
-                  await reply(lerMaisPrefix + menuText);
+                  await nazu.sendMessage(from, {
+                    text: lerMaisPrefix + menuText,
+                    contextInfo: newsletterContext
+                  }, {
+                    quoted: info
+                  });
                 }
               });
             } else {
               // Se não tem áudio válido, envia só o menu
               if (mediaBuffer) {
                 await nazu.sendMessage(from, {
-                [useVideo ? 'video' : 'image']: mediaBuffer,
-                caption: lerMaisPrefix + menuText,
-                gifPlayback: useVideo,
-                mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
-              }, {
-                quoted: info,
-                contextInfo: {
-              externalAdReply: {
-                title: "📢 Canal Lizzy",
-                body: "Ver canal",
-                showAdAttribution: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
-              forwardingScore: 999,
-              isForwarded: true,
-            }
-              });
+                  [useVideo ? 'video' : 'image']: mediaBuffer,
+                  caption: lerMaisPrefix + menuText,
+                  gifPlayback: useVideo,
+                  mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
+                }, {
+                  quoted: info,
+                  contextInfo: newsletterContext
+                });
               } else {
-                await reply(lerMaisPrefix + menuText);
+                await nazu.sendMessage(from, {
+                  text: lerMaisPrefix + menuText,
+                  contextInfo: newsletterContext
+                }, {
+                  quoted: info
+                });
               }
             }
           } else {
@@ -20439,22 +20433,15 @@ break;
                 mimetype: useVideo ? 'video/mp4' : 'image/jpeg'
               }, {
                 quoted: info,
-                contextInfo: {
-              externalAdReply: {
-                title: "📢 Canal Lizzy",
-                body: "Ver canal",
-                showAdAttribution: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
-              forwardingScore: 999,
-              isForwarded: true,
-            }
+                contextInfo: newsletterContext
               });
             } else {
-              await reply(lerMaisPrefix + menuText);
+              await nazu.sendMessage(from, {
+                text: lerMaisPrefix + menuText,
+                contextInfo: newsletterContext
+              }, {
+                quoted: info
+              });
             }
           }
         } catch (error) {
@@ -20483,7 +20470,20 @@ break;
             ...customDesign,
             header
           });
-          await reply(`${menuText}\n\n⚠️ *Nota*: Ocorreu um erro ao carregar a mídia do menu.`);
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
+          await nazu.sendMessage(from, {
+            text: `${menuText}\n\n⚠️ *Nota*: Ocorreu um erro ao carregar a mídia do menu.`,
+            contextInfo: newsletterContext
+          }, {
+            quoted: info
+          });
         }
         break;
       case 'alteradores':
@@ -21298,6 +21298,14 @@ Precisa de ajuda? Entre em contato:
               await menuFunction(groupPrefix, customBotName, pushname, customDesign)) :
             'Menu não disponível';
           const lerMaisPrefix = getMenuLerMaisText();
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
           // Envia o menu com ou sem mídia
           if (mediaBuffer) {
             await nazu.sendMessage(from, {
@@ -21306,22 +21314,15 @@ Precisa de ajuda? Entre em contato:
               gifPlayback: isGif
             }, {
               quoted: info,
-              contextInfo: {
-              externalAdReply: {
-                title: "📢 Canal Lizzy",
-                body: "Ver canal",
-                showAdAttribution: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
-              forwardingScore: 999,
-              isForwarded: true,
-            }
+              contextInfo: newsletterContext
             });
           } else {
-            await reply(lerMaisPrefix + menuText);
+            await nazu.sendMessage(from, {
+              text: lerMaisPrefix + menuText,
+              contextInfo: newsletterContext
+            }, {
+              quoted: info
+            });
           }
         }
       case 'antipv3':
