@@ -594,57 +594,6 @@ async function handleGroupJoinRequest(AbyssSock, inf) {
 
         if (!from || !participantJid) return;
 
-        // Enviar mensagem estilizada se X9 estiver ativado
-        if (inf.action === 'approve' || inf.action === 'reject') {
-            try {
-                const groupSettings = await loadGroupSettings(from);
-                if (groupSettings.x9) {
-                    if (DEBUG_MODE) console.log(`[X9] Solicitude ${inf.action} por ${inf.author} para ${participantJid}`);
-                    
-                    const data = new Date();
-                    const dataFormatada = data.toLocaleDateString('pt-BR');
-                    const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    
-                    const isApproved = inf.action === 'approve';
-                    const autorNum = inf.author?.split('@')[0] || 'desconhecido';
-                    const vitimaNum = participantJid.split('@')[0];
-                    
-                    const mensagem = isApproved 
-                        ? `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
-┃
-┃ ✅ *SOLICITAÇÃO ACEITA*
-┃
-┃ 👮 *Autor:* @${autorNum}
-┃
-┃ 👤 *Vítima:* @${vitimaNum}
-┃
-┃ 📅 *Data:* ${dataFormatada}
-┃ 🕒 *Hora:* ${horaFormatada}
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━╯`
-                        : `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
-┃
-┃ ❌ *SOLICITAÇÃO REJEITADA*
-┃
-┃ 👮 *Autor:* @${autorNum}
-┃
-┃ 👤 *Vítima:* @${vitimaNum}
-┃
-┃ 📅 *Data:* ${dataFormatada}
-┃ 🕒 *Hora:* ${horaFormatada}
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
-                    
-                    await AbyssSock.sendMessage(from, {
-                        text: mensagem,
-                        mentions: [inf.author, participantJid]
-                    });
-                }
-            } catch (logError) {
-                console.error('Erro ao enviar mensagem X9:', logError.message);
-            }
-        }
-
         if (typeof participantJid === "object") {
             Object.assign(typeIds, {
                 id: participantJid?.pn?.endsWith("s.whatsapp.net") ? participantJid?.pn : '',
@@ -1327,6 +1276,15 @@ async function createBotSocket(authDir) {
             }
             await handleGroupJoinRequest(AbyssSock, inf);
         });
+        
+        // Listener adicional para eventos de participantes (como approve/reject de solicitações)
+        AbyssSock.ev.on('groups.upsert', async (groupUpdates) => {
+            if (DEBUG_MODE) {
+                console.log('\n🐛 ========== GROUPS UPSERT ==========');
+                console.log('📦 Updates:', JSON.stringify(groupUpdates, null, 2));
+                console.log('🐛 ===================================\n');
+            }
+        });
 
 
 
@@ -1340,6 +1298,45 @@ async function createBotSocket(authDir) {
                 console.log('👥 Participants:', inf.participants);
                 console.log(' Author:', inf.author || 'N/A');
                 console.log('🐛 ================================================\n');
+            }
+            
+            // Verificar X9 para registro de solicitações aceitas
+            const groupId = inf.id || inf.jid;
+            if (groupId && inf.action === 'add' && inf.author) {
+                try {
+                    const groupSettings = await loadGroupSettings(groupId);
+                    if (groupSettings.x9) {
+                        // Alguém foi adicionado ao grupo por um admin
+                        const data = new Date();
+                        const dataFormatada = data.toLocaleDateString('pt-BR');
+                        const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        
+                        for (const participant of inf.participants) {
+                            const autorNum = inf.author?.split('@')[0] || 'desconhecido';
+                            const vitimaNum = participant.split('@')[0];
+                            
+                            const mensagem = `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
+┃
+┃ ✅ *SOLICITAÇÃO ACEITA*
+┃
+┃ 👮 *Autor:* @${autorNum}
+┃
+┃ 👤 *Vítima:* @${vitimaNum}
+┃
+┃ 📅 *Data:* ${dataFormatada}
+┃ 🕒 *Hora:* ${horaFormatada}
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
+                            
+                            await AbyssSock.sendMessage(groupId, {
+                                text: mensagem,
+                                mentions: [inf.author, participant]
+                            });
+                        }
+                    }
+                } catch (logError) {
+                    console.error('Erro ao enviar mensagem X9:', logError.message);
+                }
             }
             
             // Garante que o ID correto seja passado se estiver em 'jid'
