@@ -18488,6 +18488,72 @@ case 'addaluguel':
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
         }
         break;
+      // COMANDOS DO DONO - ADD/DEL CASE
+      case 'addcase':
+        try {
+          if (!SoDono) return reply("Apenas o dono pode usar este comando.");
+          if (!q) return reply(`⚙️ *Adicionar Case*\n\n📝 Use: ${groupPrefix}addcase case 'nome': { ... }`);
+          
+          const newCase = q.trim();
+          const indexFilePath = path.join(__dirname, 'index.js');
+          
+          // Verifica se a case já existe
+          const caseNameMatch = newCase.match(/case\s+['"]([^'"]+)['"]\s*:/);
+          if (caseNameMatch) {
+            const caseName = caseNameMatch[1];
+            const caseExistsRegex = new RegExp(`case\\s+['"]${caseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]\\s*:`);
+            const fileContent = fs.readFileSync(indexFilePath, 'utf-8');
+            if (caseExistsRegex.test(fileContent)) {
+              return reply("❌ Essa case já existe.");
+            }
+          }
+          
+          // Localiza o último break; do switch principal para inserir a nova case
+          const lastBreakRegex = /\n\s*break;\n\s*(?:case\s+['"][^'"]+['"]\s*:|\/\/|\*\/|\}\s*$)/g;
+          const matches = [...fileContent.matchAll(lastBreakRegex)];
+          
+          if (matches.length === 0) {
+            return reply("❌ Não foi possível encontrar o local para inserir a case.");
+          }
+          
+          const lastMatch = matches[matches.length - 1];
+          const insertPosition = lastMatch.index + lastMatch[0].length;
+          
+          const updatedContent = fileContent.slice(0, insertPosition) + '\n' + newCase + '\n' + fileContent.slice(insertPosition);
+          
+          fs.writeFileSync(indexFilePath, updatedContent, 'utf-8');
+          await reply("✅ Case adicionada com sucesso!");
+        } catch (e) {
+          console.error(e);
+          await reply("❌ Ocorreu um erro ao adicionar a case.");
+        }
+        break;
+      case 'delcase':
+        try {
+          if (!SoDono) return reply("Apenas o dono pode usar este comando.");
+          if (!q) return reply(`⚙️ *Deletar Case*\n\n📝 Use: ${groupPrefix}delcase nome_da_case`);
+          
+          const caseName = q.trim().toLowerCase();
+          const indexFilePath = path.join(__dirname, 'index.js');
+          const fileContent = fs.readFileSync(indexFilePath, 'utf-8');
+          
+          // Procura a case (com aspas simples ou duplas)
+          const caseRegex = new RegExp(`case\\s+['"]${caseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"]\\s*:([\\s\\S]*?)(?=\\n\\s*case\\s+['"]|\\n\\s*default\\s*:|\\n\\s*break;\\s*(?:\\/\\/|$))`, 'i');
+          const match = fileContent.match(caseRegex);
+          
+          if (!match) {
+            return reply("❗ Essa case não existe no arquivo.");
+          }
+          
+          const updatedContent = fileContent.replace(match[0], '');
+          
+          fs.writeFileSync(indexFilePath, updatedContent, 'utf-8');
+          await reply("✅ ᴄᴀsᴇ ᴅᴇʟᴇᴛᴀᴅᴀ ᴄᴏᴍ sᴜᴄᴇssᴏ!");
+        } catch (e) {
+          console.error(e);
+          await reply("❌ Ocorreu um erro ao deletar a case.");
+        }
+        break;
       // VERIFICADOR DE LINKS (FishFish API)
       case 'verificar':
       case 'checklink':
