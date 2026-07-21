@@ -27393,28 +27393,7 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
           } = dataTake[sender];
           const encmediats = await getFileBuffer(info.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage, 'sticker');
           
-          // ContextInfo do canal usando proto (igual ao !linkgp)
-          const { proto } = await import('baileys');
-          
-          const contextInfo = proto.MessageContextInfo.create({
-            externalAdReply: proto.IExternalAdReply.create({
-              title: "📬 Lizzy Stickers",
-              body: "👉 Toque para ver o canal",
-              thumbnailUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-              thumbnail: Buffer.from(""),
-              sourceUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-              mediaType: 1,
-              renderLargerThumbnail: false,
-            }),
-            forwardedNewsletterMessageInfo: proto.IForwardedNewsletterMessageInfo.create({
-              newsletterJid: "120363410980452460@newsletter",
-              newsletterName: "Lizzy",
-              serverMessageId: -1,
-            }),
-            forwardingScore: 999,
-            isForwarded: true,
-          });
-          
+          // ContextInfo do canal (igual ao !linkgp)
           await sendSticker(nazu, from, {
             sticker: `data:image/jpeg;base64,${encmediats.toString('base64')}`,
             author: pack,
@@ -27422,7 +27401,22 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
             rename: true
           }, {
             quoted: info,
-            contextInfo: contextInfo
+            contextInfo: {
+              externalAdReply: {
+                title: "📬 Lizzy Stickers",
+                body: "👉 Toque para ver o canal",
+                thumbnailUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
+                sourceUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
+                mediaType: 1,
+                renderLargerThumbnail: false,
+              },
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy",
+              },
+              forwardingScore: 999,
+              isForwarded: true,
+            }
           });
         } catch (e) {
           console.error(e);

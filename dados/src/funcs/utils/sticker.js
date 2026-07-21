@@ -201,12 +201,13 @@ const sendSticker = async (nazu, jid, {
     webpBuffer = await writeExif(webpBuffer, { packname, author });
   }
 
-  const messageOptions = { quoted };
+  const messageContent = { sticker: webpBuffer };
+  
   if (contextInfo) {
-    messageOptions.contextInfo = contextInfo;
+    messageContent.contextInfo = contextInfo;
   }
 
-  await nazu.sendMessage(jid, { sticker: webpBuffer }, messageOptions);
+  await nazu.sendMessage(jid, messageContent, { quoted });
   return webpBuffer;
 };
 
