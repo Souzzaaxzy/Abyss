@@ -26094,20 +26094,12 @@ ${groupPrefix}togglecmdvip premium_ia off`);
           await nazu.sendMessage(from, {
             text: statusMessage,
             contextInfo: {
-              externalAdReply: {
-                title: "📬 Lizzy Stickers",
-                body: "👉 Toque para ver o canal",
-                thumbnailUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-                sourceUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-                mediaType: 1,
-                renderLargerThumbnail: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
               forwardingScore: 999,
               isForwarded: true,
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy"
+              }
             }
           });
         } catch (e) {
@@ -27420,43 +27412,18 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
             webpBuffer = await writeExif(webpBuffer, { packname: pack, author });
           }
 
-          // Criar uma mensagem mock para usar com generateForwardMessageContent
-          const mockMessage = {
-            message: {
-              stickerMessage: webpBuffer
-            },
-            key: {
-              remoteJid: from,
-              fromMe: false,
-              id: generateMessageID()
+          // Enviar figurinha com forwardedNewsletterMessageInfo
+          await nazu.sendMessage(from, {
+            sticker: webpBuffer,
+            contextInfo: {
+              forwardingScore: 999,
+              isForwarded: true,
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy"
+              }
             }
-          };
-
-          // Gerar conteúdo de mensagem encaminhada
-          const forwardedContent = await generateForwardMessageContent(mockMessage, true);
-
-          // Criar a mensagem real com generateWAMessageFromContent
-          const msg = await generateWAMessageFromContent(from, forwardedContent, {
-            userJid: nazu.user.id,
-            quoted: info
           });
-
-          // Injetar forwardedNewsletterMessageInfo diretamente na stickerMessage
-          if (msg.message?.stickerMessage) {
-            msg.message.stickerMessage.forwardedNewsletterMessageInfo = {
-              newsletterJid: "120363410980452460@newsletter",
-              newsletterName: "Lizzy",
-              serverMessageId: 1,
-              pttHeaderEnabled: false,
-              storyAttributeHeaderText: "",
-              isNewsletterGCC: false
-            };
-            msg.message.stickerMessage.forwardingScore = 999;
-            msg.message.stickerMessage.isForwarded = true;
-          }
-
-          // Enviar via relayMessage
-          await nazu.relayMessage(from, msg.message, { messageId: msg.key.id });
         } catch (e) {
           console.error(e);
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
@@ -28497,20 +28464,12 @@ break;
           await nazu.sendMessage(from, {
             text: groupLink,
             contextInfo: {
-              externalAdReply: {
-                title: "📬 Link do Grupo",
-                body: "👉 Toque para entrar no grupo",
-                thumbnailUrl: groupPic,
-                sourceUrl: groupLink,
-                mediaType: 1,
-                renderLargerThumbnail: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
               forwardingScore: 999,
               isForwarded: true,
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy"
+              }
             }
           });
         } catch (e) {
@@ -28523,20 +28482,12 @@ break;
           await nazu.sendMessage(from, {
             text: "TESTE COPY - Este texto deve aparecer com o botao Ver canal",
             contextInfo: {
-              externalAdReply: {
-                title: "📬 Link do Grupo",
-                body: "👉 Toque para entrar no grupo",
-                thumbnailUrl: "https://telegra.ph/file/b5427ea4b8701bc47e751.jpg",
-                sourceUrl: "https://chat.whatsapp.com/",
-                mediaType: 1,
-                renderLargerThumbnail: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
               forwardingScore: 999,
               isForwarded: true,
+              forwardedNewsletterMessageInfo: {
+                newsletterJid: "120363410980452460@newsletter",
+                newsletterName: "Lizzy"
+              }
             }
           });
         } catch (e) {
