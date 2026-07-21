@@ -29694,6 +29694,58 @@ break;
           await reply("Ocorreu um erro 💔");
         }
         break;
+      case 'x9logs':
+        try {
+          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
+          
+          const registros = groupData.joinRequests || [];
+          
+          if (registros.length === 0) {
+            return reply(`╭━━━〔 📥 SOLICITAÇÕES 〕━━━╮
+┃
+┃ 📭 Nenhum registro encontrado.
+┃
+╰━━━━━━━━━━━━━━━━━━━━╯`);
+          }
+          
+          const ultimos = registros.slice(-5).reverse();
+          let mensagem = `╭━━━〔 📥 SOLICITAÇÕES 〕━━━╮
+┃
+┃ 📊 Últimas ${ultimos.length} solicitações
+┃
+╰━━━━━━━━━━━━━━━━━━━━╯\n\n`;
+          
+          const mentions = [];
+          
+          for (const reg of ultimos) {
+            const acaoTexto = reg.acao === 'approve' ? 'Aceitou a solicitação' 
+                : reg.acao === 'reject' ? 'Rejeitou a solicitação'
+                : 'Nova solicitação';
+            
+            mensagem += `📥 *Solicitação de Entrada*
+┃
+┃ 👮 *Autor:* @${reg.autor?.split('@')[0] || 'desconhecido'}
+┃
+┃ 👤 *Vítima:* @${reg.vitima?.split('@')[0] || 'desconhecido'}
+┃
+┃ 📌 *Ação:* ${acaoTexto}
+┃
+┃ 📅 *Data:* ${reg.data}
+┃ 🕒 *Hora:* ${reg.hora}
+┃
+────────────────────\n\n`;
+            
+            if (reg.autor) mentions.push(reg.autor);
+            if (reg.vitima) mentions.push(reg.vitima);
+          }
+          
+          await reply(mensagem, { mentions: [...new Set(mentions)] });
+        } catch (e) {
+          console.error(e);
+          await reply("Ocorreu um erro 💔");
+        }
+        break;
       case 'antis':
         try {
           if (!isGroup) return reply("Este comando só pode ser usado em grupos! 💔");

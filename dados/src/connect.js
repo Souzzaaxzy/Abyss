@@ -1306,6 +1306,48 @@ async function createBotSocket(authDir) {
 
         // Listener para solicitações de entrada em grupos (join requests)
         AbyssSock.ev.on('group.join-request', async (inf) => {
+            console.log('Join Request Event:', inf);
+            
+            const { id: groupId, author, participant, action, method } = inf;
+            
+            if (groupId) {
+                try {
+                    const groupFile = path.join(DATABASE_DIR, 'grupos', `${groupId}.json`);
+                    let groupData = {};
+                    
+                    if (fs.existsSync(groupFile)) {
+                        groupData = JSON.parse(fs.readFileSync(groupFile, 'utf-8'));
+                    }
+                    
+                    // Inicializar array de solicitações se não existir
+                    if (!groupData.joinRequests) {
+                        groupData.joinRequests = [];
+                    }
+                    
+                    // Adicionar registro da solicitação
+                    const registro = {
+                        autor: author || null,
+                        vitima: participant || null,
+                        acao: action,
+                        metodo: method || null,
+                        data: new Date().toLocaleDateString('pt-BR'),
+                        hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                        timestamp: Date.now()
+                    };
+                    
+                    groupData.joinRequests.push(registro);
+                    
+                    // Manter apenas os últimos 100 registros
+                    if (groupData.joinRequests.length > 100) {
+                        groupData.joinRequests = groupData.joinRequests.slice(-100);
+                    }
+                    
+                    fs.writeFileSync(groupFile, JSON.stringify(groupData, null, 2));
+                } catch (e) {
+                    console.error('Erro ao salvar join request:', e.message);
+                }
+            }
+            
             await handleGroupJoinRequest(AbyssSock, inf);
         });
 
