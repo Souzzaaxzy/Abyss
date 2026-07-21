@@ -440,7 +440,25 @@ async function applyUpdate() {
   printMessage('🚀 Aplicando atualização...');
 
   try {
-    await fs.cp(TEMP_DIR, process.cwd(), { recursive: true });
+    // Copiar arquivos do repositório, EXCETO o diretório dados para não perder configurações
+    const filesToCopy = await fs.readdir(TEMP_DIR);
+    
+    for (const file of filesToCopy) {
+      // Pular o diretório dados - ele será restaurado do backup
+      if (file === 'dados') {
+        printDetail('📂 Preservando diretório dados (será restaurado do backup)...');
+        continue;
+      }
+      
+      const srcPath = path.join(TEMP_DIR, file);
+      const destPath = path.join(process.cwd(), file);
+      
+      if (fsSync.statSync(srcPath).isDirectory()) {
+        await fs.cp(srcPath, destPath, { recursive: true });
+      } else {
+        await fs.copyFile(srcPath, destPath);
+      }
+    }
 
     await fs.rm(TEMP_DIR, { recursive: true, force: true });
 
