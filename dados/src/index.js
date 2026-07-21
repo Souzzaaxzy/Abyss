@@ -6930,6 +6930,17 @@ switch (command) {
         await reply(`◈ Modo RPG ${groupData.modorpg ? 'ATIVADO' : 'DESATIVADO'} neste grupo.\n\n${groupData.modorpg ? '🌌 Agora os membros podem usar todos os comandos RPG!' : '⚙️ Comandos RPG desativados.'}`);
         break;
       }
+      case 'pay':
+        try {
+          await nazu.sendMessage(from, {
+            text: '🎉 Olá! Este é um teste do novo sistema de pagamentos do bot!\n\n💳 Solicitação de pagamento enviada com sucesso.\n\nObrigado por testar essa nova função! 🚀',
+            requestPaymentFrom: sender
+          });
+        } catch (e) {
+          console.log(e);
+          reply('❌ Erro ao enviar pagamento de teste.');
+        }
+        break;
       case 'perfilrpg':
       case 'carteira':
       case 'banco':
