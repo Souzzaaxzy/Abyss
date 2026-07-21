@@ -29878,10 +29878,32 @@ break;
 📊 Total de Antis: ${totalCount}
 🟢 Ativos: ${activeCount}
 🔴 Desativados: ${inactiveCount}`;
-          await reply(painel);
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
+          await nazu.sendMessage(from, {
+            text: painel,
+            contextInfo: newsletterContext
+          }, { quoted: info });
         } catch (e) {
           console.error(e);
-          await reply("Ocorreu um erro 💔");
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
+          await nazu.sendMessage(from, {
+            text: "Ocorreu um erro 💔",
+            contextInfo: newsletterContext
+          }, { quoted: info });
         }
         break;
       case 'divdono':
