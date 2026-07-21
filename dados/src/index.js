@@ -26109,7 +26109,7 @@ ${groupPrefix}togglecmdvip premium_ia off`);
               forwardingScore: 999,
               isForwarded: true,
             }
-          }, { quoted: info });
+          });
         } catch (e) {
           console.error(e);
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
