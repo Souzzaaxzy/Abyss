@@ -27393,34 +27393,43 @@ packname: `${nomebot}`,            type: isVideo2 ? 'video' : 'image'
           } = dataTake[sender];
           const encmediats = await getFileBuffer(info.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage, 'sticker');
           
-          // ContextInfo do canal (igual ao !linkgp)
-          await sendSticker(nazu, from, {
-            sticker: `data:image/jpeg;base64,${encmediats.toString('base64')}`,
-            author: pack,
-            packname: author,
-            rename: true
-          }, {
-            quoted: info,
-            contextInfo: {
-              externalAdReply: {
-                title: "📬 Lizzy Stickers",
-                body: "👉 Toque para ver o canal",
-                thumbnailUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-                sourceUrl: "https://whatsapp.com/channel/0029VagWCLiBPvJQDtwSlY1g",
-                mediaType: 1,
-                renderLargerThumbnail: false,
-              },
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: "120363410980452460@newsletter",
-                newsletterName: "Lizzy",
-              },
-              forwardingScore: 999,
-              isForwarded: true,
-            }
+          // Preparar buffer da figurinha com metadados
+          const { writeExif, convertToWebp } = await import('./funcs/utils/sticker.js');
+          let webpBuffer = await convertToWebp(encmediats, false, false);
+          if (pack || author) {
+            webpBuffer = await writeExif(webpBuffer, { packname: pack, author });
+          }
+
+          // Usar generateWAMessageFromContent para criar a mensagem com forwardedNewsletterMessageInfo
+          const stickerMessageContent = {
+            sticker: webpBuffer
+          };
+
+          const msg = await generateWAMessageFromContent(from, stickerMessageContent, {
+            userJid: nazu.user.id,
+            quoted: info
           });
+
+          // Inserir forwardedNewsletterMessageInfo DIRETAMENTE na stickerMessage
+          // Este é o método usado por bots que simulam mensagens de canal forwarding
+          if (msg.message?.stickerMessage) {
+            msg.message.stickerMessage.forwardedNewsletterMessageInfo = {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            };
+          }
+
+          // Enviar via relayMessage (necessário para preservar os dados do canal)
+          await nazu.relayMessage(from, msg.message, { messageId: msg.key.id });
         } catch (e) {
           console.error(e);
-          await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
+          // Fallback: tentar enviar normalmente se relayMessage falhar
+          try {
+            await nazu.sendMessage(from, { sticker: webpBuffer }, { quoted: info });
+          } catch (fallbackError) {
+            console.error('Fallback também falhou:', fallbackError);
+            await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
+          }
         }
         break;
       case 'figurinhas':

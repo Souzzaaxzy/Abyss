@@ -211,4 +211,4 @@ const sendSticker = async (nazu, jid, {
   return webpBuffer;
 };
 
-export { sendSticker };
+export { sendSticker, convertToWebp, writeExif };
