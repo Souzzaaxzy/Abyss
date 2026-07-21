@@ -594,6 +594,51 @@ async function handleGroupJoinRequest(AbyssSock, inf) {
 
         if (!from || !participantJid) return;
 
+        // Detectar approve/reject de solicitação
+        if (inf.action === 'approve' || inf.action === 'reject') {
+            const groupSettings = await loadGroupSettings(from);
+            if (groupSettings.x9 && inf.author) {
+                const data = new Date();
+                const dataFormatada = data.toLocaleDateString('pt-BR');
+                const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const autorNum = inf.author?.split('@')[0] || 'desconhecido';
+                const vitimaNum = participantJid?.split('@')[0] || 'desconhecido';
+                const isApprove = inf.action === 'approve';
+                
+                const mensagem = isApprove
+                    ? `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
+┃
+┃ ✅ *SOLICITAÇÃO ACEITA*
+┃
+┃ 👮 *Autor:* @${autorNum}
+┃
+┃ 👤 *Vítima:* @${vitimaNum}
+┃
+┃ 📅 *Data:* ${dataFormatada}
+┃ 🕒 *Hora:* ${horaFormatada}
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`
+                    : `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
+┃
+┃ ❌ *SOLICITAÇÃO REJEITADA*
+┃
+┃ 👮 *Autor:* @${autorNum}
+┃
+┃ 👤 *Vítima:* @${vitimaNum}
+┃
+┃ 📅 *Data:* ${dataFormatada}
+┃ 🕒 *Hora:* ${horaFormatada}
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
+                
+                await AbyssSock.sendMessage(from, {
+                    text: mensagem,
+                    mentions: [inf.author, participantJid]
+                });
+            }
+            return;
+        }
+
         if (typeof participantJid === "object") {
             Object.assign(typeIds, {
                 id: participantJid?.pn?.endsWith("s.whatsapp.net") ? participantJid?.pn : '',
@@ -623,7 +668,6 @@ async function handleGroupJoinRequest(AbyssSock, inf) {
 
 
         if (groupSettings.autoAcceptRequests) {
-            if (DEBUG_MODE) console.log(`[Auto-Accept] Aceitando ${participantJid} no grupo ${from}`);
             await AbyssSock.groupRequestParticipantsUpdate(from, [participantJid], 'approve');
             if (!groupSettings.captchaEnabled) return;
         }
@@ -1268,42 +1312,6 @@ async function createBotSocket(authDir) {
 
 
         AbyssSock.ev.on('group-participants.update', async (inf) => {
-            // Verificar X9 para registro de solicitações aceitas
-            const groupId = inf.id || inf.jid;
-            if (groupId && inf.action === 'add' && inf.author) {
-                try {
-                    const groupSettings = await loadGroupSettings(groupId);
-                    if (groupSettings.x9) {
-                        const data = new Date();
-                        const dataFormatada = data.toLocaleDateString('pt-BR');
-                        const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                        
-                        for (const participant of inf.participants) {
-                            const autorNum = inf.author?.split('@')[0] || 'desconhecido';
-                            const vitimaNum = participant.split('@')[0];
-                            
-                            const mensagem = `╭━━━〔 📥 SOLICITAÇÃO 〕━━━╮
-┃
-┃ ✅ *SOLICITAÇÃO ACEITA*
-┃
-┃ 👮 *Autor:* @${autorNum}
-┃
-┃ 👤 *Vítima:* @${vitimaNum}
-┃
-┃ 📅 *Data:* ${dataFormatada}
-┃ 🕒 *Hora:* ${horaFormatada}
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━╯`;
-                            
-                            await AbyssSock.sendMessage(groupId, {
-                                text: mensagem,
-                                mentions: [inf.author, participant]
-                            });
-                        }
-                    }
-                } catch (e) {}
-            }
-            
             const updateData = {
                 id: inf.id || inf.jid,
                 participants: inf.participants,
