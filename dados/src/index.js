@@ -26899,6 +26899,55 @@ ${groupPrefix}togglecmdvip premium_ia off`);
           await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
         }
         break;
+      case 'togif':
+        try {
+          const quotedSticker = info.message?.extendedTextMessage?.contextInfo?.quotedMessage?.stickerMessage;
+          
+          if (!quotedSticker) {
+            return reply(`❌ Responda a uma figurinha animada utilizando:\n${groupPrefix}togif`);
+          }
+          
+          if (!quotedSticker.isLottie) {
+            return reply("❌ Essa figurinha não é animada.");
+          }
+          
+          await reply("⏳ Convertendo figurinha em GIF...");
+          
+          const stickerBuffer = await getFileBuffer(quotedSticker, 'sticker');
+          
+          const tempDir = path.join(__dirname, '..', 'database', 'tmp');
+          if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+          }
+          
+          const inputFile = path.join(tempDir, `${Date.now()}_sticker.webp`);
+          const outputFile = path.join(tempDir, `${Date.now()}_sticker.gif`);
+          
+          fs.writeFileSync(inputFile, stickerBuffer);
+          
+          await new Promise((resolve, reject) => {
+            exec(`ffmpeg -hide_banner -loglevel error -i "${inputFile}" -vf "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 "${outputFile}"`, (err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+          
+          const gifBuffer = fs.readFileSync(outputFile);
+          
+          await nazu.sendMessage(from, {
+            video: gifBuffer,
+            gifPlayback: true,
+            caption: "✅ Conversão concluída."
+          }, { quoted: info });
+          
+          fs.unlinkSync(inputFile);
+          fs.unlinkSync(outputFile);
+          
+        } catch (error) {
+          console.error('Erro no comando togif:', error);
+          await reply("❌ Não foi possível converter essa figurinha para GIF.");
+        }
+        break;
 case 'removebg':
 case 'rmbg':
 case 'sbg':
