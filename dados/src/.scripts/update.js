@@ -178,6 +178,18 @@ async function createBackup() {
       }
     }
 
+    // Backup dos GIFs personalizados (!setgif)
+    const gifsDir = path.join(process.cwd(), 'dados', 'database', 'gifs');
+    if (fsSync.existsSync(gifsDir)) {
+      printDetail('🎬 Copiando GIFs personalizados do !setgif...');
+      try {
+        await fs.access(gifsDir);
+        await fs.cp(gifsDir, path.join(BACKUP_DIR, 'dados', 'database', 'gifs'), { recursive: true });
+      } catch (accessError) {
+        printWarning(`⚠️ Não foi possível acessar o diretório de GIFs: ${accessError.message}`);
+      }
+    }
+
     // Verify backup was created successfully
     const backupDatabaseDir = path.join(BACKUP_DIR, 'dados', 'database');
     const backupConfigFile = path.join(BACKUP_DIR, 'dados', 'src', 'config.json');
@@ -446,6 +458,14 @@ async function restoreBackup() {
     if (fsSync.existsSync(backupMidiasDir)) {
       printDetail('🖼️ Restaurando diretório de mídias...');
       await fs.cp(backupMidiasDir, path.join(process.cwd(), 'dados', 'midias'), { recursive: true });
+    }
+
+    // Restaurar GIFs personalizados do !setgif
+    const backupGifsDir = path.join(BACKUP_DIR, 'dados', 'database', 'gifs');
+    if (fsSync.existsSync(backupGifsDir)) {
+      printDetail('🎬 Restaurando GIFs personalizados do !setgif...');
+      await fs.mkdir(path.join(process.cwd(), 'dados', 'database', 'gifs'), { recursive: true });
+      await fs.cp(backupGifsDir, path.join(process.cwd(), 'dados', 'database', 'gifs'), { recursive: true });
     }
 
     printMessage('✅ Backup restaurado com sucesso.');
