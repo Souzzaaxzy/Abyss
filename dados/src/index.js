@@ -21447,8 +21447,18 @@ Precisa de ajuda? Entre em contato:
           if (!isOwner) return reply("Este comando é apenas para o meu dono 💔");
           if (!q && !isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply('Digite ou marque uma imagem/vídeo! Exemplo: '+ groupPrefix + 'tm Olá a todos!');
           const cabecalho = `╔══════════════════════\n║  📡 *TRANSMISSÃO DO ${nomebot}* 📡\n╚══════════════════════\n\n`;
+          const newsletterContext = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
           const genSuffix = () => Math.floor(100 + Math.random() * 900).toString();
           let baseMessage = {};
+          let hasMedia = false;
+          let mediaType = null;
           // Verifica se a mensagem atual tem imagem
           if (isImage) {
             const image = await getFileBuffer(info.message.imageMessage, 'image');
@@ -21458,6 +21468,8 @@ Precisa de ajuda? Entre em contato:
               image,
               caption: textoFinal ? `${cabecalho}${textoFinal}` : cabecalho.trim()
             };
+            hasMedia = true;
+            mediaType = 'image';
           }
           // Verifica se a mensagem atual tem vídeo
           else if (isVideo) {
@@ -21468,6 +21480,8 @@ Precisa de ajuda? Entre em contato:
               video,
               caption: textoFinal ? `${cabecalho}${textoFinal}` : cabecalho.trim()
             };
+            hasMedia = true;
+            mediaType = 'video';
           }
           // Verifica se cita uma imagem
           else if (isQuotedImage) {
@@ -21476,6 +21490,8 @@ Precisa de ajuda? Entre em contato:
               image,
               caption: q ? `${cabecalho}${q}` : cabecalho.trim()
             };
+            hasMedia = true;
+            mediaType = 'image';
           }
           // Verifica se cita um vídeo
           else if (isQuotedVideo) {
@@ -21484,6 +21500,8 @@ Precisa de ajuda? Entre em contato:
               video,
               caption: q ? `${cabecalho}${q}` : cabecalho.trim()
             };
+            hasMedia = true;
+            mediaType = 'video';
           }
           // Apenas texto
           else {
@@ -21504,7 +21522,7 @@ Precisa de ajuda? Entre em contato:
               if (message.text) {
                 message.text = `${message.text}\n\n> ID: ${suffix}`;
               }
-              await nazu.sendMessage(group.id, message);
+              await nazu.sendMessage(group.id, message, { contextInfo: newsletterContext });
               enviados++;
               if (enviados < totalGroups) {
                 const delay = Math.floor(Math.random() * 1000) + 1000;
@@ -21514,7 +21532,18 @@ Precisa de ajuda? Entre em contato:
               console.error(`Erro ao enviar para grupo ${group.id}:`, error.message);
             }
           }
-          await reply(`✅ Transmissão enviada para ${enviados}/${totalGroups} grupos!`);
+          const newsletterContextReply = {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+              newsletterJid: "120363410980452460@newsletter",
+              newsletterName: "Lizzy"
+            }
+          };
+          await nazu.sendMessage(from, {
+            text: `✅ Transmissão enviada para ${enviados}/${totalGroups} grupos!`,
+            contextInfo: newsletterContextReply
+          }, { quoted: info });
         } catch (e) {
           console.error(e);
           await reply("Ocorreu um erro 💔");
