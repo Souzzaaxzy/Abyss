@@ -82,6 +82,9 @@ export default async function menuDono(prefix, botName = "MeuBot", userName = "U
 │ 🚫 ${prefix}addblackglobal
 │ 📋 ${prefix}listblackglobal
 │ ✅ ${prefix}rmblackglobal
+│ ➕ ${prefix}addcase
+│ ❌ ${prefix}delcase
+│ 🎬 ${prefix}setgif
 ╰──────────────
 
 

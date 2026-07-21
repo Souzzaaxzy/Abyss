@@ -18554,6 +18554,68 @@ case 'addaluguel':
           await reply("❌ Ocorreu um erro ao deletar a case.");
         }
         break;
+      // SET GIF PARA COMANDOS DE BRINCADEIRA
+      case 'setgif':
+        try {
+          if (!SoDono) return reply("❌ Apenas o dono do bot pode utilizar este comando.");
+          
+          if (!q) return reply(`❌ Informe o nome do comando.\n\nExemplo:\n${groupPrefix}setgif tapa`);
+          
+          const cmdName = q.trim().toLowerCase();
+          
+          // Lista de comandos de brincadeira válidos
+          const validCommands = ['tapa', 'soco', 'socar', 'beijo', 'beijar', 'beijob', 'beijarb', 'abraco', 'abracar', 'mata', 'matar', 'tapar', 'goza', 'gozar', 'mamar', 'mamada', 'cafune', 'morder', 'mordida', 'lamber', 'lambida', 'explodir', 'sexo', 'siririca', 'punheta', 'chute', 'chutar', 'tomate'];
+          
+          if (!validCommands.includes(cmdName)) {
+            return reply(`❌ Esse comando não existe.\n\nComandos disponíveis:\n${validCommands.join(', ')}`);
+          }
+          
+          // Verificar se respondeu um GIF
+          const RSGif = info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+          const gifData = RSGif?.videoMessage || info.message?.videoMessage;
+          
+          if (!gifData) {
+            return reply(`❌ Responda a um GIF utilizando:\n${groupPrefix}setgif ${cmdName}`);
+          }
+          
+          // Verificar se é realmente um GIF (mimetype)
+          const isGif = gifData.mimetype?.includes('gif');
+          if (!isGif) {
+            return reply(`❌ A mensagem respondida precisa ser um GIF.`);
+          }
+          
+          // Baixar o GIF
+          const gifBuffer = await getFileBuffer(gifData, 'video');
+          
+          // Salvar no arquivo games.json
+          const gamesFilePath = path.join(__dirname, 'funcs/json/games.json');
+          let gamesData = JSON.parse(fs.readFileSync(gamesFilePath, 'utf-8'));
+          
+          if (!gamesData.games2) {
+            gamesData.games2 = {};
+          }
+          
+          // Salva o GIF - usa URL temporária do catbox ou salva localmente
+          try {
+            // Faz upload do GIF para o catbox
+            const catboxUrl = await upload(gifBuffer);
+            
+            gamesData.games2[cmdName] = {
+              video: { url: catboxUrl },
+              isGif: true
+            };
+            
+            fs.writeFileSync(gamesFilePath, JSON.stringify(gamesData, null, 2));
+            await reply(`✅ GIF do comando "${cmdName}" atualizado com sucesso!`);
+          } catch (uploadErr) {
+            console.error('Erro ao fazer upload do GIF:', uploadErr);
+            await reply("❌ Ocorreu um erro ao salvar o GIF.");
+          }
+        } catch (e) {
+          console.error(e);
+          await reply("❌ Ocorreu um erro interno.");
+        }
+        break;
       // VERIFICADOR DE LINKS (FishFish API)
       case 'verificar':
       case 'checklink':
@@ -34930,6 +34992,8 @@ break;
             responseText = GamezinData[command]?.replaceAll('#nome#', `@${getUserName(targetUser)}`) || `Voce acabou de dar um(a) ${command} no(a) @${getUserName(targetUser)}`;
           }
           let media = gamesData.games2[command];
+          // Verifica se é um GIF customizado
+          const isCustomGif = media?.isGif === true;
           // Resolver caminho absoluto para mídias locais
           const resolveMediaPath = (url) => {
             if (typeof url === 'string' && url.startsWith('./')) {
@@ -34967,7 +35031,7 @@ break;
                 video: { url: videoPath },
                 caption: responseText,
                 mentions: [targetUser],
-                gifPlayback: true
+                gifPlayback: isCustomGif
               });
             } else if (fs.existsSync(videoPath)) {
               const videoBuffer = fs.readFileSync(videoPath);
@@ -34975,7 +35039,7 @@ break;
                 video: videoBuffer,
                 caption: responseText,
                 mentions: [targetUser],
-                gifPlayback: true
+                gifPlayback: isCustomGif
               });
             } else {
               await nazu.sendMessage(from, {
