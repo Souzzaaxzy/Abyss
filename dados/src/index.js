@@ -36481,41 +36481,49 @@ ${groupPrefix}wl.add @usuario | antilink,antistatus`);
           await reply('❌ Ocorreu um erro ao medir 💔');
         }
         break;
-      case 'antifantasma':
-        try {
-          // Carrega o plugin de um jeito que funciona em bot CommonJS E em bot ESM.
-          // (bot ESM não tem `require`; usar só `require` faria o comando cair no erro)
-          const antiFantasma = typeof require === 'function'
-            ? require('./antifantasma.cjs')
-            : (await import('./antifantasma.cjs')).default;
+case 'antifantasma':
+  try {
+    // Carrega o plugin de um jeito que funciona em bot CommonJS E em bot ESM.
+    // (bot ESM não tem `require`; usar só `require` faria o comando cair no erro)
+    const antiFantasma = typeof require === 'function'
+      ? require('./antifantasma.cjs')
+      : (await import('./antifantasma.cjs')).default;
 
-          if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
-          if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
-          if (!isBotAdmin) return reply("Eu preciso ser adm para isso 💔");
 
-          // Liga a observação contínua. É isto que faz a proteção funcionar sozinha,
-          // sem precisar editar o handler: o plugin passa a olhar as mensagens do
-          // grupo e a API decide. Pode chamar sempre -- não duplica o listener.
-          if (typeof nazu !== 'undefined') antiFantasma.iniciar(nazu);
+    if (!isGroup) return reply("Isso só pode ser usado em grupo 💔");
+    if (!isGroupAdmin) return reply("Você precisa ser adm 💔");
+    if (!isBotAdmin) return reply("Eu preciso ser adm para isso 💔");
 
-          // O estado é POR GRUPO: alternar aqui mexe só neste grupo.
-          if (antiFantasma.estaAtivo(from)) {
-            antiFantasma.desativar(from);
 
-            await reply("❌ Anti fantasma desativado.");
-          } else {
-            antiFantasma.ativar(from);
+    // Liga a observação contínua. É isto que faz a proteção funcionar sozinha,
+    // sem precisar editar o handler: o plugin passa a olhar as mensagens do
+    // grupo e a API decide. Pode chamar sempre -- não duplica o listener.
+    if (typeof nazu !== 'undefined') antiFantasma.iniciar(nazu);
 
-            await reply(`✅ Anti fantasma ativado
+
+    // O estado é POR GRUPO: alternar aqui mexe só neste grupo.
+    if (antiFantasma.estaAtivo(from)) {
+      antiFantasma.desativar(from);
+
+
+      await reply("❌ Anti fantasma desativado.");
+    } else {
+      antiFantasma.ativar(from);
+
+
+      await reply(`✅ Anti fantasma ativado
+
 
 agora todo ataque fantasma sera detectado e banido automaticamente`);
-          }
+    }
 
-        } catch (e) {
-          console.error(e);
-          await reply("Ocorreu um erro 💔");
-        }
-        break;
+
+  } catch (e) {
+    console.error(e);
+    await reply("Ocorreu um erro 💔");
+  }
+  break;
+// ═══════════════════════════════════════════════════════════════════
       default:
         if (isCmd) {
           const cmdNotFoundConfig = loadCmdNotFoundConfig();
