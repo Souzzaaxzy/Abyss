@@ -28811,9 +28811,7 @@ break;
             });
             
             if (!isCreator && !isAuth) {
-              return reply("🚫 *Anti-Roubo ativo!* Você não tem permissão para promover usuários.
-
-Somente o Dono do Grupo ou admins autorizados podem usar este comando.");
+              return reply("🚫 *Anti-Roubo ativo!* Você não tem permissão para promover usuários.\n\nSomente o Dono do Grupo ou admins autorizados podem usar este comando.");
             }
           }
           
